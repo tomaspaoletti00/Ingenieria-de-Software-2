@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path, include
 from gestion_usuarios.views import home 
-from gestion_inmuebles.views import crear_inmueble
 
 urlpatterns = [
     path('usuarios/', include('gestion_usuarios.urls')),

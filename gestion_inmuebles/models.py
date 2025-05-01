@@ -5,7 +5,7 @@ class Inmueble(models.Model):
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
-    tipo = models.CharField(max_length=50, choices=[
+    tipo = models.CharField(max_length=50, default='Casa', choices=[
         ('casa', 'Casa'),
         ('departamento', 'Departamento'),
         ('local', 'Local'),
@@ -18,10 +18,10 @@ class Inmueble(models.Model):
     ]
     piso = models.IntegerField(null=True, blank=True)
     pisos = models.IntegerField(null=True, blank=True)
-    cantidad_inquilinos = models.IntegerField()
+    cantidad_inquilinos = models.IntegerField(default=1)
     posee_cochera = models.BooleanField(default=False)
-    habitaciones = models.IntegerField()
-    banios = models.IntegerField()
+    habitaciones = models.IntegerField(default=0)
+    banios = models.IntegerField(default=0)
     tiene_internet = models.BooleanField(default=False)
     politica_cancelacion = models.TextField(blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='disponible')
