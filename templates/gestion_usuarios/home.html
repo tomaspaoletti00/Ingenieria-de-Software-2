@@ -27,6 +27,11 @@
         .btn:hover {
             opacity: 0.8;
         }
+
+        .btn-tercero {
+            background-color: #4ddc06;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -36,5 +41,9 @@
         <a href="{% url 'registro' %}" class="btn btn-secondary">Registrarse</a>
     </div>
     <a href="{% url 'homeInmuebles' %}" class="btn btn-secondary">Ir a Inmuebles</a>
+    <div>
+        <a href="{% url 'admin:index' %}" class="btn btn-tercero">Panel de Aministración</a>
+    </div>
+    
 </body>
 </html>
