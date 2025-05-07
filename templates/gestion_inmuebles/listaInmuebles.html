@@ -1,0 +1,49 @@
+
+{% extends 'base.html' %}
+{% load static %} 
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Inmuebles</title>
+    <link rel="stylesheet" href="{% static 'styles/listaInmuebles.css' %}">
+</head>
+<body>
+    <div class="titulo">
+        <h1>Inmuebles</h1>
+    </div>
+    <div class="container">
+        {% for inmueble in inmuebles %}
+        <div class="card">
+            {% if inmueble.imagen %}
+            <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+            {% endif %}
+            <div class="card-content">
+                <h2>{{ inmueble.nombre }}</h2>
+                <p><strong>Dirección:</strong> {{ inmueble.direccion }}</p>
+                <p><strong>Tipo:</strong> {{ inmueble.get_tipo_display }}</p>
+                <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+                <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
+                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }} | <strong>Baños:</strong> {{ inmueble.banios }}</p>
+                <p><strong>Ambientes:</strong> {{ inmueble.ambientes }}</p>
+                <p><strong>Cochera:</strong> {{ inmueble.posee_cochera|yesno:"Sí,No" }}</p>
+                <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
+                {% if inmueble.descripcion %}
+                <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p>No hay inmuebles disponibles.</p>
+        {% endfor %}
+    </div>
+    <div class="logout-container">
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Cerrar sesión</button>
+        </form>
+      </div>
+</body>
+</html>
+{% endblock %}

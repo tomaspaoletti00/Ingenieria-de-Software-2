@@ -1,6 +1,40 @@
-<h2>Registro</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Registrarse</button>
-</form>
+
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/registro.css' %}">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro</title>
+  <link rel="stylesheet" href="{% static 'styles/registro.css' %}">
+</head>
+<body>
+  <div class="registro-container">
+    <div class="titulo">
+     <h2>Registrar Cuenta</h2>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-columns">
+        <div class="form-left">
+          {{ form.username.label_tag }} {{ form.username }}
+          {{ form.email.label_tag }} {{ form.email }}
+          {{ form.password1.label_tag }} {{ form.password1 }}
+          {{ form.password2.label_tag }} {{ form.password2 }}
+        </div>
+        <div class="form-right">
+          {{ form.first_name.label_tag }} {{ form.first_name }}
+          {{ form.dni.label_tag }} {{ form.dni }}
+          {{ form.telefono.label_tag }} {{ form.telefono }}
+        </div>
+      </div>
+      <button type="submit">Registrarse</button>
+    </form>
+  </div>
+</body>
+</html>
+{% endblock %}

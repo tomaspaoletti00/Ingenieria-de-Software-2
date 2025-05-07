@@ -1,0 +1,83 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0f172a; /* Azul oscuro sólido */
+  color: #333;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.titulo {
+  background-color:#1e293b;
+  padding: 10px;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  text-align: center;
+  color: white;
+  border: 2px solid #1e3c72; /* Marco oscuro */
+}
+
+.registro-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 800px;
+}
+
+.titulo h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+
+.form-columns {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+.form-left,
+.form-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+label {
+  font-weight: bold;
+  color: #1e293b;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3e5190; /* Azul fuerte */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #395295;
+}
