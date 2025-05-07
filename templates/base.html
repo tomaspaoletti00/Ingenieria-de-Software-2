@@ -5,34 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alquier Express Inicio</title>
+    <link rel="stylesheet" href="{% static 'styles/base.css' %}">
 </head>
 <body>
-   
-
-    <nav>
-        <ul>
-            <li>
-                <a href="/">Home</a>
-                </li>
-            <li>
-                <a href="/usuarios/registro">Registro</a>
-                '</li>
-            
-            {% if user.is_authenticated %}
-            <li>
-                <a href="/usuarios/logout">Cerrar Sesión</a>
-                </li>    
-            {% else %}
-             <li>
-                <a href="/usuarios/login">Iniciar Sesión</a>
-                '</li>    
-            {% endif %}
-            
-        </ul>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="{% static 'img/logoAlquilerExpress.png' %}" alt="Logo" class="logo-img">
+                Alquiler Express
+            </a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/usuarios/registro">Registro</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="/usuarios/logout">Cerrar Sesión</a></li>
+                {% else %}
+                    <li><a href="/usuarios/login">Iniciar Sesión</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </nav>
-
+    <main>
     {% block content %}
-
+   
     {% endblock %}
+    </main>
 </body>
 </html>

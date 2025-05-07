@@ -38,12 +38,7 @@
         <p>No hay inmuebles disponibles.</p>
         {% endfor %}
     </div>
-    <div class="logout-container">
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="logout-btn">Cerrar sesión</button>
-        </form>
-      </div>
+   
 </body>
 </html>
 {% endblock %}
