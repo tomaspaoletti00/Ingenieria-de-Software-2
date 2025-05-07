@@ -27,13 +27,14 @@ class Inmueble(models.Model):
     ]
     )
     imagen = models.ImageField(upload_to='inmuebles/', blank=True, null=True)
+    superficie = models.IntegerField(default=0) 
 
 
 class InmueblesSimilares(Inmueble):
     tiene_internet = models.BooleanField(default=False)
     baños = models.IntegerField(default=0) 
     tiene_cochera = models.BooleanField(default=False)
-    superficie = models.IntegerField(default=0) 
+    
 
 
 
@@ -56,9 +57,13 @@ class Cochera(Inmueble):
         ('Descubierta', 'Descubierta'),
     ]
     )
+    largo_plaza = models.DecimalField(max_digits=10, decimal_places=2)
+    ancho_plaza = models.DecimalField(max_digits=10, decimal_places=2)
+    plazas = models.IntegerField(null=True, blank=True)
     
 
     def __str__(self):
+    
         return f"{self.nombre} - ${self.precio}"
     
 
