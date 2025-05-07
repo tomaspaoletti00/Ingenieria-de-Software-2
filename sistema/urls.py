@@ -19,6 +19,7 @@ from django.urls import path
 from django.urls import path, include
 from gestion_usuarios.views import home 
 
+
 urlpatterns = [
     path('usuarios/', include('gestion_usuarios.urls')),
     path('', home, name='home'),

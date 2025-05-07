@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from .forms import RegistroUsuarioForm
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 def home(request):
@@ -25,7 +25,11 @@ def login_usuario(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')  # redirigí a la vista que quieras como home
+            return redirect('listaInmuebles')  # redirigí a la vista que quieras como home
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
     return render(request, 'gestion_usuarios/login.html')
+
+def logout_usuario(request):
+    logout(request)
+    return redirect('home')
