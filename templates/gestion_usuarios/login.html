@@ -3,39 +3,26 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sesión</title>
-  <link rel="stylesheet" href="{% static 'styles/registro.css' %}">
-</head>
-<body>
-  <div class="login-container">
-    <form method="post">
-      {% csrf_token %}
-      <div class="form-group">
+<link rel="stylesheet" href="{% static 'styles/login.css' %}">
+<div class="login-container">
+    <form method="post" class="login-form">
+        {% csrf_token %}
+        <h2>Iniciar Sesión</h2>
+        
         <label for="username">Nombre de Usuario</label>
-        <input type="text" name="username" placeholder="Introduce tu nombre de usuario" required>
-      </div>
-
-      <div class="form-group">
+        <input type="text" name="username" id="username" required>
         <label for="password">Contraseña</label>
-        <input type="password" name="password" placeholder="Introduce tu contraseña" required>
-      </div>
+        <input type="password" name="password" id="password" required>
 
-      <button type="submit">Iniciar sesión</button>
+        <button type="submit">Iniciar Sesión</button>
 
-      {% for message in messages %}
-        <p class="error-message">{{ message }}</p>
-      {% endfor %}
+        <p class="register-link">
+            ¿No tenés cuenta? <a href="/usuarios/registro">Registrate acá</a>
+        </p>
+
+        {% for message in messages %}
+            <p class="error-message">{{ message }}</p>
+        {% endfor %}
     </form>
-
-    <p class="register-link">
-      <a href="{% url 'registro' %}">¿No tienes cuenta? Regístrate aqui</a>
-    </p>
-  </div>
-</body>
-</html>
+</div>
 {% endblock %}
