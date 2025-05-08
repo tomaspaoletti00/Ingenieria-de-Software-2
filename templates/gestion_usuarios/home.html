@@ -1,53 +1,24 @@
+
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/home.css' %}">
     <title>Alquiler Express</title>
-    <style>
-        .btn {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
-
-        .btn-tercero {
-            background-color: #4ddc06;
-            color: white;
-        }
-    </style>
-</head>
+ </head>
 <body>
     <div>
         <h2>Bienvenido a Alquiler Express, entra en tu cuenta o regístrate.</h2>
         <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
         <a href="{% url 'registro' %}" class="btn btn-secondary">Registrarse</a>
  </div>
-    <a href="{% url 'listaInmuebles' %}" class="btn btn-secondary">Ir a Inmuebles</a>
-    <div> 
-        <a href="{% url 'admin:index' %}" class="btn btn-tercero">Panel de Aministración</a>
-    </div>
-    
+
 </body>
 </html>
 {% endblock %}

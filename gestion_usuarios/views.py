@@ -1,9 +1,12 @@
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from .forms import RegistroUsuarioForm
-
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from .models import Usuario
+from django.shortcuts import get_object_or_404
 
 def home(request):
     return render(request, 'gestion_usuarios/home.html')
@@ -25,11 +28,43 @@ def login_usuario(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('listaInmuebles')  # redirigí a la vista que quieras como home
+            if user.is_superuser:
+                 return redirect('panel-admin')
+            elif user.is_staff:
+                 return redirect('panel-emp')
+            else:
+                 return redirect('listaInmuebles') # redirigí a la vista que quieras como home
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
     return render(request, 'gestion_usuarios/login.html')
 
+@login_required
 def logout_usuario(request):
     logout(request)
     return redirect('home')
+
+def es_empleado(user):
+    return user.is_authenticated and user.is_staff
+
+@user_passes_test(es_empleado)
+def panelEmp(request):
+    return render(request, 'gestion_usuarios/panel-emp.html')
+
+def es_admin(user):
+    return user.is_authenticated and user.is_superuser
+
+@user_passes_test(es_admin)
+def panelAdmin(request):
+    return render(request, 'gestion_usuarios/panel-admin.html')
+
+@login_required
+@user_passes_test(es_empleado)
+def detalle_cliente(request, user_id):
+    cliente = get_object_or_404(Usuario, id=user_id, is_staff=False, is_superuser=False)
+    return render(request, 'gestion_usuarios/detalle-cliente.html', {'cliente': cliente})
+
+@login_required
+@user_passes_test(es_empleado)
+def listar_clientes(request):
+    usuarios = Usuario.objects.filter(is_staff=False, is_superuser=False)
+    return render(request, 'gestion_usuarios/lista-clientes.html', {'usuarios': usuarios})

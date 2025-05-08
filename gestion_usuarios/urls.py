@@ -7,5 +7,9 @@ urlpatterns = [
     path('login/', views.login_usuario, name='login'),
     path('home/', views.home, name='home'),
     path('logout/', views.logout_usuario, name='logout'),
+    path('panel-emp', views.panelEmp, name='panel-emp'),
+    path('panel-admin', views.panelAdmin, name='panel-admin'),
+    path('panel-admin/lista-clientes/', views.listar_clientes, name='lista-clientes'),
+    path('panel-admin/lista-clientes/<int:user_id>/', views.detalle_cliente, name='detalle-cliente'),
     
 ]

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Detalle del Cliente</h2>
+<ul>
+    <li><strong>Username:</strong> {{ cliente.username }}</li>
+    <li><strong>Email:</strong> {{ cliente.email }}</li>
+    <li><strong>Fecha de Registro:</strong> {{ cliente.date_joined }}</li>
+    <li><strong>Nombre Completo:</strong> {{ cliente.name}}</li>
+    <li><strong>DNI:</strong> {{ cliente.dni}}</li>
+    <li><strong>Telefono:</strong> {{ cliente.telefono}}</li>
+    
+    
+
+    <!-- Agregá más info si querés -->
+  </ul>
+
+<a href="{% url 'lista-clientes' %}" class="btn btn-secondary">Volver al listado</a>
+{% endblock %}

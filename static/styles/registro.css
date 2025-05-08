@@ -1,37 +1,43 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #0f172a; /* Azul oscuro sólido */
-  color: #333;
+  background-color: #f4f4f4;
+  color: #e2e8f0;
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100%;  
+  overflow: hidden; 
 }
 
-.titulo {
-  background-color:#1e293b;
-  padding: 10px;
-  margin-bottom: 25px;
-  border-radius: 8px;
+.registro-container h2{
   text-align: center;
-  color: white;
-  border: 2px solid #1e3c72; /* Marco oscuro */
+  margin-bottom: 20px;
+  color: #ffffff;
+
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  margin-top: 40px;
+  height: 100%;  
 }
 
 .registro-container {
-  background-color: #ffffff;
-  padding: 20px;
+  background-color: #1e293b;
+  padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  width: 90%;
+  width: 100%;
   max-width: 800px;
-}
-
-.titulo h2 {
-  margin: 0;
-  font-size: 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  margin-top: -90px;
 }
 
 
@@ -39,6 +45,7 @@ body {
   display: flex;
   gap: 30px;
   margin-bottom: 25px;
+  flex-wrap: wrap;
 }
 
 .form-left,
@@ -55,29 +62,41 @@ input[type="password"],
 input[type="number"] {
   width: 100%;
   padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+input:focus {
+  outline: 2px solid #38bdf8;
 }
 
 label {
   font-weight: bold;
-  color: #1e293b;
+  color: #f1f5f9;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  background-color: #3e5190; /* Azul fuerte */
-  color: white;
+  background-color: #38bdf8;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
+  color: #0f172a;
+  font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #395295;
+  background-color: #0ea5e9;
+}
+
+.form-errors {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
 }
