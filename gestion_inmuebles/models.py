@@ -57,8 +57,8 @@ class Cochera(Inmueble):
         ('Descubierta', 'Descubierta'),
     ]
     )
-    largo_plaza = models.DecimalField(max_digits=10, decimal_places=2)
-    ancho_plaza = models.DecimalField(max_digits=10, decimal_places=2)
+    largo_plaza = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ancho_plaza = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     plazas = models.IntegerField(null=True, blank=True)
     
 
