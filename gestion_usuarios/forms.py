@@ -30,3 +30,8 @@ class RegistroUsuarioForm(UserCreationForm):
         self.fields["username"].label = "Nombre de usuario"
         self.fields["password1"].label = "Contraseña"
         self.fields["password2"].label = "Confirmar contraseña"
+        
+class EditarPerfilForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['first_name', 'email', 'dni', 'telefono']

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from .models import Usuario
 from django.shortcuts import get_object_or_404
+from .forms import EditarPerfilForm
 
 def home(request):
     return render(request, 'gestion_usuarios/home.html')
@@ -68,3 +69,24 @@ def detalle_cliente(request, user_id):
 def listar_clientes(request):
     usuarios = Usuario.objects.filter(is_staff=False, is_superuser=False)
     return render(request, 'gestion_usuarios/lista-clientes.html', {'usuarios': usuarios})
+
+@login_required
+def ver_perfil(request):
+     if request.method == 'POST' and 'eliminar_cuenta' in request.POST:
+         request.user.delete()
+         logout(request)
+         return redirect('home')
+         messages.success(request, 'Tu cuenta fue eliminada exitosamente.')
+     return render(request, 'gestion_usuarios/perfil.html', {'usuario': request.user})
+
+@login_required
+def editar_perfil(request):
+    usuario = request.user
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=usuario)
+        if form.is_valid():
+            form.save()
+            return redirect('perfil_usuario')
+    else:
+        form = EditarPerfilForm(instance=usuario)
+    return render(request, 'gestion_usuarios/editar_perfil.html', {'form': form})

@@ -63,3 +63,18 @@ main {
     height: 50px;
     width: auto;
 }
+
+.alerta {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 15px auto;
+  width: 90%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.alerta.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}

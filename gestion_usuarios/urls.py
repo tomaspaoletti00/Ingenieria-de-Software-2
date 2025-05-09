@@ -11,5 +11,7 @@ urlpatterns = [
     path('panel-admin', views.panelAdmin, name='panel-admin'),
     path('panel-admin/lista-clientes/', views.listar_clientes, name='lista-clientes'),
     path('panel-admin/lista-clientes/<int:user_id>/', views.detalle_cliente, name='detalle-cliente'),
+    path('perfil/', views.ver_perfil, name='perfil_usuario'),
+    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
     
 ]

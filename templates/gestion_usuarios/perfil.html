@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="perfil-container">
+    <h2>Perfil de {{ usuario.first_name }}</h2>
+    <li><strong>Usuario:</strong> {{ usuario.username }}</li>
+    <li><strong>Nombre Completo:</strong> {{ usurio.first_name}}</li>
+    <li><strong>Email:</strong> {{ usuario.email }}</li>
+    <li><strong>Fecha de Registro:</strong> {{ usuario.date_joined }}</li>
+    <li><strong>DNI:</strong> {{ usuario.dni}}</li>
+    <li><strong>Telefono:</strong> {{ usuario.telefono}}</li>
+</div>
+<a href="{% url 'editar_perfil' %}">
+    <button>Editar Perfil</button>
+</a>
+
+<form method="post" onsubmit="return confirm('¿Estás seguro de que querés eliminar tu cuenta? Esta acción no se puede deshacer.')">
+    {% csrf_token %}
+    <input type="hidden" name="eliminar_cuenta" value="1">
+    <button>Eliminar cuenta</button>
+</form>
+{% endblock %}

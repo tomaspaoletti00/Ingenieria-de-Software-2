@@ -14,6 +14,7 @@
                 <img src="{% static 'img/logoAlquilerExpress.png' %}" alt="Logo" class="logo-img">Alquiler Express</a>
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
+               
 
                 {% if user.is_staff %}
                     <li><a href="/usuarios/panel-emp">Panel de Empleado</a></li>
@@ -22,6 +23,7 @@
                     <li><a href="/usuarios/panel-admin">Panel de Administrador</a></li>
                 {% endif %}
                 {% if user.is_authenticated %}
+                    <li><a href="/usuarios/perfil">Perfil</a></li>
                     <li><a href="/usuarios/logout">Cerrar Sesión</a></li>
                 {% else %}
                     <li><a href="/usuarios/registro">Registro</a></li>
@@ -31,6 +33,17 @@
             </ul>
         </div>
     </nav>
+
+    {% if messages %}
+      <div class="mensajes">
+        {% for message in messages %}
+          <div class="alerta {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <main>
     {% block content %}
    
