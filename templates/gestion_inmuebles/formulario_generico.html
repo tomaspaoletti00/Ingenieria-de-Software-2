@@ -1,0 +1,5 @@
+<form method="POST" enctype="multipart/form-data" action="/inmuebles/formulario/?tipo={{ tipo }}">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit"> Enviar </button>
+</form>

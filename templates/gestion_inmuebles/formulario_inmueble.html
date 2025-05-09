@@ -1,0 +1,22 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Formulario para cada tipo de inmueble</h1>
+        <button class="form-button" data-tipo="departamento"> Departamento </button>
+        <button class="form-button" data-tipo="casa"> Casa </button>
+        <button class="form-button" data-tipo="local"> Local </button>
+        <button class="form-button" data-tipo="cochera"> Cochera </button>
+        <div id="container-form">
+
+        </div>
+    </div>
+    <script src="{% static 'js/formulario_ajax.js' %}"></script>
+</body>
+</html>
