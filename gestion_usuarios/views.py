@@ -46,13 +46,15 @@ def logout_usuario(request):
 
 def es_empleado(user):
     return user.is_authenticated and user.is_staff
+def es_admin(user):
+    return user.is_authenticated and user.is_superuser
 
 @user_passes_test(es_empleado)
+@user_passes_test(es_admin)
 def panelEmp(request):
     return render(request, 'gestion_usuarios/panel-emp.html')
 
-def es_admin(user):
-    return user.is_authenticated and user.is_superuser
+
 
 @user_passes_test(es_admin)
 def panelAdmin(request):
@@ -60,12 +62,14 @@ def panelAdmin(request):
 
 @login_required
 @user_passes_test(es_empleado)
+@user_passes_test(es_admin)
 def detalle_cliente(request, user_id):
     cliente = get_object_or_404(Usuario, id=user_id, is_staff=False, is_superuser=False)
     return render(request, 'gestion_usuarios/detalle-cliente.html', {'cliente': cliente})
 
 @login_required
 @user_passes_test(es_empleado)
+@user_passes_test(es_admin)
 def listar_clientes(request):
     usuarios = Usuario.objects.filter(is_staff=False, is_superuser=False)
     return render(request, 'gestion_usuarios/lista-clientes.html', {'usuarios': usuarios})
@@ -90,3 +94,15 @@ def editar_perfil(request):
     else:
         form = EditarPerfilForm(instance=usuario)
     return render(request, 'gestion_usuarios/editar_perfil.html', {'form': form})
+
+@login_required
+@user_passes_test(es_admin)
+def detalle_empleado(request, user_id):
+    empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
+    return render(request, 'gestion_usuarios/detalle-empleado.html', {'empleado': empleado})
+
+@login_required
+@user_passes_test(es_admin)
+def listar_empleados(request):
+    empleados = Usuario.objects.filter(is_staff=True, is_superuser=False)
+    return render(request, 'gestion_usuarios/lista-empleados.html', {'empleados': empleados})

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Detalle del empleado</h2>
+<ul>
+    <li><strong>Usuario:</strong> {{ empleado.username }}</li>
+    <li><strong>Nombre Completo:</strong> {{ empleado.first_name}}</li>
+    <li><strong>Email:</strong> {{ empleado.email }}</li>
+    <li><strong>Fecha de Registro:</strong> {{ empleado.date_joined }}</li>
+
+    <li><strong>DNI:</strong> {{ empleado.dni}}</li>
+    <li><strong>Telefono:</strong> {{ empleado.telefono}}</li>
+    
+    
+
+    <!-- Agregá más info si querés -->
+  </ul>
+
+<a href="{% url 'lista-empleados' %}" class="btn btn-secondary">Volver al listado</a>
+{% endblock %}
