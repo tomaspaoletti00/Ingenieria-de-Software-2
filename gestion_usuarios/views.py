@@ -106,3 +106,5 @@ def detalle_empleado(request, user_id):
 def listar_empleados(request):
     empleados = Usuario.objects.filter(is_staff=True, is_superuser=False)
     return render(request, 'gestion_usuarios/lista-empleados.html', {'empleados': empleados})
+
+
