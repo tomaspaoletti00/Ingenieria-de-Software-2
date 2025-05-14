@@ -7,24 +7,24 @@
     <tr>
       <th>Nombre de Usuario</th>
       <th>Correo</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for usuario in usuarios %}
     <tr>
-        <td>
-            <a href="{% url 'detalle-cliente' usuario.id %}">
-              {{ usuario.username }}
-            </a>
-          </td>
+      <td>{{ usuario.username }}</td>
+      <td>{{ usuario.email }}</td>
       <td>
         <a href="{% url 'detalle-cliente' usuario.id %}">
-          {{ usuario.email }}
+          <button style="padding: 6px 12px; background-color: #3e5190; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Ver Perfil
+          </button>
         </a>
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="2">No hay clientes registrados.</td></tr>
+    <tr><td colspan="3">No hay clientes registrados.</td></tr>
     {% endfor %}
   </tbody>
 </table>
