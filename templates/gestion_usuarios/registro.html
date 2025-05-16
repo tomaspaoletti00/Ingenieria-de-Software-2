@@ -7,42 +7,43 @@
 <link rel="stylesheet" href="{% static 'styles/registro.css' %}">
 
 <div class="main-content">
-  <div class="registro-container">
-      <h2>Registrar Cuenta</h2>
-    <form method="post">
-      {% csrf_token %}
-      
-      {% if form.errors %}
-        <div class="form-errors">
-          <ul>
-            {% for field in form %}
-              {% for error in field.errors %}
-                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-              {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
+  <div class="registro-wrapper">
+    <div class="registro-container">
+        <h2>Registrar Cuenta</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-columns">
+            <div class="form-left">
+              {{ form.username.label_tag }} {{ form.username }}
+              {{ form.email.label_tag }} {{ form.email }}
+              {{ form.password1.label_tag }} {{ form.password1 }}
+              {{ form.password2.label_tag }} {{ form.password2 }}
+            </div>
+            <div class="form-right">
+              {{ form.first_name.label_tag }} {{ form.first_name }}
+              {{ form.dni.label_tag }} {{ form.dni }}
+              {{ form.telefono.label_tag }} {{ form.telefono }}
+            </div>
+          </div>
+          <button type="submit">Registrarse</button>
+        </form>
+    </div>
 
-      <div class="form-columns">
-        <div class="form-left">
-          {{ form.username.label_tag }} {{ form.username }}
-          {{ form.email.label_tag }} {{ form.email }}
-          {{ form.password1.label_tag }} {{ form.password1 }}
-          {{ form.password2.label_tag }} {{ form.password2 }}
-        </div>
-        <div class="form-right">
-          {{ form.first_name.label_tag }} {{ form.first_name }}
-          {{ form.dni.label_tag }} {{ form.dni }}
-          {{ form.telefono.label_tag }} {{ form.telefono }}
-        </div>
+    {% if form.errors %}
+      <div class="form-errors-right">
+        <h4>Errores en el formulario</h4>
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
       </div>
-
-      <button type="submit">Registrarse</button>
-    </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

@@ -15,6 +15,7 @@ body {
   text-align: center;
   margin-bottom: 20px;
   color: #ffffff;
+  padding-top: 24px;
 
 }
 
@@ -31,13 +32,14 @@ body {
 .registro-container {
   background-color: #1e293b;
   padding: 30px;
-  border-radius: 12px;
+  border-radius: 8px;
   width: 100%;
   max-width: 800px;
   overflow: hidden;
   box-sizing: border-box;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  margin-top: -90px;
+  margin-top: -60px;
+  padding-top: 20px;
 }
 
 
@@ -96,7 +98,38 @@ button:hover {
 .form-errors {
   background-color: #fee2e2;
   color: #991b1b;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 5%;
+  border-radius: 2px;
   margin-bottom: 20px;
+}
+
+.registro-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.form-errors-right {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.95rem;
+  border: 1px solid #fecaca;
+}
+
+.form-errors-right h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #b91c1c;
+}
+
+.form-errors-right ul {
+  padding-left: 20px;
+  margin: 0;
 }

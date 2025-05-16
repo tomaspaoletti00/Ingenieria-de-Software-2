@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/verificar-token.css' %}">
+
+
+<div class="token-container">
+    <div class="token-form-box">
+        <h2>Autenticación de Administrador</h2>
+        <p>Se ha enviado un código de verificación a tu correo electrónico. Ingresalo abajo para continuar.</p>
+
+        <!-- Formulario de verificación -->
+        <form method="post" action="{% url 'verificar-token' %}">
+            {% csrf_token %}
+            <label for="token">Código recibido por correo:</label>
+            <input type="text" name="token" id="token" required>
+            <button type="submit">Verificar</button>
+        </form>
+
+        <!-- Botón separado para reenviar -->
+        <form method="post" action="{% url 'reenviar-token' %}">
+            {% csrf_token %}
+            <button type="submit" class="resend-btn">Reenviar código</button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

@@ -8,6 +8,13 @@ from django.contrib.auth.decorators import user_passes_test
 from .models import Usuario
 from django.shortcuts import get_object_or_404
 from .forms import EditarPerfilForm
+import random
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_protect
+from django.utils import timezone
+from .models import TokenVerificacion
+from django.contrib import messages
+
 
 def home(request):
     return render(request, 'gestion_usuarios/home.html')
@@ -28,13 +35,34 @@ def login_usuario(request):
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
+
             if user.is_superuser:
-                 return redirect('panel-admin')
-            elif user.is_staff:
-                 return redirect('panel-emp')
+                token_existente = TokenVerificacion.objects.filter(usuario=user).first()
+                if token_existente and not token_existente.expirado() and not token_existente.usado:
+                    messages.error(request, 'Ya se envió un token válido. Esperá que expire o usalo.')
+                    return redirect('verificar-token')
+
+                # Generar nuevo token
+                token = generar_token()
+                
+                TokenVerificacion.objects.update_or_create(
+                    usuario=user,
+                    defaults={'token': token, 'creado_en': timezone.now(), 'usado': False}
+                )
+
+                send_mail(
+                    'Tu token de verificación',
+                    f'Tu código es: {token}',
+                    'no-reply@tuapp.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+                
+                request.session['pending_admin_id'] = user.id
+                return redirect('verificar-token')
             else:
-                 return redirect('listaInmuebles') # redirigí a la vista que quieras como home
+                login(request, user)
+                return redirect('listaInmuebles')
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
     return render(request, 'gestion_usuarios/login.html')
@@ -107,3 +135,53 @@ def listar_empleados(request):
     empleados = Usuario.objects.filter(is_staff=True, is_superuser=False)
     return render(request, 'gestion_usuarios/lista-empleados.html', {'empleados': empleados})
 
+def generar_token():
+    return str(random.randint(100000, 999999))
+
+
+def verificar_token(request):
+    if request.method == 'POST':
+        token_ingresado = request.POST.get('token')
+        user_id = request.session.get('pending_admin_id')
+        user = Usuario.objects.get(id=user_id)
+        token_obj = TokenVerificacion.objects.filter(usuario=user, usado=False).first()
+
+        if token_obj and not token_obj.expirado() and token_obj.token == token_ingresado:
+            token_obj.usado = True
+            token_obj.save()
+            login(request, user)
+            del request.session['pending_admin_id']
+            return redirect('panel-admin')
+        else:
+            messages.error(request, 'Token incorrecto o expirado.')
+    return render(request, 'gestion_usuarios/verificar-token.html')
+
+@csrf_protect
+def reenviar_token(request):
+    user_id = request.session.get('pending_admin_id')
+    if not user_id:
+        messages.error(request, "Sesión no válida.")
+        return redirect('login')
+
+    usuario = get_object_or_404(Usuario, id=user_id)
+
+    # Marcar el token anterior como usado
+    TokenVerificacion.objects.filter(usuario=usuario, usado=False).update(usado=True)
+
+    # Generar nuevo token
+    nuevo_token = generar_token()
+    TokenVerificacion.objects.update_or_create(
+        usuario=usuario,
+        defaults={'token': nuevo_token, 'creado_en': timezone.now(), 'usado': False}
+    )
+
+    send_mail(
+        'Nuevo código de verificación',
+        f'Tu nuevo código es: {nuevo_token}',
+        'no-reply@tuapp.com',
+        [usuario.email],
+        fail_silently=False,
+    )
+
+    messages.success(request, "Se envió un nuevo código a tu correo.")
+    return redirect('verificar-token')

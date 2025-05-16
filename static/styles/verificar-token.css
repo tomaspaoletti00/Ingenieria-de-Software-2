@@ -1,0 +1,90 @@
+.token-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 60vh;  /* fijo, no min-height */
+    padding-top: 0px;
+    overflow: hidden;
+    overflow-x: hidden;
+}
+
+.token-form-box {
+    background-color: #1e293b;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    color: #e2e8f0;
+    overflow: hidden;
+    overflow-x: hidden;
+}
+
+.token-form-box h2 {
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.token-form-box p {
+    font-size: 14px;
+    color: #cbd5e1;
+    margin-bottom: 25px;
+}
+
+.token-form-box label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #e2e8f0;
+}
+
+.token-form-box input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 6px;
+    background-color: #334155;
+    color: #f1f5f9;
+    font-size: 14px;
+}
+
+.token-form-box input[type="text"]:focus {
+    outline: 2px solid #38bdf8;
+}
+
+.token-form-box button {
+    background-color: #38bdf8;
+    color: #0f172a;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 10px;
+    width: 100%;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.token-form-box button:hover {
+    background-color: #0ea5e9;
+}
+
+.token-form-box .resend-btn {
+    background-color: #64748b;
+    color: #f1f5f9;
+}
+
+.token-form-box .resend-btn:hover {
+    background-color: #475569;
+}
+
+.error-message {
+    color: #f87171;
+    font-size: 13px;
+    margin-top: 8px;
+}
+

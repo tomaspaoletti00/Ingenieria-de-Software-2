@@ -15,6 +15,7 @@ urlpatterns = [
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
     path('panel-admin/lista-empleados/', views.listar_empleados, name='lista-empleados'),
     path('panel-admin/lista-empleados/<int:user_id>/', views.detalle_empleado, name='detalle-empleado'),
-
+    path('verificar-token/', views.verificar_token, name='verificar-token'),
+    path('verificar-token/reenviar/', views.reenviar_token, name='reenviar-token'),
     
 ]
