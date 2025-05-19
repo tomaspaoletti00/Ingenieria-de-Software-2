@@ -2,13 +2,7 @@
     {% csrf_token %}
     {{ form }}
     <div id="container-persona">
-        <div id="persona">
-            <input name="nombre_completo" placeholder="Nombre completo" />
-            <input name="edad" type="number" min="0" placeholder="Edad" />
-            <input name="dni" placeholder="DNI" />
-        </div>
     </div>
-    <button id="eliminar-persona"> - </button>
-    <button id="agregar-persona"> + </button>
-    <button id="continuar-reserva"> Continuar reserva </button>
+    <button id="agregar-persona" type="button"> + </button>
+    <button id="continuar-reserva" type="button"> Continuar reserva </button>
 </form>

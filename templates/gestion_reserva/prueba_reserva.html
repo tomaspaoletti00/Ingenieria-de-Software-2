@@ -8,9 +8,17 @@
 </head>
 <body>
     <div class="container">
-        <button id="reserva-normal"></button>
-        <div id="container-widget">
+        <button id="reserva-normal">Realizar Reserva</button>
+        <div id="container-widget"></div>
+    </div>
 
+    <!-- Plantilla oculta para inquilino -->
+    <div id="formulario-persona-plantilla" style="display: none;">
+        <div class="persona" data-n="">
+            <input type="text" name="nombre" placeholder="Nombre completo">
+            <input type="number" name="edad" placeholder="Edad">
+            <input type="text" name="dni" placeholder="DNI">
+            <button type="button" class="eliminar-persona">Eliminar</button>
         </div>
     </div>
     <script src="{% static 'js/solicitar_reserva.js' %}"></script>
