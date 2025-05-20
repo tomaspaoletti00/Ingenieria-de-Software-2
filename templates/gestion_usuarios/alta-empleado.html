@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Registrar Nuevo Empleado</h2>
+  
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Crear empleado</button>
+  </form>
+
+  <a href="{% url 'lista-empleados' %}">Volver a la lista de empleados</a>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

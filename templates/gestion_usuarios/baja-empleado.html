@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>¿Seguro que querés dar de baja al empleado <strong>{{ empleado.username }}</strong>?</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, dar de baja</button>
+    <a href="{% url 'lista-empleados' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}

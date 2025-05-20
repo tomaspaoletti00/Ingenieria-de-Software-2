@@ -2,29 +2,42 @@
 
 {% block content %}
 <h2>Empleados Registrados</h2>
+
 <table>
   <thead>
     <tr>
       <th>Nombre de Usuario</th>
       <th>Correo</th>
+      <th>Acciones</th> <!-- Agregamos columna de acciones -->
     </tr>
   </thead>
   <tbody>
     {% for empleado in empleados %}
     <tr>
-        <td>
-            <a href="{% url 'detalle-empleado' empleado.id %}">
-              {{ empleado.username }}
-            </a>
-          </td>
+      <td>
+        <a href="{% url 'detalle-empleado' empleado.id %}">
+          {{ empleado.username }}
+        </a>
+      </td>
       <td>
         <a href="{% url 'detalle-empleado' empleado.id %}">
           {{ empleado.email }}
         </a>
       </td>
+      <td>
+        {% if empleado.is_active %}
+          <a href="{% url 'baja_empleado' empleado.id %}" class="btn btn-danger btn-sm">
+             ❌ Dar de baja
+          </a>
+        {% else %}
+          <span class="text-muted">Inactivo</span>
+        {% endif %}
+      </td>
     </tr>
     {% empty %}
-    <tr><td colspan="2">No hay empleados registrados.</td></tr>
+    <tr>
+      <td colspan="3">No hay empleados registrados.</td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>

@@ -17,4 +17,8 @@
   </ul>
 
 <a href="{% url 'lista-empleados' %}" class="btn btn-secondary">Volver al listado</a>
+<br>
+<a href="{% url 'editar-empleado' empleado.id %}" class="btn btn-warning btn-sm">
+  ✏️ Editar
+</a>
 {% endblock %}
