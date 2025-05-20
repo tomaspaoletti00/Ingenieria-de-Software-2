@@ -1,0 +1,8 @@
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <div id="container-persona">
+    </div>
+    <button id="agregar-persona" type="button"> + </button>
+    <button id="continuar-reserva" type="button"> Continuar reserva </button>
+</form>

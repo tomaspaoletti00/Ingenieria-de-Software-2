@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'gestion_usuarios',
     'gestion_inmuebles',
+    'gestion_reserva',
 ]
 
 MIDDLEWARE = [
