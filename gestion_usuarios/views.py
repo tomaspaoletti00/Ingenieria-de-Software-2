@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import render, redirect
-from .forms import RegistroUsuarioForm
+from .forms import RegistroUsuarioForm,RegistroEmpleadoForm,EditarEmpleadoForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -185,3 +185,40 @@ def reenviar_token(request):
 
     messages.success(request, "Se envió un nuevo código a tu correo.")
     return redirect('verificar-token')
+@login_required
+@user_passes_test(es_admin)
+def alta_empleado(request):
+    if request.method == 'POST':
+        form = RegistroEmpleadoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Empleado registrado correctamente.')
+            return redirect('lista-empleados')
+    else:
+        form = RegistroEmpleadoForm()
+    return render(request, 'gestion_usuarios/alta-empleado.html', {'form': form})
+
+@login_required
+@user_passes_test(es_admin)
+def baja_empleado(request, user_id):
+    empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
+    if request.method == 'POST':
+        empleado.is_active = False
+        empleado.save()
+        messages.success(request, 'Empleado dado de baja correctamente.')
+        return redirect('lista-empleados')
+    return render(request, 'gestion_usuarios/baja-empleado.html', {'empleado': empleado})
+
+@login_required
+@user_passes_test(es_admin)
+def editar_empleado(request, user_id):
+    empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
+    if request.method == 'POST':
+        form = EditarEmpleadoForm(request.POST, instance=empleado)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Empleado actualizado correctamente.')
+            return redirect('detalle-empleado', user_id=empleado.id)
+    else:
+        form = EditarEmpleadoForm(instance=empleado)
+    return render(request, 'gestion_usuarios/editar-empleado.html', {'form': form, 'empleado': empleado})

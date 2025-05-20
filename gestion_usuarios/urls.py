@@ -16,6 +16,9 @@ urlpatterns = [
     path('panel-admin/lista-empleados/', views.listar_empleados, name='lista-empleados'),
     path('panel-admin/lista-empleados/<int:user_id>/', views.detalle_empleado, name='detalle-empleado'),
     path('verificar-token/', views.verificar_token, name='verificar-token'),
-    path('verificar-token/reenviar/', views.reenviar_token, name='reenviar-token'),
-    
+    path('verificar-token/reenviar/', views.reenviar_token, name='reenviar-token'),    path('panel-admin/alta-empleado/', views.alta_empleado, name='alta_empleado'),
+    path('baja-empleado/<int:user_id>/', views.baja_empleado, name='baja_empleado'),
+    path('editar-empleado/<int:user_id>/', views.editar_empleado, name='editar-empleado'),
+    path('panel-admin/alta-empleado/', views.alta_empleado, name='alta_empleado'),
+
 ]
