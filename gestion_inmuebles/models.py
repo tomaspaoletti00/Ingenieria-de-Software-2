@@ -1,24 +1,27 @@
 
 from django.db import models
+from django.core.validators import MinValueValidator
+from decimal import Decimal
 
 class Inmueble(models.Model):
+    tipo = models.CharField(default='-',max_length=20, editable=False)
     nombre = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=200)
+    calle = models.PositiveIntegerField(default=0)
+    numero = models.PositiveIntegerField(default=0)
+    provincia = models.CharField(max_length=100)
+    ciudad = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
-    tipo = models.CharField(default='Casa', choices=[
-        ('Casa', 'Casa'),
-        ('Departamento', 'Departamento'),
-        ('Local', 'Local'),
-        ('Otro', 'Otro'),
-    ]) 
     politica_cancelacion = models.TextField(blank=True)
     estado = models.CharField(default='Disponible', choices=[
         ('Disponible', 'Disponible'),
         ('No_disponible', 'No disponible'),
         ('Mantenimiento', 'En mantenimiento'),
     ])
-    Precio = models.DecimalField(max_digits=10, decimal_places=2)
-    Tiempo = models.CharField(default='-', choices=[
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+    tiempo = models.CharField(default='-', choices=[
         ('Por_hora', 'Por hora'),
         ('Por_dia', 'Por día'),
         ('Por_semana', 'Por semana'),
@@ -27,29 +30,46 @@ class Inmueble(models.Model):
     ]
     )
     imagen = models.ImageField(upload_to='inmuebles/', blank=True, null=True)
-    superficie = models.IntegerField(default=0) 
+    superficie = models.PositiveIntegerField(default=0) 
 
 
 class InmueblesSimilares(Inmueble):
     tiene_internet = models.BooleanField(default=False)
-    baños = models.IntegerField(default=0) 
+    banios = models.PositiveIntegerField(default=0) 
     tiene_cochera = models.BooleanField(default=False)
+
     
 
 
 
 
 class Departamento(InmueblesSimilares):
-    piso = models.IntegerField(null=True, blank=True)
-    cantidad_inquilinos = models.IntegerField(default=1)    
+    piso = models.PositiveIntegerField(null=True, blank=True)
+    cantidad_inquilinos = models.PositiveIntegerField(default=1)    
+    tipo = "Departamento"
+
+    def save(self, *args, **kwargs):
+        self.tipo = "Departamento"
+        super().save(*args, **kwargs)
 
 class Casa(InmueblesSimilares):
-    pisos = models.IntegerField(null=True, blank=True)
-    cantidad_inquilinos = models.IntegerField(default=1)    
+    pisos = models.PositiveIntegerField(null=True, blank=True)
+    cantidad_inquilinos = models.PositiveIntegerField(default=1)    
+    tipo = "Casa"
+
+    def save(self, *args, **kwargs):
+        self.tipo = "Casa"
+        super().save(*args, **kwargs)
+
 
 class Local(InmueblesSimilares):
-    frente = models.DecimalField(max_digits=10, decimal_places=2)
-    fondo = models.DecimalField(max_digits=10, decimal_places=2)
+    frente = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(Decimal('0.00'))])
+    fondo = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(Decimal('0.00'))])
+    tipo = "Local"
+
+    def save(self, *args, **kwargs):
+        self.tipo = "Local"
+        super().save(*args, **kwargs)
 
 class Cochera(Inmueble):
     tipo_cochera = models.CharField(default='-', choices=[
@@ -57,9 +77,14 @@ class Cochera(Inmueble):
         ('Descubierta', 'Descubierta'),
     ]
     )
-    largo_plaza = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    ancho_plaza = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    plazas = models.IntegerField(null=True, blank=True)
+    largo_plaza = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(Decimal('0.00'))])
+    ancho_plaza = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(Decimal('0.00'))])
+    plazas = models.PositiveIntegerField(null=True, blank=True)
+    tipo = "Cochera"
+
+    def save(self, *args, **kwargs):
+        self.tipo = "Cochera"
+        super().save(*args, **kwargs)
     
 
     def __str__(self):

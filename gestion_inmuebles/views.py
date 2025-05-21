@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from gestion_inmuebles.models import Departamento, Casa, Local, Cochera
 from .forms import InmuebleForm, FormularioDepartamento, FormularioCasa, FormularioLocal, FormularioCochera
 from .models import Inmueble
 
@@ -17,9 +18,49 @@ def crear_inmueble(request):
         form = InmuebleForm()
     return render(request, 'gestion_inmuebles/crear_inmueble.html', {'form': form})
 
-def listarInmuebles(request):
-    inmuebles = Inmueble.objects.all()  # Esto sería el equivalente a SELECT * FROM inmueble
-    return render(request, 'gestion_inmuebles/listaInmuebles.html', {'inmuebles': inmuebles})
+def listar_Inmuebles(request):
+    tipo_filtro = request.GET.get('tipo')
+    ciudad_filtro = request.GET.get('ciudad')
+    provincia_filtro = request.GET.get('provincia')
+
+    inmuebles_base = Inmueble.objects.all()
+
+    # Aplicar filtros comunes
+    if ciudad_filtro:
+        inmuebles_base = inmuebles_base.filter(ciudad__iexact=ciudad_filtro)
+    if provincia_filtro:
+        inmuebles_base = inmuebles_base.filter(provincia__iexact=provincia_filtro)
+
+    inmuebles = []
+
+    for inmueble in inmuebles_base:
+        try:
+            tipo_obj = Departamento.objects.get(pk=inmueble.pk)
+            tipo = "Departamento"
+        except Departamento.DoesNotExist:
+            try:
+                tipo_obj = Casa.objects.get(pk=inmueble.pk)
+                tipo = "Casa"
+            except Casa.DoesNotExist:
+                try:
+                    tipo_obj = Local.objects.get(pk=inmueble.pk)
+                    tipo = "Local"
+                except Local.DoesNotExist:
+                    try:
+                        tipo_obj = Cochera.objects.get(pk=inmueble.pk)
+                        tipo = "Cochera"
+                    except Cochera.DoesNotExist:
+                        continue
+
+        if not tipo_filtro or tipo.lower() == tipo_filtro.lower():
+            inmuebles.append({'tipo': tipo, 'objeto': tipo_obj})
+
+    return render(request, 'gestion_inmuebles/listaInmuebles.html', {
+        'inmuebles': inmuebles,
+        'tipo': tipo_filtro,
+        'ciudad': ciudad_filtro,
+        'provincia': provincia_filtro,
+    })
 
 # Esto es todo lo de la parte para agregar inmuebles de los cuatro tipos
 # Hay varios def con codigo muy parecido, si fuera oo2 seria como un homicidio triple
@@ -27,6 +68,8 @@ def listarInmuebles(request):
 
 def formulario_inmueble(request):
     return render(request, 'gestion_inmuebles/formulario_inmueble.html')
+
+
 
 def crear_formulario(request):
     formulario_tipo = {
@@ -55,6 +98,7 @@ def crear_departamento(request):
         redirect('gestion_inmuebles/formulario_inmueble.html')
 
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
+
 
 def crear_casa(request):
     form = FormularioCasa(request.POST or None, request.FILES or None)
@@ -94,3 +138,7 @@ def crear_cochera(request):
         redirect('gestion_inmuebles/formulario_inmueble.html')
 
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
+
+def inmueble_detalle(request, pk):
+    inmueble = get_object_or_404(Inmueble, pk=pk)
+    return render(request, 'gestion_inmuebles/detalle_inmueble.html', {'inmueble': inmueble})

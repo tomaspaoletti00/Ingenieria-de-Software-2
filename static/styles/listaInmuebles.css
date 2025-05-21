@@ -56,4 +56,50 @@ body {
     font-size: 15px;
     line-height: 1.4;
 }
+.filtros {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    padding: 10px 15px;
+    background-color: #4a90e2;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s;    
+}
+
+.btn-filtro:hover {
+    background-color: #3576c0;
+}
+.card-link {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    outline: none !important;
+    color: inherit;
+    display: block;
+}
+
+.card-link:hover,
+.card-link:focus,
+.card-link:active {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    outline: none !important;
+    color: inherit;
+}
+
+.card-link h2,
+.card-link p {
+    text-decoration: none;
+}
+
+.card-link * {
+    text-decoration: none !important;
+}
 

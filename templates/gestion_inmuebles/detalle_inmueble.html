@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{ inmueble.nombre }}</h1>
+    {% if inmueble.imagen %}
+        <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+    {% endif %}
+    <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
+    <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
+    <p><strong>Dirección:</strong> {{ inmueble.calle }} {{ inmueble.numero }}</p>
+    <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
+    <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
+    <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
+    <a href="{% url 'listaInmuebles' %}">← Volver a la lista</a>
+{% endblock %}
