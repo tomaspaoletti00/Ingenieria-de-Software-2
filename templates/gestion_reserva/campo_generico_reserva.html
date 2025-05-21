@@ -1,6 +1,13 @@
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form }}
+    <label for="metodo_pago">Método de Pago:</label>
+    <select name="metodo_pago" id="metodo_pago">
+      <option value="efectivo">Efectivo</option>
+      <option value="transferencia bancaria">Transferencia Bancaria</option>
+      <option value="mercado pago">Mercado Pago</option>
+      <option value="tarjeta">Tarjeta de crédito/débito</option>
+    </select>
     <div id="container-persona">
     </div>
     <button id="agregar-persona" type="button"> + </button>

@@ -1,3 +1,18 @@
+function getCookie(name) { // usando protección CSRF (por defecto sí) para que no rechace server
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     /* FUNCIONES */
 
@@ -13,8 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function continuarReserva(container_persona) {
         if (container_persona.querySelectorAll(".persona").length === 0) {
             console.log("¡Mínimo un inquilino!");
+            
             return;
         }
+        datos_formulario.metodo_pago = document.querySelector("select[name='metodo_pago']").value;
 
         const personas = [];
         const campos = container_persona.querySelectorAll(".persona");
@@ -36,6 +53,20 @@ document.addEventListener("DOMContentLoaded", () => {
         datos_formulario.fecha_inicio = document.querySelector("input[name='fecha_inicio']").value;
         datos_formulario.fecha_fin = document.querySelector("input[name='fecha_fin']").value;
         console.log(datos_formulario);
+
+     fetch("/reserva/crear/?inmueble_id=1", {
+         method: "POST",
+         headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie('csrftoken')  // si usás csrf
+            },
+            body: JSON.stringify(datos_formulario)
+      })
+            .then(response => response.json())
+            .then(data => {
+                alert("Reserva enviada correctamente");
+       })
+        .catch(error => console.error("Error al guardar reserva:", error));
     }
 
     function inicializarFormularioReserva(data) {
