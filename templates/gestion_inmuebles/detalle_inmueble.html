@@ -11,4 +11,7 @@
     <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
     <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
     <a href="{% url 'listaInmuebles' %}">← Volver a la lista</a>
+    <a href="{% url 'reserva' inmueble.id %}">
+    <button>Realizar reserva</button>
+    </a>
 {% endblock %}

@@ -14,7 +14,7 @@ class Reserva(models.Model):
     fecha_fin = models.DateTimeField()
     tipo = models.CharField(max_length=10, choices=TIPO_RESERVA)
     estado = models.CharField(max_length=20, default="pendiente")
-    metodo_pago = models.CharField(max_length=50)
+    metodo_pago = models.CharField(max_length=50,default="efectivo")
     datos_inquilinos = models.JSONField()
 
     def clean(self):

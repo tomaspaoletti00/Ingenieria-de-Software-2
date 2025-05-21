@@ -1,15 +1,24 @@
+{% extends 'base.html' %}
+
 {% load static %} 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+{% block content %}
     <div class="container">
-        <button id="reserva-normal">Realizar Reserva</button>
-        <div id="container-widget"></div>
+        <form method="POST" enctype="multipart/form-data">
+             {% csrf_token %}
+             {{ form }}
+         <label for="metodo_pago">Método de Pago:</label>
+      <select name="metodo_pago" id="metodo_pago">
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia bancaria">Transferencia Bancaria</option>
+          <option value="mercado pago">Mercado Pago</option>
+          <option value="tarjeta">Tarjeta de crédito/débito</option>
+        </select>
+    <div id="container-persona">
+    </div>
+    <button id="agregar-persona" type="button"> + </button>
+    <button id="continuar-reserva" type="button"> Continuar reserva </button>
+</form>
+        <div id="container-widget" data-inmueble-id="{{ inmueble_id }}" data-cant-personas="{{ cant_personas }}">
     </div>
 
     <!-- Plantilla oculta para inquilino -->
@@ -21,6 +30,7 @@
             <button type="button" class="eliminar-persona">Eliminar</button>
         </div>
     </div>
-    <script src="{% static 'js/solicitar_reserva.js' %}"></script>
-</body>
-</html>
+    <script 
+        src="{% static 'js/solicitar_reserva.js' %}">
+    </script>
+{% endblock %}
