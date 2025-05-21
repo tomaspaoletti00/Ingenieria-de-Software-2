@@ -13,32 +13,85 @@
     <div class="titulo">
         <h1>Inmuebles</h1>
     </div>
-    <div class="container">
-        {% for inmueble in inmuebles %}
-        <div class="card">
-            {% if inmueble.imagen %}
-            <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
-            {% endif %}
-            <div class="card-content">
-                <h2>{{ inmueble.nombre }}</h2>
-                <p><strong>Dirección:</strong> {{ inmueble.direccion }}</p>
-                <p><strong>Tipo:</strong> {{ inmueble.get_tipo_display }}</p>
-                <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
-                <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }} | <strong>Baños:</strong> {{ inmueble.banios }}</p>
-                <p><strong>Ambientes:</strong> {{ inmueble.ambientes }}</p>
-                <p><strong>Cochera:</strong> {{ inmueble.posee_cochera|yesno:"Sí,No" }}</p>
-                <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
-                {% if inmueble.descripcion %}
-                <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
-                {% endif %}
-            </div>
-        </div>
-        {% empty %}
-        <p>No hay inmuebles disponibles.</p>
-        {% endfor %}
+
+    <div class="filtros">
+        <form method="get" class="filtro-form">
+            <label for="tipo">Tipo:</label>
+            <select name="tipo" id="tipo">
+                <option value="">Todos</option>
+                <option value="Departamento" {% if request.GET.tipo == "Departamento" %}selected{% endif %}>Departamento</option>
+                <option value="Casa" {% if request.GET.tipo == "Casa" %}selected{% endif %}>Casa</option>
+                <option value="Local" {% if request.GET.tipo == "Local" %}selected{% endif %}>Local</option>
+                <option value="Cochera" {% if request.GET.tipo == "Cochera" %}selected{% endif %}>Cochera</option>
+            </select>
+
+            <label for="internet">Con Internet:</label>
+            <select name="tiene_internet" id="internet">
+                <option value="">-</option>
+                <option value="true" {% if request.GET.tiene_internet == "true" %}selected{% endif %}>Sí</option>
+                <option value="false" {% if request.GET.tiene_internet == "false" %}selected{% endif %}>No</option>
+            </select>
+
+            <label for="provincia">Provincia:</label>
+            <select name="provincia" id="provincia">
+                <option value="">Todas</option>
+                <option value="Córdoba" {% if request.GET.provincia == "Córdoba" %}selected{% endif %}>Córdoba</option>
+                <option value="Santa Fe" {% if request.GET.provincia == "Santa Fe" %}selected{% endif %}>Santa Fe</option>
+                <!-- Agregá más provincias si es necesario -->
+            </select>
+
+            <button type="submit">Filtrar</button>
+        </form>
     </div>
-   
+
+    <div class="container">
+    {% for inmueble in inmuebles %}
+        {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
+            <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
+                <div class="card">
+                    {% if inmueble.imagen %}
+                        <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+                    {% endif %}
+                <div class="card-content">
+                    <h2>{{ inmueble.nombre }}</h2>
+                    <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
+                    <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
+                    <p><strong>Calle:</strong> {{ inmueble.calle }}</p>
+                    <p><strong>Número:</strong> {{ inmueble.numero }}</p>
+                    <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
+                    <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
+                    <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+
+                    {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
+                        <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
+                        <p><strong>Baños:</strong> {{ inmueble.banios }}</p>
+                        <p><strong>Ambientes:</strong> {{ inmueble.ambientes }}</p>
+                        <p><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</p>
+                        <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
+                    {% elif inmueble.tipo == "Local" %}
+                        <p><strong>Frente:</strong> {{ inmueble.frente }} m</p>
+                        <p><strong>Fondo:</strong> {{ inmueble.fondo }} m</p>
+                        <p><strong>Superficie:</strong> {{ inmueble.superficie }} m²</p>
+                    {% elif inmueble.tipo == "Cochera" %}
+                        <p><strong>Tipo de Cochera:</strong> {{ inmueble.tipo_cochera }}</p>
+                        <p><strong>Largo plaza:</strong> {{ inmueble.largo_plaza }} m</p>
+                        <p><strong>Ancho plaza:</strong> {{ inmueble.ancho_plaza }} m</p>
+                        <p><strong>Plazas:</strong> {{ inmueble.plazas }}</p>
+                    {% endif %}
+
+                    {% if inmueble.descripcion %}
+                    <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
+                    {% endif %}
+                </div>
+                </div>
+            {% endwith %}
+    {% empty %}
+        <p>No hay inmuebles disponibles.</p>
+    {% endfor %}
+    </div>
+    
+
+
 </body>
 </html>
 {% endblock %}
