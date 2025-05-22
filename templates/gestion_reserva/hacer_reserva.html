@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %} 
+{% block content %}
+    <div class="container">
+        <form id="formulario-reserva" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form }}
+        </form>
+        <div style="flex: none;">
+            <p>Maximo: </p>
+            <p id="max-inquilino">{{ cant_inquilino }}</p>
+        </div>
+        <div id="container-persona">
+            <!-- Aca se agregan dinamicamente el/los inquilino(s) -->
+        </div>
+        <button id="agregar-persona" type="button"> + </button>
+        <button id="completar-reserva" type="button"> Completar reserva </button>
+    </div>
+
+    <!-- Plantilla oculta para inquilino -->
+    <div id="formulario-persona-plantilla" style="display: none;">
+        <div class="persona">
+            <input type="text" name="nombre" placeholder="Nombre completo">
+            <input type="number" name="edad" placeholder="Edad">
+            <input type="text" name="dni" placeholder="DNI">
+            <button type="button" class="eliminar-persona">Eliminar</button>
+        </div>
+    </div>
+    <script src="{% static 'js/solicitar_reserva.js' %}"></script>
+{% endblock %}

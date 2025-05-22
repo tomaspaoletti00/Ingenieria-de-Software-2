@@ -1,23 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     /* FUNCIONES */
+    function agregarPersona(container, plantilla, max) {
+        cant_actual = container_persona.querySelectorAll(".persona").length;
+        if (cant_actual < max) {
+            const clon = plantilla.firstElementChild.cloneNode(true);
+            clon.querySelectorAll("input").forEach(input => input.value = "");
 
-    function agregarPersona(container, plantilla) {
-        const clon = plantilla.firstElementChild.cloneNode(true);
-        clon.querySelectorAll("input").forEach(input => input.value = "");
+            clon.querySelector(".eliminar-persona").addEventListener("click", () => clon.remove());
 
-        clon.querySelector(".eliminar-persona").addEventListener("click", () => clon.remove());
-
-        container.appendChild(clon);
+            container.appendChild(clon);
+        } else {
+            console.log("Llegaste al maximo de personas aceptadas");
+        }
     }
 
-    function continuarReserva(container_persona) {
-        if (container_persona.querySelectorAll(".persona").length === 0) {
-            console.log("¡Mínimo un inquilino!");
-            return;
-        }
-
+    function completarReserva(container_persona) {
         const personas = [];
         const campos = container_persona.querySelectorAll(".persona");
+
+        if (campos.length === 0) {
+            alert("¡Debe agregar al menos una persona!");
+            return;
+        }
 
         for (let campo of campos) {
             const nombre = campo.querySelector("input[name='nombre']").value.trim();
@@ -25,35 +30,46 @@ document.addEventListener("DOMContentLoaded", () => {
             const dni = campo.querySelector("input[name='dni']").value.trim();
 
             if (!nombre || !edad || !dni) {
-                console.log("¡Llenar todos los campos!");
+                alert("¡Complete todos los campos de cada persona!");
                 return;
             }
 
             personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
         }
 
-        datos_formulario.personas = personas;
-        datos_formulario.fecha_inicio = document.querySelector("input[name='fecha_inicio']").value;
-        datos_formulario.fecha_fin = document.querySelector("input[name='fecha_fin']").value;
-        console.log(datos_formulario);
-    }
+        // Obtenemos fechas y método de pago del formulario
+        const fecha_inicio = document.querySelector("input[name='fecha_inicio']").value;
+        const fecha_fin = document.querySelector("input[name='fecha_fin']").value;
+        const metodo_pago = document.querySelector("select[name='metodo_pago']").value;
 
-    function inicializarFormularioReserva(data) {
-        container_widget.innerHTML = data;
+        if (!fecha_inicio || !fecha_fin || !metodo_pago) {
+            alert("Complete todos los campos del formulario.");
+            return;
+        }
 
-        const agregar_persona = document.getElementById("agregar-persona");
-        const continuar_reserva = document.getElementById("continuar-reserva");
-        const container_persona = document.getElementById("container-persona");
-        const plantilla = document.getElementById("formulario-persona-plantilla");
+        // Construimos objeto para enviar
+        const datosForm = new FormData();
+        datosForm.append("csrfmiddlewaretoken", document.querySelector("input[name='csrfmiddlewaretoken']").value);
+        datosForm.append("fecha_inicio", fecha_inicio);
+        datosForm.append("fecha_fin", fecha_fin);
+        datosForm.append("metodo_pago", metodo_pago);
+        datosForm.append("datos_inquilinos", JSON.stringify(personas)); // JSON serializado
 
-        agregar_persona.addEventListener("click", () => agregarPersona(container_persona, plantilla));
-        continuar_reserva.addEventListener("click", () => continuarReserva(container_persona));
+        // Enviamos el form manualmente
+        fetch(window.location.href, {
+            method: "POST",
+            body: datosForm
+        })
+        .then(res => res.redirected ? window.location.href = res.url : res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error); // en caso de error manual
+            }
+        })
+        .catch(err => console.error("Error al enviar reserva:", err));
     }
 
     /* MAIN */
-
-    const reserva_normal = document.getElementById("reserva-normal");
-    const container_widget = document.getElementById("container-widget");
 
     let datos_formulario = {
         fecha_inicio: null,
@@ -62,10 +78,14 @@ document.addEventListener("DOMContentLoaded", () => {
         metodo_pago: null
     };
 
-    reserva_normal.addEventListener("click", () => {
-        fetch("/reserva/prueba/normal")
-            .then(response => response.text())
-            .then(data => inicializarFormularioReserva(data))
-            .catch(error => console.error("Error al cargar el formulario:", error));
-    });
+    const agregar_persona = document.getElementById("agregar-persona");
+    const completar_reserva = document.getElementById("completar-reserva");
+
+    const max_inquilino = parseInt(document.getElementById("max-inquilino").innerText, 10);
+
+    const plantilla = document.getElementById("formulario-persona-plantilla");
+    const container_persona = document.getElementById("container-persona");
+
+    agregar_persona.addEventListener("click", () => agregarPersona(container_persona, plantilla, max_inquilino));
+    completar_reserva.addEventListener("click", () => completarReserva(container_persona));
 });
