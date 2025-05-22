@@ -1,49 +1,46 @@
 import json
-
 from django.shortcuts import render, redirect
 from .forms import ReservaNormalForm, ReservaCocheraForm
-from gestion_inmuebles.models import Inmueble
-from .models import Reserva
+from gestion_inmuebles.models import Inmueble, Casa, Departamento
 from django.http import JsonResponse
+from .models import Reserva
 
 # Create your views here.
-def pagina_prueba(request):
-    return render(request, 'gestion_reserva/prueba_reserva.html')
 
-def campo_reserva_normal(request):
-    form = ReservaNormalForm(request.POST or None, request.FILES or None)
+def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
+    cant_default = 1
+    if (tipo_inmueble == "Casa"):
+        casa_aux = Casa.objects.get(pk=id_inmueble)
+        cant_default = casa_aux.cantidad_inquilinos
+    elif (tipo_inmueble == "Departamento"):
+        depto_aux = Departamento.objects.get(pk=id_inmueble)
+        cant_default = depto_aux.cantidad_inquilinos
+    return cant_default
 
-    context = {
-        'form': form
-    }
+def hacer_reserva(request, id_inmueble):
+    inmueble = Inmueble.objects.get(id=id_inmueble)
+    tipo_inmueble = inmueble.tipo
+    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)
 
-    return render(request, 'gestion_reserva/campo_generico_reserva.html', context)
-
-def campo_reserva_cochera(request):
-    form = ReservaCocheraForm(request.POST or None, request.FILES or None)
-
-    context = {
-        'form': form
-    }
-
-    return render(request, 'gestion_reserva/campo_generico_reserva.html', context)
-
-
-def realizar_reserva(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        form = ReservaCocheraForm(request.POST) if tipo_inmueble == "Cochera" else ReservaNormalForm(request.POST)
 
-        inmueble_id = request.GET.get("inmueble_id")  # o como lo manejes
-        inmueble = Inmueble.objects.get(id=inmueble_id)
+        if form.is_valid():
+            reserva = form.save(commit=False)
+            reserva.usuario = request.user
+            reserva.inmueble = inmueble  # 👈 ACÁ ESTÁ EL PUNTO CLAVE
+            reserva.datos_inquilinos = json.loads(request.POST.get("datos_inquilinos", "[]"))
+            reserva.save()
+            return redirect("inmueble_detalle", pk=inmueble.id)
+        else:
+            return JsonResponse({"error": form.errors.as_json()}, status=400)
+    else:
+        form = ReservaCocheraForm(initial={"inmueble": inmueble}) if tipo_inmueble == "Cochera" else ReservaNormalForm(initial={"inmueble": inmueble})
 
-        reserva = Reserva.objects.create(
-            usuario=request.user,
-            inmueble=inmueble,
-            fecha_inicio=data['fecha_inicio'],
-            fecha_fin=data['fecha_fin'],
-            tipo='normal',
-            metodo_pago=data['metodo_pago'],
-            datos_inquilinos=data['personas'],
-            estado='pendiente'
-        )
-        return JsonResponse({"mensaje": "Reserva creada"})
+
+    context = {
+        "form": form,
+        "cant_inquilino": cant_inquilino
+    }
+
+    return render(request, 'gestion_reserva/hacer_reserva.html', context)
