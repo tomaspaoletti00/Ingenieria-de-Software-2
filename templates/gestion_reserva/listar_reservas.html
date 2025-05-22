@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Listado de Reservas</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Inmueble</th>
+            <th>Usuario</th>
+            <th>Fecha inicio</th>
+            <th>Fecha fin</th>
+            <th>Método de pago</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.id }}</td>
+                <td>{{ reserva.inmueble.nombre }}</td>
+                <td>{{ reserva.usuario.username }}</td>
+                <td>{{ reserva.fecha_inicio }}</td>
+                <td>{{ reserva.fecha_fin }}</td>
+                <td>{{ reserva.metodo_pago }}</td>
+                <td>
+                      {% if puede_cambiar_estado %}
+                         <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+                          {% csrf_token %}
+                          <select name="nuevo_estado">
+                               <option value="pendiente" {% if reserva.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                               <option value="aceptada" {% if reserva.estado == 'aceptada' %}selected{% endif %}>Aceptada</option>
+                               <option value="rechazada" {% if reserva.estado == 'rechazada' %}selected{% endif %}>Rechazada</option>
+                         </select>
+                               <button type="submit">Cambiar</button>
+                         </form>
+                      {% else %}
+                          {{ reserva.estado }}
+                     {% endif %}
+               </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7">No hay reservas.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

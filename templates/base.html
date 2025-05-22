@@ -25,6 +25,7 @@
                     <li><a href="/usuarios/panel-admin">Panel de Administrador</a></li>
                 {% endif %}
                 {% if user.is_authenticated %}
+                    <li><a href="/reserva/reservas/">Listar Reservas</a></li>
                     <li><a href="/usuarios/perfil">Perfil</a></li>
                     <li><a href="/usuarios/logout">Cerrar Sesión</a></li>
                 {% else %}

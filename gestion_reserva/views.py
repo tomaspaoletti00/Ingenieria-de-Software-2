@@ -4,6 +4,8 @@ from .forms import ReservaNormalForm, ReservaCocheraForm
 from gestion_inmuebles.models import Inmueble, Casa, Departamento
 from django.http import JsonResponse
 from .models import Reserva
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
 
 # Create your views here.
 
@@ -17,6 +19,7 @@ def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
         cant_default = depto_aux.cantidad_inquilinos
     return cant_default
 
+@login_required
 def hacer_reserva(request, id_inmueble):
     inmueble = Inmueble.objects.get(id=id_inmueble)
     tipo_inmueble = inmueble.tipo
@@ -44,3 +47,28 @@ def hacer_reserva(request, id_inmueble):
     }
 
     return render(request, 'gestion_reserva/hacer_reserva.html', context)
+
+
+@login_required
+def listar_reservas(request):
+    if request.user.is_superuser or request.user.is_staff:
+        reservas = Reserva.objects.all()
+        puede_cambiar_estado = True
+    else:
+        reservas = Reserva.objects.filter(usuario=request.user)
+        puede_cambiar_estado = False
+
+    return render(request, 'gestion_reserva/listar_reservas.html', {
+        'reservas': reservas,
+        'puede_cambiar_estado': puede_cambiar_estado,
+    })
+
+
+def cambiar_estado_reserva(request, reserva_id):
+    if request.method == 'POST':
+        reserva = get_object_or_404(Reserva, id=reserva_id)
+        nuevo_estado = request.POST.get('nuevo_estado')
+        if nuevo_estado in ['pendiente', 'aceptada', 'rechazada']:
+            reserva.estado = nuevo_estado
+            reserva.save()
+    return redirect('listar_reservas')  # Asegurate que este nombre esté bien
