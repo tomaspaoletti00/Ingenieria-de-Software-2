@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from decimal import Decimal
 
 class Inmueble(models.Model):
+    activo = models.BooleanField(default=True)
     tipo = models.CharField(default='-',max_length=20, editable=False)
     nombre = models.CharField(max_length=100)
     calle = models.PositiveIntegerField(default=0)
@@ -33,11 +34,12 @@ class Inmueble(models.Model):
     superficie = models.PositiveIntegerField(default=0) 
 
 
+
 class InmueblesSimilares(Inmueble):
     tiene_internet = models.BooleanField(default=False)
     banios = models.PositiveIntegerField(default=0) 
     tiene_cochera = models.BooleanField(default=False)
-
+    habitaciones = models.PositiveIntegerField(default=0)
     
 
 

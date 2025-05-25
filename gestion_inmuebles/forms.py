@@ -6,6 +6,7 @@ class InmuebleForm(ModelForm):
         class Meta:
             model = Inmueble
             fields = '__all__'
+            exclude = ['activo']
 
         def clean(self):
             cleaned_data = super().clean()
@@ -28,22 +29,26 @@ class FormularioDepartamento(InmuebleForm):
     class Meta:
         model = Departamento    
         fields = '__all__'
+        exclude = ['activo']
         
 
 class FormularioCasa(InmuebleForm):
     class Meta(InmuebleForm):
         model = Casa
         fields = '__all__'
+        exclude = ['activo']
 
 
 class FormularioLocal(InmuebleForm):    
     class Meta(InmuebleForm):
         model = Local
         fields = '__all__'
+        exclude = ['activo']
 
 class FormularioCochera(InmuebleForm):
     class Meta(InmuebleForm):
         model = Cochera
         fields = '__all__'
+        exclude = ['activo']
 
 

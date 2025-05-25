@@ -9,5 +9,7 @@ urlpatterns = [
     path('formularioInmueble/', views.formulario_inmueble, name='formularioInmueble'),
     path('formulario/', views.crear_formulario),
     path('inmuebles/', views.listar_Inmuebles, name='listar_Inmuebles'),
-    path('inmuebles/<int:pk>/', views.inmueble_detalle, name='inmueble_detalle')
+    path('inmuebles/<int:pk>/', views.inmueble_detalle, name='inmueble_detalle'),
+    path('inmuebles/<int:pk>/editar/', views.editar_inmueble, name='editar_inmueble'),
+    path('inmuebles/<int:inmueble_id>/baja/', views.baja_inmueble, name='baja_inmueble'),
 ]
