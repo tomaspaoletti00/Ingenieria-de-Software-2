@@ -20,7 +20,7 @@ def crear_inmueble(request):
 
 def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
-    orden_superficie = request.GET.get("superficie")
+    orden_superficie = request.GET.get("orden_superficie")
     orden_precio = request.GET.get("orden_precio")
     
 
@@ -28,7 +28,7 @@ def listar_Inmuebles(request):
 
     if orden_superficie == "asc":
         inmuebles_base = inmuebles_base.order_by("superficie")
-    elif orden_precio == "desc":
+    elif orden_superficie == "desc":
         inmuebles_base = inmuebles_base.order_by("-superficie")
     
 
@@ -39,8 +39,6 @@ def listar_Inmuebles(request):
 
     if tipo_filtro:
         inmuebles_base = inmuebles_base.filter(tipo=tipo_filtro)
-    if orden_superficie:
-        inmuebles_base = inmuebles_base.filter(superficie_iexact=orden_superficie)
 
     inmuebles = []
 

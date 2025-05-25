@@ -15,9 +15,5 @@
     <button>Editar Perfil</button>
 </a>
 
-<form method="post" onsubmit="return confirm('¿Estás seguro de que querés eliminar tu cuenta? Esta acción no se puede deshacer.')">
-    {% csrf_token %}
-    <input type="hidden" name="eliminar_cuenta" value="1">
-    <button>Eliminar cuenta</button>
-</form>
+
 {% endblock %}

@@ -25,19 +25,18 @@
                 <option value="Cochera" {% if request.GET.tipo == "Cochera" %}selected{% endif %}>Cochera</option>
             </select>
 
-            <label for="internet">Con Internet:</label>
-            <select name="tiene_internet" id="internet">
-                <option value="">-</option>
-                <option value="true" {% if request.GET.tiene_internet == "true" %}selected{% endif %}>Sí</option>
-                <option value="false" {% if request.GET.tiene_internet == "false" %}selected{% endif %}>No</option>
-            </select>
+            <label for="orden_precio">Ordenar por precio:</label>
+            <select name="orden_precio" id="orden_precio">
+                <option value="">---</option>
+                <option value="asc" {% if request.GET.orden_precio == "asc" %}selected{% endif %}>Menor a mayor</option>
+                <option value="desc" {% if request.GET.orden_precio == "desc" %}selected{% endif %}>Mayor a menor</option>
+            </select>     
 
-            <label for="provincia">Provincia:</label>
-            <select name="provincia" id="provincia">
-                <option value="">Todas</option>
-                <option value="Córdoba" {% if request.GET.provincia == "Córdoba" %}selected{% endif %}>Córdoba</option>
-                <option value="Santa Fe" {% if request.GET.provincia == "Santa Fe" %}selected{% endif %}>Santa Fe</option>
-                <!-- Agregá más provincias si es necesario -->
+            <label for="orden_superficie">Ordenar por superficie:</label>
+            <select name="orden_superficie" id="orden_superficie">
+                <option value="">---</option>
+                <option value="asc" {% if request.GET.orden_superficie == "asc" %}selected{% endif %}>Menor a mayor</option>
+                <option value="desc" {% if request.GET.orden_superficie == "desc" %}selected{% endif %}>Mayor a menor</option>
             </select>
 
             <button type="submit">Filtrar</button>
@@ -61,17 +60,16 @@
                     <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
                     <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
                     <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
-
+                    <p><strong>Superficie:</strong> {{ inmueble.superficie }} m²</p>
                     {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
                         <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
                         <p><strong>Baños:</strong> {{ inmueble.banios }}</p>
-                        <p><strong>Ambientes:</strong> {{ inmueble.ambientes }}</p>
                         <p><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</p>
                         <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
                     {% elif inmueble.tipo == "Local" %}
+                        <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
                         <p><strong>Frente:</strong> {{ inmueble.frente }} m</p>
-                        <p><strong>Fondo:</strong> {{ inmueble.fondo }} m</p>
-                        <p><strong>Superficie:</strong> {{ inmueble.superficie }} m²</p>
+                        <p><strong>Fondo:</strong> {{ inmueble.fondo }} m</p>                        
                     {% elif inmueble.tipo == "Cochera" %}
                         <p><strong>Tipo de Cochera:</strong> {{ inmueble.tipo_cochera }}</p>
                         <p><strong>Largo plaza:</strong> {{ inmueble.largo_plaza }} m</p>
