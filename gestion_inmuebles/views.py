@@ -1,13 +1,18 @@
 from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import user_passes_test
 from gestion_inmuebles.models import Departamento, Casa, Local, Cochera
 from .forms import InmuebleForm, FormularioDepartamento, FormularioCasa, FormularioLocal, FormularioCochera
 from .models import Inmueble
+from gestion_usuarios.views import es_admin, es_empleado
 
 def adminInmuebles(request):
     return render(request, 'gestion_inmuebles/adminInmuebles.html')
 
+@user_passes_test(es_admin)
 def crear_inmueble(request):
     if request.method == 'POST':
         form = InmuebleForm(request.POST, request.FILES)
@@ -17,6 +22,7 @@ def crear_inmueble(request):
     else:
         form = InmuebleForm()
     return render(request, 'gestion_inmuebles/crear_inmueble.html', {'form': form})
+
 
 def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
@@ -72,7 +78,7 @@ def listar_Inmuebles(request):
 # Esto es todo lo de la parte para agregar inmuebles de los cuatro tipos
 # Hay varios def con codigo muy parecido, si fuera oo2 seria como un homicidio triple
 # Despues le hago refactoring lo importante es que anda y se guarda en la base de datos
-
+@user_passes_test(es_admin)
 def formulario_inmueble(request):
     return render(request, 'gestion_inmuebles/formulario_inmueble.html')
 
@@ -149,6 +155,7 @@ def crear_cochera(request):
 def inmueble_detalle(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
     return render(request, 'gestion_inmuebles/detalle_inmueble.html', {'inmueble': inmueble})
+@user_passes_test(es_admin)
 def editar_inmueble(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
     if request.method == 'POST':
@@ -167,7 +174,7 @@ def get_real_instance(inmueble):
         except subclass.DoesNotExist:
             continue
     return inmueble
-
+@user_passes_test(es_admin)
 def baja_inmueble(request, inmueble_id):
     inmueble = get_object_or_404(Inmueble, id=inmueble_id)
 
