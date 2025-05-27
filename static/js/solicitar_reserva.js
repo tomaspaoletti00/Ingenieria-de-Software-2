@@ -75,10 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
             method: "POST",
             body: datosForm
         })
-        .then(res => res.redirected ? window.location.href = res.url : res.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error); // en caso de error manual
+        .then(res => {
+            if (res.redirected) {
+                window.location.href = res.url;
+            } else {
+                return res.json().then(data => {
+                    const errores = JSON.parse(data.error); // el backend manda los errores como string JSON
+                    const mensajes = Object.values(errores)
+                        .flat()
+                        .map(err => err.message);
+                    alert(mensajes.join("\n"));
+                });
             }
         })
         .catch(err => console.error("Error al enviar reserva:", err));

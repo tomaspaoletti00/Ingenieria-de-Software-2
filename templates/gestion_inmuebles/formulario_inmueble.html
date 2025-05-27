@@ -1,22 +1,78 @@
-{% load static %} 
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Carga de Inmuebles</title>
+    <style>
+      /* Estilo básico para que se vea mejor */
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9fafb;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #2c3e50;
+      }
+      .form-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+      }
+      .form-button {
+        background-color: #007bff;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 5px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        user-select: none;
+      }
+      .form-button:hover,
+      .form-button:focus {
+        background-color: #0056b3;
+        outline: none;
+      }
+      #container-form {
+        /* Aquí cargarás el formulario por AJAX */
+      }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <main class="container" role="main" aria-label="Formulario de carga de inmuebles">
         <h1>Formulario para cada tipo de inmueble</h1>
-        <button class="form-button" data-tipo="departamento"> Departamento </button>
-        <button class="form-button" data-tipo="casa"> Casa </button>
-        <button class="form-button" data-tipo="local"> Local </button>
-        <button class="form-button" data-tipo="cochera"> Cochera </button>
-        <div id="container-form">
+        <nav class="form-buttons" aria-label="Seleccionar tipo de inmueble">
+            <button class="form-button" data-tipo="departamento" type="button" aria-pressed="false">Departamento</button>
+            <button class="form-button" data-tipo="casa" type="button" aria-pressed="false">Casa</button>
+            <button class="form-button" data-tipo="local" type="button" aria-pressed="false">Local</button>
+            <button class="form-button" data-tipo="cochera" type="button" aria-pressed="false">Cochera</button>
+        </nav>
+        <section id="container-form" tabindex="-1" aria-live="polite" aria-relevant="additions">
+            <!-- Aquí se cargará el formulario correspondiente -->
+        </section>
+    </main>
 
-        </div>
-    </div>
     <script src="{% static 'js/formulario_ajax.js' %}"></script>
 </body>
 </html>
+
+{% endblock %}

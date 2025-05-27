@@ -26,7 +26,7 @@ def hacer_reserva(request, id_inmueble):
     cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)
 
     if request.method == "POST":
-        form = ReservaCocheraForm(request.POST) if tipo_inmueble == "Cochera" else ReservaNormalForm(request.POST)
+        form = ReservaCocheraForm(request.POST, initial={"inmueble": inmueble}) if tipo_inmueble == "Cochera" else ReservaNormalForm(request.POST, initial={"inmueble": inmueble})
 
         if form.is_valid():
             reserva = form.save(commit=False)

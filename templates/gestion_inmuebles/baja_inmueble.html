@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>¿Estás seguro de que querés dar de baja este inmueble?</h2>
+<p><strong>{{ inmueble.direccion }}</strong></p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar baja</button>
+    <a href="{% url 'listaInmuebles' %}">Cancelar</a>
+</form>
+{% endblock %}

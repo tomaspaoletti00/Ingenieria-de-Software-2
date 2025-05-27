@@ -14,4 +14,9 @@
     <a href="{% url 'hacer_reserva' inmueble.id %}">
         <button>Realizar reserva</button>
     </a>
+    <a href="{% url 'editar_inmueble' inmueble.id %}">
+        <button>Editar inmueble</button>
+    <a href="{% url 'baja_inmueble' inmueble.id %}">
+        <button>Dar de baja inmueble</button>
+</a>
 {% endblock %}

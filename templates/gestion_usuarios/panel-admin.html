@@ -11,7 +11,10 @@
 </head>
 <body>
     <h1>Este es el Panel de Administrador</h1>
-    <a href="{% url 'lista-empleados' %}" class="btn btn-primary">Ver Empleados</a>
+    <div class="d-flex gap-2">
+    <a href="{% url 'lista-empleados' %}" style="padding: 10px; background-color: rgba(30, 41, 59, 1); color: white; border-radius: 5px; text-decoration: none;">➕Ver Empleados</a>
+    <a href="{% url 'formularioInmueble' %}" style="padding: 10px; background-color: rgba(30, 41, 59, 1); color: white; border-radius: 5px; text-decoration: none;">➕Agregar Inmueble</a>
+    </div>
     <br>
     <br>
     

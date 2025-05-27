@@ -17,7 +17,7 @@
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                
-
+                <li><a href="/inmuebles/listaInmuebles">Inmuebles Disponibles</a></li>
                 {% if user.is_staff %}
                     <li><a href="/usuarios/panel-emp">Panel de Empleado</a></li>
                 {% endif %}
@@ -30,8 +30,11 @@
                     <li><a href="/usuarios/logout">Cerrar Sesión</a></li>
                 {% else %}
                     <li><a href="/usuarios/registro">Registro</a></li>
-                    <li><a href="/usuarios/login">Iniciar Sesión</a></li>
+                    <li><a href="/usuarios/login">Iniciar Sesión</a></li>                    
+
                 {% endif %}
+                
+
                 
             </ul>
         </div>
