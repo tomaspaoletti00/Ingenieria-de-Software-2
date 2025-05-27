@@ -1,24 +1,13 @@
 
 {% extends 'base.html' %}
+
 {% load static %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="es">
+<link rel="stylesheet" href="{% static 'styles/home.css' %}">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'styles/home.css' %}">
-    <title>Alquiler Express</title>
- </head>
-<body>
-    <div>
-        <h2>Bienvenido a Alquiler Express, entra en tu cuenta o regístrate.</h2>
-        <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
-        <a href="{% url 'registro' %}" class="btn btn-secondary">Registrarse</a>
- </div>
-
-</body>
-</html>
+<div class="home-container">
+  <h1>Bienvenido a Alquiler Express</h1>
+  <p>Explorá nuestras opciones de alquiler y gestióná tu cuenta fácilmente.</p>
+</div>
 {% endblock %}

@@ -20,5 +20,7 @@ urlpatterns = [
     path('baja-empleado/<int:user_id>/', views.baja_empleado, name='baja_empleado'),
     path('editar-empleado/<int:user_id>/', views.editar_empleado, name='editar-empleado'),
     path('panel-admin/alta-empleado/', views.alta_empleado, name='alta_empleado'),
+    path('deshabilitar/<int:user_id>/', views.deshabilitar_usuario, name='deshabilitar_usuario'),
+
 
 ]
