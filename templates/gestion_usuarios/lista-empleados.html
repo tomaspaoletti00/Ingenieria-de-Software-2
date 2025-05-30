@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <h2>Empleados Registrados</h2>
 
@@ -8,31 +8,31 @@
     <tr>
       <th>Nombre de Usuario</th>
       <th>Correo</th>
-      <th>Acciones</th> <!-- Agregamos columna de acciones -->
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for empleado in empleados %}
     <tr>
-      <td>
-        <a href="{% url 'detalle-empleado' empleado.id %}">
-          {{ empleado.username }}
-        </a>
-      </td>
-      <td>
+      <td>{{ empleado.username }}</td>
+      <td>{{ empleado.email }}</td>
+      <td style="display: flex; gap: 10px;">
         <a href="{% url 'detalle-empleado' empleado.id %}">
           <button style="padding: 6px 12px; background-color: #3e5190; color: white; border: none; border-radius: 6px; cursor: pointer;">
             Ver Perfil
           </button>
         </a>
-      </td>
-      <td>
+
         {% if empleado.is_active %}
-          <a href="{% url 'baja_empleado' empleado.id %}" class="btn btn-danger btn-sm">
-             ❌ Dar de baja
-          </a>
+        <form method="post" action="{% url 'baja_empleado' empleado.id %}">
+          {% csrf_token %}
+          <button type="submit" onclick="return confirm('¿Estás seguro de que querés dar de baja a este empleado?')"
+            style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Dar de baja
+          </button>
+        </form>
         {% else %}
-          <span class="text-muted">Inactivo</span>
+          <span style="color: red; font-weight: bold;">Inactivo</span>
         {% endif %}
       </td>
     </tr>

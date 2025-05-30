@@ -2,6 +2,14 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from .models import Reserva
+from django.contrib import admin
+from .models import Tarjeta
+
+
+class PagoForm(forms.Form):
+    numero = forms.CharField(max_length=16, label="Número de tarjeta")
+    titular = forms.CharField(max_length=100, label="Titular de la tarjeta")
+    codigo = forms.CharField(max_length=4, label="Código de seguridad")
 
 class ReservaNormalForm(forms.ModelForm):
     class Meta:
@@ -34,7 +42,8 @@ class ReservaNormalForm(forms.ModelForm):
         conflictos = Reserva.objects.filter(
             inmueble=inmueble,
             fecha_inicio__lt=fecha_fin,
-            fecha_fin__gt=fecha_inicio
+            fecha_fin__gt=fecha_inicio,
+            estado="aceptada"
         )
         if self.instance.pk:
             conflictos = conflictos.exclude(pk=self.instance.pk)

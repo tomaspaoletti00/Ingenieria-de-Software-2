@@ -2,23 +2,50 @@
 {% load static %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Este es el Panel de Administrador</h1>
-    <div class="d-flex gap-2">
-    <a href="{% url 'lista-empleados' %}" style="padding: 10px; background-color: rgba(30, 41, 59, 1); color: white; border-radius: 5px; text-decoration: none;">➕Ver Empleados</a>
-    <a href="{% url 'formularioInmueble' %}" style="padding: 10px; background-color: rgba(30, 41, 59, 1); color: white; border-radius: 5px; text-decoration: none;">➕Agregar Inmueble</a>
+<h1>Panel de Administrador</h1>
+
+<style>
+    .admin-button {
+        display: inline-block;
+        padding: 10px;
+        background-color: rgba(30, 41, 59, 1);
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        margin: 5px 0;
+    }
+
+    details {
+        margin-bottom: 20px;
+    }
+
+    summary {
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+</style>
+
+<details>
+    <summary>Empleados</summary>
+    <div class="d-flex flex-column">
+        <a href="{% url 'lista-empleados' %}" class="admin-button">Ver Empleados</a>
+        <a href="{% url 'alta_empleado' %}" class="admin-button">Dar de alta nuevo empleado</a>
     </div>
-    <br>
-    <br>
-    
-    <a href="{% url 'alta_empleado' %}" style="padding: 10px; background-color: rgba(30, 41, 59, 1); color: white; border-radius: 5px; text-decoration: none;">➕ Dar de alta nuevo empleado</a>
-</body>
-</html>
+</details>
+
+<details>
+    <summary>Inmuebles</summary>
+    <div class="d-flex flex-column">
+        <a href="{% url 'formularioInmueble' %}" class="admin-button">Agregar Inmueble</a>
+    </div>
+</details>
+
+<details>
+    <summary>Clientes</summary>
+    <div class="d-flex flex-column">
+        <a href="{% url 'lista-clientes' %}" class="admin-button">Ver Clientes</a>
+    </div>
+</details>
+
 {% endblock %}

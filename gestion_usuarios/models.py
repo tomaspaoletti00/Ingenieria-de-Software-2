@@ -7,8 +7,8 @@ from datetime import timedelta
 import uuid
 
 class Usuario(AbstractUser):
-    dni = models.CharField(max_length=10, unique=True)
-    telefono = models.CharField(max_length=20)
+    dni = models.PositiveIntegerField(max_length=10, unique=True)
+    telefono = models.PositiveIntegerField(max_length=20)
     
     def __str__(self):
         return self.email

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Pago de Reserva</h2>
+<p>Inmueble: {{ reserva.inmueble.nombre }}</p>
+<p>Monto a pagar: {{ reserva.inmueble.precio }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Pagar</button>
+</form>
+{% endblock %}

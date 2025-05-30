@@ -19,4 +19,63 @@
     <a href="{% url 'baja_inmueble' inmueble.id %}">
         <button>Dar de baja inmueble</button>
 </a>
+<h2></h2>
+
+<!-- Pestañas -->
+<div>
+    <button onclick="mostrarPestaña('aceptadas')">Reservas aceptadas</button>
+    <button onclick="mostrarPestaña('pendientes')">Solicitudes de reserva pendientes</button>
+</div>
+
+<!-- Contenido de pestañas -->
+<div id="pestana-aceptadas" class="pestana">
+    <h3>Reservas aceptadas</h3>
+    {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_aceptadas puede_cambiar_estado=puede_cambiar_estado %}
+</div>
+
+<div id="pestana-pendientes" class="pestana" style="display:none;">
+    <h3>Solicitudes de reserva pendientes</h3>
+    {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_pendientes puede_cambiar_estado=puede_cambiar_estado %}
+</div>
+
+<script>
+function mostrarPestaña(nombre) {
+    document.getElementById('pestana-aceptadas').style.display = 'none';
+    document.getElementById('pestana-pendientes').style.display = 'none';
+    document.getElementById('pestana-' + nombre).style.display = 'block';
+}
+</script>
+    <thead>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.usuario.username }}</td>
+                <td>{{ reserva.fecha_inicio }}</td>
+                <td>{{ reserva.fecha_fin }}</td>
+                <td>{{ reserva.metodo_pago }}</td>
+                <td>
+                   {% if puede_cambiar_estado %}
+  {% if reserva.estado == 'pendiente' %}
+    <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+             {% csrf_token %}
+             <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
+       <select name="nuevo_estado">
+            <option value="aceptada">Aceptar</option>
+           <option value="rechazada">Rechazar</option>
+       </select>
+           <button type="submit">Cambiar</button>
+             </form>
+             {% else %}
+                  {{ reserva.get_estado_display }}
+     {% endif %}
+        {% else %}
+        {{ reserva.get_estado_display }}
+     {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

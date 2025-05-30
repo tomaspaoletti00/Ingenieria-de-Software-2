@@ -149,6 +149,7 @@ def crear_cochera(request):
 def inmueble_detalle(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
     return render(request, 'gestion_inmuebles/detalle_inmueble.html', {'inmueble': inmueble})
+
 def editar_inmueble(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
     if request.method == 'POST':

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <h2>Clientes Registrados</h2>
 <table>
@@ -15,12 +15,24 @@
     <tr>
       <td>{{ usuario.username }}</td>
       <td>{{ usuario.email }}</td>
-      <td>
+      <td style="display: flex; gap: 10px;">
         <a href="{% url 'detalle-cliente' usuario.id %}">
           <button style="padding: 6px 12px; background-color: #3e5190; color: white; border: none; border-radius: 6px; cursor: pointer;">
             Ver Perfil
           </button>
         </a>
+
+        {% if usuario.is_active %}
+        <form method="post" action="{% url 'deshabilitar_usuario' usuario.id %}">
+          {% csrf_token %}
+          <button type="submit" onclick="return confirm('¿Estás seguro de que querés deshabilitar esta cuenta?')"
+            style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Deshabilitar cuenta
+          </button>
+        </form>
+        {% else %}
+          <span style="color: red; font-weight: bold;">Cuenta deshabilitada</span>
+        {% endif %}
       </td>
     </tr>
     {% empty %}
