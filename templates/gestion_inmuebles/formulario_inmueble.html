@@ -1,78 +1,157 @@
 {% extends 'base.html' %}
-{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Carga de Inmuebles</title>
-    <style>
-      /* Estilo básico para que se vea mejor */
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f9fafb;
-        margin: 0;
-        padding: 20px;
-        color: #333;
-      }
-      .container {
-        max-width: 700px;
-        margin: 0 auto;
-        background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 25px;
-        color: #2c3e50;
-      }
-      .form-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-bottom: 30px;
-      }
-      .form-button {
-        background-color: #007bff;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 5px;
-        color: white;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        user-select: none;
-      }
-      .form-button:hover,
-      .form-button:focus {
-        background-color: #0056b3;
-        outline: none;
-      }
-      #container-form {
-        /* Aquí cargarás el formulario por AJAX */
-      }
-    </style>
-</head>
-<body>
-    <main class="container" role="main" aria-label="Formulario de carga de inmuebles">
-        <h1>Formulario para cada tipo de inmueble</h1>
-        <nav class="form-buttons" aria-label="Seleccionar tipo de inmueble">
-            <button class="form-button" data-tipo="departamento" type="button" aria-pressed="false">Departamento</button>
-            <button class="form-button" data-tipo="casa" type="button" aria-pressed="false">Casa</button>
-            <button class="form-button" data-tipo="local" type="button" aria-pressed="false">Local</button>
-            <button class="form-button" data-tipo="cochera" type="button" aria-pressed="false">Cochera</button>
-        </nav>
-        <section id="container-form" tabindex="-1" aria-live="polite" aria-relevant="additions">
-            <!-- Aquí se cargará el formulario correspondiente -->
-        </section>
-    </main>
+{% block content %}
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #2c3e50;
+  }
+  .form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  .form-button {
+    background-color: #007bff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  .form-button:hover,
+  .form-button:focus {
+    background-color: #0056b3;
+    outline: none;
+  }
+  #container-form {
+    /* Aquí cargarás el formulario por AJAX */
+  }
 
-    <script src="{% static 'js/formulario_ajax.js' %}"></script>
-</body>
-</html>
+  /* Estilos para el formulario */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: #34495e;
+  }
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="file"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="email"]:focus,
+  input[type="url"]:focus,
+  input[type="file"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0,123,255,0.3);
+    outline: none;
+  }
 
+  .field-error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+
+  /* Botón guardar igual que antes */
+  button[type="submit"] {
+    background-color: #007bff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    align-self: center;
+    transition: background-color 0.3s ease;
+  }
+  button[type="submit"]:hover,
+  button[type="submit"]:focus {
+    background-color: #0056b3;
+    outline: none;
+  }
+</style>
+
+<main class="container" role="main" aria-label="Formulario de carga de inmuebles">
+    <h1>Formulario para cada tipo de inmueble</h1>
+    <nav class="form-buttons" aria-label="Seleccionar tipo de inmueble">
+        <button class="form-button" data-tipo="departamento" type="button" aria-pressed="false">Departamento</button>
+        <button class="form-button" data-tipo="casa" type="button" aria-pressed="false">Casa</button>
+        <button class="form-button" data-tipo="local" type="button" aria-pressed="false">Local</button>
+        <button class="form-button" data-tipo="cochera" type="button" aria-pressed="false">Cochera</button>
+    </nav>
+    <section id="container-form" tabindex="-1" aria-live="polite" aria-relevant="additions">
+        <!-- Aquí se cargará el formulario correspondiente -->
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div style="color: #e74c3c; font-weight: bold; margin-bottom: 12px;">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          {% if form.errors %}
+            <div style="color: #e74c3c; font-weight: bold; margin-bottom: 12px;">
+              Por favor, corregí los errores antes de continuar.
+            </div>
+          {% endif %}
+
+          {% for field in form %}
+            <div>
+              {{ field.label_tag }}
+              {{ field }}
+              {% if field.errors %}
+                <div class="field-error">{{ field.errors }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+         
+        </form>
+    </section>
+</main>
+
+<script src="{% static 'js/formulario_ajax.js' %}"></script>
 {% endblock %}

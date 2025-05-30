@@ -18,10 +18,7 @@ class Inmueble(models.Model):
         ('No_disponible', 'No disponible'),
         ('Mantenimiento', 'En mantenimiento'),
     ])
-    precio = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-    )
+    precio = models.PositiveIntegerField(default=0)
     tiempo = models.CharField(default='-', choices=[
         ('Por_hora', 'Por hora'),
         ('Por_dia', 'Por día'),

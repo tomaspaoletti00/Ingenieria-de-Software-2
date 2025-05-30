@@ -17,7 +17,7 @@ from django.contrib import messages
 
 
 def home(request):
-    return render(request, 'gestion_usuarios/home.html')
+    return render(request, 'gestion_inmuebles/listaInmuebles.html')
 
 def registrar_usuario(request):
     if request.method == 'POST':

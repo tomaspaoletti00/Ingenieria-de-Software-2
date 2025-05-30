@@ -17,12 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import path, include
-from gestion_usuarios.views import home 
+from gestion_inmuebles.views import listar_Inmuebles
 
 
 urlpatterns = [
     path('usuarios/', include('gestion_usuarios.urls')),
-    path('', home, name='home'),
+    path('', listar_Inmuebles, name='inicio'),
     path('admin/', admin.site.urls),
     path('inmuebles/', include('gestion_inmuebles.urls')),
     path('reserva/', include('gestion_reserva.urls')),

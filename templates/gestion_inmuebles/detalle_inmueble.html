@@ -1,24 +1,80 @@
 {% extends 'base.html' %}
+
 {% block content %}
-    <h1>{{ inmueble.nombre }}</h1>
+<div style="max-width: 800px; margin: auto; padding: 2rem;">
+    <h1 style="font-size: 2rem; margin-bottom: 1rem;">{{ inmueble.nombre }}</h1>
+
     {% if inmueble.imagen %}
-        <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+        <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}" style="width:100%; height:auto; border-radius: 10px; margin-bottom: 1.5rem;">
     {% endif %}
-    <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
-    <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-    <p><strong>Dirección:</strong> {{ inmueble.calle }} {{ inmueble.numero }}</p>
-    <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
-    <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
-    <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
-    <a href="{% url 'listaInmuebles' %}">← Volver a la lista</a>
-    <a href="{% url 'hacer_reserva' inmueble.id %}">
-        <button>Realizar reserva</button>
-    </a>
-    {% if user.is_superuser %}
-    <a href="{% url 'editar_inmueble' inmueble.id %}">
-        <button>Editar inmueble</button>
-    <a href="{% url 'baja_inmueble' inmueble.id %}">
-        <button>Dar de baja inmueble</button>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Tipo:</strong> {{ inmueble.tipo }}
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Precio:</strong> ${{ inmueble.precio }} <em>({{ inmueble.get_tiempo_display }})</em>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Dirección:</strong> {{ inmueble.calle }} {{ inmueble.numero }}, {{ inmueble.ciudad }}, {{ inmueble.provincia }}
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Superficie:</strong> {{ inmueble.superficie }} m²
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Estado:</strong> {{ inmueble.get_estado_display }}
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Descripción:</strong> {{ inmueble.descripcion|linebreaks }}
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+        <strong>Política de cancelación:</strong> {{ inmueble.politica_cancelacion|linebreaks }}
+    </div>
+
+    {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
+        <h3>Detalles específicos</h3>
+        <ul>
+            {% if inmueble.tipo == "Departamento" %}
+                <li><strong>Piso:</strong> {{ inmueble.piso }}</li>
+            {% else %}
+                <li><strong>Pisos:</strong> {{ inmueble.pisos }}</li>
+            {% endif %}
+            <li><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</li>
+            <li><strong>Baños:</strong> {{ inmueble.banios }}</li>
+            <li><strong>Inquilinos:</strong> {{ inmueble.cantidad_inquilinos }}</li>
+            <li><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</li>
+            <li><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</li>
+        </ul>
+    {% elif inmueble.tipo == "Local" %}
+        <h3>Detalles específicos</h3>
+        <ul>
+            <li><strong>Frente:</strong> {{ inmueble.frente }} m</li>
+            <li><strong>Fondo:</strong> {{ inmueble.fondo }} m</li>
+            <li><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</li>
+            <li><strong>Baños:</strong> {{ inmueble.banios }}</li>
+            <li><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</li>
+            <li><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</li>
+        </ul>
+    {% elif inmueble.tipo == "Cochera" %}
+        <h3>Detalles de la cochera</h3>
+        <ul>
+            <li><strong>Tipo:</strong> {{ inmueble.get_tipo_cochera_display }}</li>
+            <li><strong>Largo plaza:</strong> {{ inmueble.largo_plaza }} m</li>
+            <li><strong>Ancho plaza:</strong> {{ inmueble.ancho_plaza }} m</li>
+            <li><strong>Plazas disponibles:</strong> {{ inmueble.plazas }}</li>
+        </ul>
     {% endif %}
-</a>
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'listaInmuebles' %}" style="margin-right: 1rem;">← Volver a la lista</a>
+        <a href="{% url 'hacer_reserva' inmueble.id %}">
+            <button style="padding: 0.5rem 1rem;">Realizar reserva</button>
+        </a>
+    </div>
+</div>
 {% endblock %}
