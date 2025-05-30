@@ -13,7 +13,7 @@ def crear_inmueble(request):
         form = InmuebleForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('homeInmuebles')  # o donde quieras redirigir
+            return redirect('listaInmuebles')  # o donde quieras redirigir
     else:
         form = InmuebleForm()
     return render(request, 'gestion_inmuebles/crear_inmueble.html', {'form': form})
@@ -22,21 +22,23 @@ def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
     orden_superficie = request.GET.get("orden_superficie")
     orden_precio = request.GET.get("orden_precio")
-    
+    largo_plaza = request.GET.get("largo_plaza")  # Nuevo filtro para cochera
+    ancho_plaza = request.GET.get("ancho_plaza")
 
-    inmuebles_base = Inmueble.objects.filter(estado="Disponible", activo="True")
+    inmuebles_base = Inmueble.objects.exclude(activo="0")
 
+    # Aplicar ordenamientos
     if orden_superficie == "asc":
         inmuebles_base = inmuebles_base.order_by("superficie")
     elif orden_superficie == "desc":
         inmuebles_base = inmuebles_base.order_by("-superficie")
-    
 
     if orden_precio == "asc":
         inmuebles_base = inmuebles_base.order_by("precio")
     elif orden_precio == "desc":
         inmuebles_base = inmuebles_base.order_by("-precio")
 
+    # Filtrar por tipo
     if tipo_filtro:
         inmuebles_base = inmuebles_base.filter(tipo=tipo_filtro)
 
@@ -61,12 +63,35 @@ def listar_Inmuebles(request):
                     except Cochera.DoesNotExist:
                         continue
 
+        if tipo.lower() == "cochera":
+        # Largo
+            if largo_plaza:
+                try:
+                    largo_plaza_val = float(largo_plaza)
+                except ValueError:
+                    largo_plaza_val = None
+
+                if largo_plaza_val is not None and tipo_obj.largo_plaza < largo_plaza_val:
+                    continue
+
+            # Ancho
+            if ancho_plaza:
+                try:
+                    ancho_plaza_val = float(ancho_plaza)
+                except ValueError:
+                    ancho_plaza_val = None
+
+                if ancho_plaza_val is not None and tipo_obj.ancho_plaza < ancho_plaza_val:
+                    continue
+
+        # Solo agregar si coincide con filtro de tipo o no hay filtro
         if not tipo_filtro or tipo.lower() == tipo_filtro.lower():
             inmuebles.append({'tipo': tipo, 'objeto': tipo_obj})
 
     return render(request, 'gestion_inmuebles/listaInmuebles.html', {
         'inmuebles': inmuebles,
         'tipo': tipo_filtro,
+        'largo_plaza': largo_plaza,  # Pasar al template para mantener selección en el filtro
     })
 
 # Esto es todo lo de la parte para agregar inmuebles de los cuatro tipos
@@ -102,7 +127,8 @@ def crear_departamento(request):
 
     if form.is_valid():
         form.save()
-        redirect('gestion_inmuebles/formulario_inmueble.html')
+        messages.success(request, 'Departamento cargado correctamente.')
+        return redirect('listaInmuebles')
 
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
 
@@ -116,7 +142,8 @@ def crear_casa(request):
 
     if form.is_valid():
         form.save()
-        redirect('gestion_inmuebles/formulario_inmueble.html')
+        messages.success(request, 'Casa cargada correctamente.')
+        return redirect('listaInmuebles')
 
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
 
@@ -129,8 +156,9 @@ def crear_local(request):
 
     if form.is_valid():
         form.save()
-        redirect('gestion_inmuebles/formulario_inmueble.html')
-
+        messages.success(request, 'Local cargado correctamente.')
+        return redirect('listaInmuebles')
+    
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
 
 def crear_cochera(request):
@@ -142,20 +170,28 @@ def crear_cochera(request):
 
     if form.is_valid():
         form.save()
-        redirect('gestion_inmuebles/formulario_inmueble.html')
+        messages.success(request, 'Cochera cargada correctamente.')
+        return redirect('listaInmuebles')
 
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
 
 def inmueble_detalle(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
     return render(request, 'gestion_inmuebles/detalle_inmueble.html', {'inmueble': inmueble})
+
 def editar_inmueble(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
+
     if request.method == 'POST':
+        if not inmueble.activo:
+            inmueble.activo = True
+            inmueble.save()
+            return redirect('listado_inmuebles_admin')
+
         form = InmuebleForm(request.POST, request.FILES, instance=inmueble)
         if form.is_valid():
             form.save()
-            return redirect('inmueble_detalle', pk=inmueble.pk)
+            return redirect('listado_inmuebles_admin')
     else:
         form = InmuebleForm(instance=inmueble)
 
@@ -178,3 +214,7 @@ def baja_inmueble(request, inmueble_id):
         return redirect('listaInmuebles')
 
     return render(request, 'gestion_inmuebles/baja_inmueble.html', {'inmueble': inmueble})
+
+def listar_inmuebles_admin(request):
+    inmuebles = Inmueble.objects.all()
+    return render(request, 'gestion_inmuebles/listaInmueblesAdmin.html', {'inmuebles': inmuebles})

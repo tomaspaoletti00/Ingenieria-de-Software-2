@@ -1,24 +1,31 @@
 from django.forms import ModelForm, NumberInput
+from django import forms
 from .models import Inmueble, Departamento, Casa, Local, Cochera
 
-class InmuebleForm(ModelForm):       
-        
-        class Meta:
-            model = Inmueble
-            fields = '__all__'
-            exclude = ['activo']
+class CustomClearableFileInput(forms.ClearableFileInput):
+    initial_text = ''      # texto para "Currently" (Actualmente)
+    input_text = 'Cambiar' # texto para el botón "Change"
+    clear_checkbox_label = 'Limpiar imagen'  # el texto que ya estás seteando
 
-        def clean(self):
-            cleaned_data = super().clean()
+class InmuebleForm(forms.ModelForm):
+    class Meta:
+        model = Inmueble
+        fields = '__all__'
+        exclude = ['activo']
+        widgets = {
+            'imagen': CustomClearableFileInput,
+        }
 
-            campos_a_validar = ['precio']  # Agregá los campos que quieras validar
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'imagen' in self.fields:
+            self.fields['imagen'].widget.clear_checkbox_label = "Limpiar imagen"
 
-            for campo in campos_a_validar:
-                valor = cleaned_data.get(campo)
-                if valor is not None and valor <= 0:
-                    self.add_error(campo, f'El campo {campo} debe ser mayor a cero.')
-
-            return cleaned_data
+    def clean_precio(self):
+        precio = self.cleaned_data.get('precio')
+        if precio is not None and precio <= 0:
+            raise forms.ValidationError('El precio debe ser mayor a cero.')
+        return precio
 
 
 #   Formularios para Departamento, Casa, Local y Cochera

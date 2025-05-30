@@ -17,7 +17,7 @@ from django.contrib import messages
 
 
 def home(request):
-    return render(request, 'gestion_usuarios/home.html')
+    return render(request, 'gestion_inmuebles/listaInmuebles.html')
 
 def registrar_usuario(request):
     if request.method == 'POST':
@@ -222,3 +222,16 @@ def editar_empleado(request, user_id):
     else:
         form = EditarEmpleadoForm(instance=empleado)
     return render(request, 'gestion_usuarios/editar-empleado.html', {'form': form, 'empleado': empleado})
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def deshabilitar_usuario(request, user_id):
+    if request.method == 'POST':
+        usuario = get_object_or_404(Usuario, id=user_id)
+        if usuario.is_active:
+            usuario.is_active = False
+            usuario.save()
+            messages.success(request, f'Cuenta de {usuario.username} deshabilitada correctamente.')
+        else:
+            messages.warning(request, f'La cuenta de {usuario.username} ya estaba deshabilitada.')
+    return redirect('lista-clientes')  

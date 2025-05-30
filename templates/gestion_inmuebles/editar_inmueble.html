@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 {% block content %}
 <!DOCTYPE html>
 <html lang="es">
@@ -8,7 +8,20 @@
     <title>Editar Inmueble</title>
     <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
     <style>
-        /* Estilos básicos en caso de que no tengas un CSS aparte */
+        textarea {
+            resize: none;
+        }
+        .clearablefileinput-current {
+            display: none !important;
+        }
+        label[for="id_imagen"] + a {
+             display: none;
+        }
+
+        label[for="id_imagen"]::after {
+            content: none !important;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f7f9fc;
@@ -58,18 +71,74 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        .mensaje-inactivo {
+            text-align: center;
+            font-weight: bold;
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+
+        .btn-reestablecer {
+            background-color: #059669;
+        }
+
+        .btn-reestablecer:hover {
+            background-color: #047857;
+        }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h1>Editar Inmueble</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
+<div class="form-container">
+    <h1>Editar Inmueble</h1>
+
+    {% if inmueble.imagen %}
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{{ inmueble.imagen.url }}" alt="Imagen actual" style="max-width: 100%; max-height: 250px; border-radius: 8px; object-fit: contain;" />
+      </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if not inmueble.activo %}
+            <p class="mensaje-inactivo">Este inmueble está dado de baja.</p>
+            <button type="submit" class="btn-reestablecer">¿Reestablecer?</button>
+        {% else %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+              {% if field.name != 'imagen' %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+              {% endif %}
+            {% endfor %}
+
+            {{ form.imagen }}
+            {{ form.imagen.errors }}
 
             <button type="submit">Guardar Cambios</button>
-        </form>
-    </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const labelImagen = document.querySelector('label[for="id_imagen"]');
+    if (labelImagen) {
+      const nextNode = labelImagen.nextSibling;
+      if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim() === ":") {
+        nextNode.textContent = "";
+      }
+      const enlace = labelImagen.nextElementSibling;
+      if (enlace && enlace.tagName === 'A') {
+        enlace.style.display = 'none';
+      }
+    }
+  });
+</script>
+
 </body>
 </html>
 {% endblock %}

@@ -12,4 +12,5 @@ urlpatterns = [
     path('inmuebles/<int:pk>/', views.inmueble_detalle, name='inmueble_detalle'),
     path('inmuebles/<int:pk>/editar/', views.editar_inmueble, name='editar_inmueble'),
     path('inmuebles/<int:inmueble_id>/baja/', views.baja_inmueble, name='baja_inmueble'),
+    path('listaInmueblesAdmin/', views.listar_inmuebles_admin, name='listado_inmuebles_admin'),
 ]

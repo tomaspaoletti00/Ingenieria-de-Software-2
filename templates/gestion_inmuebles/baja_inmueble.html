@@ -1,11 +1,80 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>¿Estás seguro de que querés dar de baja este inmueble?</h2>
-<p><strong>{{ inmueble.direccion }}</strong></p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dar de Baja Inmueble</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f9fc;
+            padding: 40px;
+        }
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Confirmar baja</button>
-    <a href="{% url 'listaInmuebles' %}">Cancelar</a>
-</form>
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .btn-confirmar {
+            background-color: #b91c1c;
+            color: white;
+        }
+
+        .btn-confirmar:hover {
+            background-color: #7f1d1d;
+        }
+
+        .btn-cancelar {
+            background-color: #9ca3af;
+            color: white;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>¿Estás seguro de que querés dar de baja este inmueble?</h2>
+    <p><strong>{{ inmueble.direccion }}</strong></p>
+
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-confirmar">Confirmar baja</button>
+        <a href="{% url 'listaInmuebles' %}" class="btn btn-cancelar">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>
 {% endblock %}
