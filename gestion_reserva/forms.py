@@ -1,15 +1,16 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.timezone import now
+from datetime import datetime, timedelta
 from .models import Reserva
-from django.contrib import admin
-from .models import Tarjeta
-
 
 class PagoForm(forms.Form):
     numero = forms.CharField(max_length=16, label="Número de tarjeta")
     titular = forms.CharField(max_length=100, label="Titular de la tarjeta")
     codigo = forms.CharField(max_length=4, label="Código de seguridad")
+
+
+HORAS_CHOICES = [(f"{h:02}:00", f"{h:02}:00") for h in range(0, 24)]
+
 
 class ReservaNormalForm(forms.ModelForm):
     class Meta:
@@ -21,80 +22,96 @@ class ReservaNormalForm(forms.ModelForm):
             'metodo_pago': forms.Select(),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.inmueble = kwargs.pop('inmueble', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
-        fecha_inicio = cleaned_data.get("fecha_inicio")
-        fecha_fin = cleaned_data.get("fecha_fin")
+        inicio = cleaned_data.get("fecha_inicio")
+        fin = cleaned_data.get("fecha_fin")
 
-        if not fecha_inicio or not fecha_fin:
-            return
+        if not inicio or not fin:
+            return cleaned_data
 
-        if fecha_fin <= fecha_inicio:
+        if fin <= inicio:
             raise ValidationError("La fecha de fin debe ser posterior a la de inicio.")
 
-        if (fecha_fin.date() - fecha_inicio.date()).days < 28:
+        if (fin - inicio).days < 28:
             raise ValidationError("La duración mínima de una reserva normal debe ser de al menos un mes.")
 
-        inmueble = self.initial.get("inmueble")
-        if not inmueble:
-            return
+        if self.inmueble:
+            conflictos = Reserva.objects.filter(
+                inmueble=self.inmueble,
+                fecha_inicio__lt=fin,
+                fecha_fin__gt=inicio,
+                estado="aceptada"
+            )
+            if self.instance.pk:
+                conflictos = conflictos.exclude(pk=self.instance.pk)
+            if conflictos.exists():
+                raise ValidationError("Ya existe una reserva aceptada que se superpone con este rango.")
 
-        conflictos = Reserva.objects.filter(
-            inmueble=inmueble,
-            fecha_inicio__lt=fecha_fin,
-            fecha_fin__gt=fecha_inicio,
-            estado="aceptada"
-        )
-        if self.instance.pk:
-            conflictos = conflictos.exclude(pk=self.instance.pk)
+        return cleaned_data
 
-        if conflictos.exists():
-            raise ValidationError("El inmueble ya está reservado en el rango de fechas seleccionado.")
-
-    def save(self, commit=True):
-        instancia = super().save(commit=False)
-        if commit:
-            instancia.save()
-        return instancia
 
 class ReservaCocheraForm(forms.ModelForm):
+    dia = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label="Día de reserva"
+    )
+    hora_inicio = forms.ChoiceField(
+        choices=HORAS_CHOICES,
+        label="Hora de inicio"
+    )
+    horas = forms.IntegerField(
+        min_value=1,
+        max_value=24,
+        label="Duración (horas)"
+    )
+
     class Meta:
         model = Reserva
-        fields = ['fecha_inicio', 'fecha_fin', 'metodo_pago']
-        widgets = {
-            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'metodo_pago': forms.Select(),
-        }
+        fields = ['metodo_pago']
+
+    def __init__(self, *args, **kwargs):
+        self.inmueble = kwargs.pop('inmueble', None)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
-        fecha_inicio = cleaned_data.get("fecha_inicio")
-        fecha_fin = cleaned_data.get("fecha_fin")
+        dia = cleaned_data.get("dia")
+        hora_inicio_str = cleaned_data.get("hora_inicio")
+        horas = cleaned_data.get("horas")
 
-        if not fecha_inicio or not fecha_fin:
-            return
+        if not dia or not hora_inicio_str or not horas:
+            raise ValidationError("Complete todos los campos de día, hora y duración.")
 
-        if fecha_fin <= fecha_inicio:
-            raise ValidationError("La fecha y hora de fin debe ser posterior a la de inicio.")
+        hora_inicio = datetime.strptime(hora_inicio_str, "%H:%M").time()
+        fecha_inicio = datetime.combine(dia, hora_inicio)
+        fecha_fin = fecha_inicio + timedelta(hours=horas)
 
-        inmueble = self.initial.get("inmueble")
-        if not inmueble:
-            return
+        cleaned_data["fecha_inicio"] = fecha_inicio
+        cleaned_data["fecha_fin"] = fecha_fin
 
-        conflictos = Reserva.objects.filter(
-            inmueble=inmueble,
-            fecha_inicio__lt=fecha_fin,
-            fecha_fin__gt=fecha_inicio
-        )
-        if self.instance.pk:
-            conflictos = conflictos.exclude(pk=self.instance.pk)
+        if self.inmueble:
+            conflictos = Reserva.objects.filter(
+                inmueble=self.inmueble,
+                fecha_inicio__lt=fecha_fin,
+                fecha_fin__gt=fecha_inicio,
+                estado="aceptada"
+            )
+            if self.instance.pk:
+                conflictos = conflictos.exclude(pk=self.instance.pk)
+            if conflictos.exists():
+                raise ValidationError("Ya hay una reserva que se superpone con ese horario.")
 
-        if conflictos.exists():
-            raise ValidationError("La cochera ya está reservada en ese horario.")
+        return cleaned_data
 
     def save(self, commit=True):
         instancia = super().save(commit=False)
+        instancia.fecha_inicio = self.cleaned_data["fecha_inicio"]
+        instancia.fecha_fin = self.cleaned_data["fecha_fin"]
         if commit:
             instancia.save()
         return instancia

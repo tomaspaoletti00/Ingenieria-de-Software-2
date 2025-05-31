@@ -16,46 +16,51 @@ from gestion_reserva.models import Tarjeta
 
 from django.shortcuts import render
 
-
-
-
 def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
-    cant_default = 1
-    if (tipo_inmueble == "Casa"):
-        casa_aux = Casa.objects.get(pk=id_inmueble)
-        cant_default = casa_aux.cantidad_inquilinos
-    elif (tipo_inmueble == "Departamento"):
-        depto_aux = Departamento.objects.get(pk=id_inmueble)
-        cant_default = depto_aux.cantidad_inquilinos
-    return cant_default
+    if tipo_inmueble == "Casa":
+        return Casa.objects.get(pk=id_inmueble).cantidad_inquilinos
+    elif tipo_inmueble == "Departamento":
+        return Departamento.objects.get(pk=id_inmueble).cantidad_inquilinos
+    return 1
+
 
 @login_required
 def hacer_reserva(request, id_inmueble):
-    inmueble = Inmueble.objects.get(id=id_inmueble)
+    inmueble = get_object_or_404(Inmueble, pk=id_inmueble)
     tipo_inmueble = inmueble.tipo
-    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)
+    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, inmueble.id)
+
+    FormClase = ReservaCocheraForm if tipo_inmueble == "Cochera" else ReservaNormalForm
 
     if request.method == "POST":
-        form = ReservaCocheraForm(request.POST, initial={"inmueble": inmueble}) if tipo_inmueble == "Cochera" else ReservaNormalForm(request.POST, initial={"inmueble": inmueble})
+        form = FormClase(request.POST, inmueble=inmueble)
 
         if form.is_valid():
             reserva = form.save(commit=False)
             reserva.usuario = request.user
-            reserva.inmueble = inmueble  # 👈 ACÁ ESTÁ EL PUNTO CLAVE
-            reserva.datos_inquilinos = json.loads(request.POST.get("datos_inquilinos", "[]"))
-            reserva.save()
-            return redirect("inmueble_detalle", pk=inmueble.id)
-        else:
-            return JsonResponse({"error": form.errors.as_json()}, status=400)
-    else:
-        form = ReservaCocheraForm(initial={"inmueble": inmueble}) if tipo_inmueble == "Cochera" else ReservaNormalForm(initial={"inmueble": inmueble})
-    
-    context = {
-        "form": form,
-        "cant_inquilino": cant_inquilino
-    }
+            reserva.inmueble = inmueble
 
-    return render(request, 'gestion_reserva/hacer_reserva.html', context)
+            try:
+                datos_inquilinos = json.loads(request.POST.get("datos_inquilinos", "[]"))
+                if not datos_inquilinos:
+                    form.add_error(None, "Debe agregar al menos una persona.")
+                else:
+                    reserva.datos_inquilinos = datos_inquilinos
+                    reserva.save()
+                    return redirect("inmueble_detalle", pk=inmueble.id)
+            except json.JSONDecodeError:
+                form.add_error(None, "Error al procesar los datos de los inquilinos.")
+    else:
+        form = FormClase(inmueble=inmueble)
+
+    return render(request, "gestion_reserva/hacer_reserva.html", {
+        "form": form,
+        "cant_inquilino": cant_inquilino,
+        "tipo_inmueble": tipo_inmueble,
+        "inmueble": inmueble,
+        "usuario": request.user
+    })
+
 
 @login_required
 def listar_reservas(request):
