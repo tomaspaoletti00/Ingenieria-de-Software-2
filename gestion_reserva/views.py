@@ -154,6 +154,17 @@ def pagar_reserva(request, reserva_id):
             reserva.estado = "aceptada"
             reserva.save()
 
+            conflictos = Reserva.objects.filter(
+                inmueble=reserva.inmueble,
+                estado__in=['pendiente', 'pendiente_pago'],
+                fecha_inicio__lt=reserva.fecha_fin,
+                fecha_fin__gt=reserva.fecha_inicio
+            ).exclude(pk=reserva.pk)
+
+            for r in conflictos:
+                r.estado = 'rechazada'
+                r.save()
+
             # Aca podrías llamar a una función para rechazar reservas en conflicto
             return redirect("inmueble_detalle", pk=reserva.inmueble.id)
     else:
