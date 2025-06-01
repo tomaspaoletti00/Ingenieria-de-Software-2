@@ -18,7 +18,11 @@
     <div id="container-persona" data-max="{{ cant_inquilino }}">
         <div class="persona">
             <input type="text" name="nombre" placeholder="ADMIN no tiene nombre" value="{{ usuario.first_name }}" readonly>
-            <input type="number" name="edad" placeholder="Edad">
+            {% if tipo_inmueble == 'Cochera' %}
+                <input type="text" name="edad" placeholder="Patente">
+            {% else %}
+                <input type="number" name="edad" placeholder="Edad">
+            {% endif %}
             <input type="text" name="dni" placeholder="ADMIN no tiene DNI" value="{{ usuario.dni }}" readonly>
         </div>
         <!-- Acá se insertan los inquilinos -->
@@ -35,7 +39,11 @@
 <div id="formulario-persona-plantilla" style="display: none;">
     <div class="persona">
         <input type="text" name="nombre" placeholder="Nombre completo">
-        <input type="number" name="edad" placeholder="Edad">
+        {% if tipo_inmueble == 'Cochera' %}
+            <input type="text" name="edad" placeholder="Patente">
+        {% else %}
+            <input type="number" name="edad" placeholder="Edad">
+        {% endif %}
         <input type="text" name="dni" placeholder="DNI">
         <button type="button" class="eliminar-persona">Eliminar</button>
     </div>
