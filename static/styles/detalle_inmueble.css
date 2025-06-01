@@ -1,0 +1,32 @@
+    button {
+        background-color: #2196F3; /* Verde suave */
+        color: white;
+        padding: 5px 5px;
+        margin: 0.5rem 0.5rem 0 0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #4569a0; /* Verde un poco más oscuro */
+    }
+
+    a button {
+        text-decoration: none;
+    }
+
+    /* Para los botones de pestañas */
+    .pestana-selector {
+        margin-top: 2rem;
+    }
+
+    .pestana-selector button {
+        background-color: #2196F3; /* Azul */
+    }
+
+    .pestana-selector button:hover {
+        background-color: #1976D2;
+    }

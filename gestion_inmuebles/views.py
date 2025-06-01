@@ -16,7 +16,7 @@ def crear_inmueble(request):
             return redirect('listaInmuebles')  # o donde quieras redirigir
     else:
         form = InmuebleForm()
-    return render(request, 'gestion_inmuebles/crear_inmueble.html', {'form': form})
+    return render(request, 'gestion_inmuebles/formulario_inmueble.html', {'form': form})
 
 def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
@@ -99,7 +99,25 @@ def listar_Inmuebles(request):
 # Despues le hago refactoring lo importante es que anda y se guarda en la base de datos
 
 def formulario_inmueble(request):
-    return render(request, 'gestion_inmuebles/formulario_inmueble.html')
+    tipo = request.GET.get("tipo") or request.POST.get("tipo")
+    form = None
+
+    if tipo == "departamento":
+        form = FormularioDepartamento(request.POST or None, request.FILES or None)
+    elif tipo == "casa":
+        form = FormularioCasa(request.POST or None, request.FILES or None)
+    elif tipo == "local":
+        form = FormularioLocal(request.POST or None, request.FILES or None)
+    elif tipo == "cochera":
+        form = FormularioCochera(request.POST or None, request.FILES or None)
+
+    if request.method == "POST" and form is not None:
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Inmueble cargado correctamente.')
+            return redirect("listaInmuebles")  # o como se llame tu redirect
+
+    return render(request, "gestion_inmuebles/formulario_inmueble.html", {"form": form, "tipo": tipo})
 
 
 
@@ -176,9 +194,31 @@ def crear_cochera(request):
     return render(request, 'gestion_inmuebles/formulario_generico.html', context)
 
 def inmueble_detalle(request, pk):
-    inmueble = get_object_or_404(Inmueble, pk=pk)
-    return render(request, 'gestion_inmuebles/detalle_inmueble.html', {'inmueble': inmueble})
-
+    inmueble_base = get_object_or_404(Inmueble, pk=pk)
+    try:
+        tipo_obj = Departamento.objects.get(pk=pk)
+        tipo = "Departamento"
+    except Departamento.DoesNotExist:
+        try:
+            tipo_obj = Casa.objects.get(pk=pk)
+            tipo = "Casa"
+        except Casa.DoesNotExist:
+            try:
+                tipo_obj = Local.objects.get(pk=pk)
+                tipo = "Local"
+            except Local.DoesNotExist:
+                try:
+                    tipo_obj = Cochera.objects.get(pk=pk)
+                    tipo = "Cochera"
+                except Cochera.DoesNotExist:
+                    tipo_obj = inmueble_base
+                    tipo = "Desconocido"
+    return render(request, 'gestion_inmuebles/detalle_inmueble.html', {
+        'inmueble': tipo_obj,
+        'tipo': tipo,
+        'inmueble_base': inmueble_base,
+    })
+    
 def editar_inmueble(request, pk):
     inmueble = get_object_or_404(Inmueble, pk=pk)
 

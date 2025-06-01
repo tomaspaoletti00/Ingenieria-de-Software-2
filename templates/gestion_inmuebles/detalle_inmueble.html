@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'styles/detalle_inmueble.css' %}">
 <div style="max-width: 800px; margin: auto; padding: 2rem;">
     <h1 style="font-size: 2rem; margin-bottom: 1rem;">{{ inmueble.nombre }}</h1>
 
@@ -9,7 +10,7 @@
     {% endif %}
 
     <div style="margin-bottom: 1rem;">
-        <strong>Tipo:</strong> {{ inmueble.tipo }}
+        <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
     </div>
 
     <div style="margin-bottom: 1rem;">
@@ -36,20 +37,20 @@
         <strong>Política de cancelación:</strong> {{ inmueble.politica_cancelacion|linebreaks }}
     </div>
 
-    {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
-        <h3>Detalles específicos</h3>
-        <ul>
-            {% if inmueble.tipo == "Departamento" %}
-                <li><strong>Piso:</strong> {{ inmueble.piso }}</li>
-            {% else %}
-                <li><strong>Pisos:</strong> {{ inmueble.pisos }}</li>
-            {% endif %}
-            <li><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</li>
-            <li><strong>Baños:</strong> {{ inmueble.banios }}</li>
-            <li><strong>Inquilinos:</strong> {{ inmueble.cantidad_inquilinos }}</li>
-            <li><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</li>
-            <li><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</li>
-        </ul>
+   {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
+    <h3>Detalles específicos</h3>
+    <ul>
+        {% if inmueble.tipo == "Departamento" %}
+            <li><strong>Piso:</strong> {{ inmueble.piso }}</li>
+        {% else %}
+            <li><strong>Pisos:</strong> {{ inmueble.pisos }}</li>
+        {% endif %}
+        <li><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</li>
+        <li><strong>Baños:</strong> {{ inmueble.banios }}</li>
+        <li><strong>Inquilinos:</strong> {{ inmueble.cantidad_inquilinos }}</li>
+        <li><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</li>
+        <li><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</li>
+    </ul>
     {% elif inmueble.tipo == "Local" %}
         <h3>Detalles específicos</h3>
         <ul>
@@ -70,65 +71,42 @@
         </ul>
     {% endif %}
 
-    <a href="{% url 'listaInmuebles' %}">← Volver a la lista</a>
+    <a href="{% url 'listaInmuebles' %}"> 
+        <button>←Volver al inicio</button>
+    </a>
+    <br>
+    <br>
+    {% if user.is_authenticated %}
     <a href="{% url 'hacer_reserva' inmueble.id %}">
         <button>Realizar reserva</button>
     </a>
-<!-- Pestañas -->
-<div>
-    <button onclick="mostrarPestaña('aceptadas')">Reservas aceptadas</button>
-    <button onclick="mostrarPestaña('pendientes')">Solicitudes de reserva pendientes</button>
-</div>
+    {% endif %}
 
-<!-- Contenido de pestañas -->
-<div id="pestana-aceptadas" class="pestana">
-    <h3>Reservas aceptadas</h3>
-    {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_aceptadas puede_cambiar_estado=puede_cambiar_estado %}
-</div>
+    <!-- Pestañas -->
+    {% if user.is_authenticated %}
+    <div class="pestana-selector">
+        <button onclick="mostrarPestaña('aceptadas')">Reservas aceptadas</button>
+        <button onclick="mostrarPestaña('pendientes')">Solicitudes de reserva pendientes</button>
+    </div>
 
-<div id="pestana-pendientes" class="pestana" style="display:none;">
-    <h3>Solicitudes de reserva pendientes</h3>
-    {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_pendientes puede_cambiar_estado=puede_cambiar_estado %}
-</div>
+    <!-- Contenido de pestañas -->
+    <div id="pestana-aceptadas" class="pestana" style="margin-top: 1rem;">
+        <h3>Reservas aceptadas</h3>
+        {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_aceptadas puede_cambiar_estado=puede_cambiar_estado %}
+    </div>
 
-<script>
-function mostrarPestaña(nombre) {
-    document.getElementById('pestana-aceptadas').style.display = 'none';
-    document.getElementById('pestana-pendientes').style.display = 'none';
-    document.getElementById('pestana-' + nombre).style.display = 'block';
-}
-</script>
-    <thead>
-    </thead>
-    <tbody>
-        {% for reserva in reservas %}
-            <tr>
-                <td>{{ reserva.usuario.username }}</td>
-                <td>{{ reserva.fecha_inicio }}</td>
-                <td>{{ reserva.fecha_fin }}</td>
-                <td>{{ reserva.metodo_pago }}</td>
-                <td>
-                   {% if puede_cambiar_estado %}
-  {% if reserva.estado == 'pendiente' %}
-    <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
-             {% csrf_token %}
-             <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
-       <select name="nuevo_estado">
-            <option value="aceptada">Aceptar</option>
-           <option value="rechazada">Rechazar</option>
-       </select>
-           <button type="submit">Cambiar</button>
-             </form>
-             {% else %}
-                  {{ reserva.get_estado_display }}
-     {% endif %}
-        {% else %}
-        {{ reserva.get_estado_display }}
-     {% endif %}
-                </td>
-            </tr>
-        {% empty %}
-        {% endfor %}
-    </tbody>
-</table>
+    <div id="pestana-pendientes" class="pestana" style="display:none; margin-top: 1rem;">
+        <h3>Solicitudes de reserva pendientes</h3>
+        {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_pendientes puede_cambiar_estado=puede_cambiar_estado %}
+    </div>
+    {% endif %}
+    <script>
+    function mostrarPestaña(nombre) {
+        document.getElementById('pestana-aceptadas').style.display = 'none';
+        document.getElementById('pestana-pendientes').style.display = 'none';
+        document.getElementById('pestana-' + nombre).style.display = 'block';
+    }
+    </script>
+    
+
 {% endblock %}
