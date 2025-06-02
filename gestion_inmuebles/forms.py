@@ -30,6 +30,7 @@ class InmuebleForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if 'imagen' in self.fields:
             self.fields['imagen'].widget.clear_checkbox_label = "Limpiar imagen"
+        self.fields['superficie'].label = "Superficie (m²)"
 
     def clean_superficie(self):
         superficie = self.cleaned_data.get('superficie')
@@ -54,6 +55,8 @@ class FormularioDepartamento(InmuebleForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['tiempo'].choices = TIEMPO_GENERAL
+        self.fields['banios'].label = "Baños"
+
 
 
 class FormularioCasa(InmuebleForm):
@@ -63,15 +66,22 @@ class FormularioCasa(InmuebleForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['tiempo'].choices = TIEMPO_GENERAL
+        self.fields['banios'].label = "Baños"
+
 
 
 class FormularioLocal(InmuebleForm):
     class Meta(InmuebleForm.Meta):
         model = Local
+        
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['tiempo'].choices = TIEMPO_GENERAL
+        self.fields['banios'].label = "Baños"
+        self.fields['frente'].label = "Frente (m²)"
+        self.fields['fondo'].label = "Fondo (m²)"
+
 
     def clean_frente(self):
         frente = self.cleaned_data.get('frente')
@@ -93,6 +103,8 @@ class FormularioCochera(InmuebleForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['tiempo'].choices = TIEMPO_COCHERA
+        self.fields['largo_plaza'].label = "Largo de la plaza (m²)"
+        self.fields['ancho_plaza'].label = "Ancho de la plaza (m²)"
 
     def clean_largo_plaza(self):
         largo = self.cleaned_data.get('largo_plaza')

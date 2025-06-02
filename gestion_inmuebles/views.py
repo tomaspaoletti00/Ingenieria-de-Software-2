@@ -220,22 +220,46 @@ def inmueble_detalle(request, pk):
     })
     
 def editar_inmueble(request, pk):
-    inmueble = get_object_or_404(Inmueble, pk=pk)
+    # Obtenemos el inmueble base
+    inmueble_base = get_object_or_404(Inmueble, pk=pk)
 
+    # Determinamos la subclase del inmueble
+    if Departamento.objects.filter(pk=pk).exists():
+        inmueble = Departamento.objects.get(pk=pk)
+        form_class = FormularioDepartamento
+    elif Casa.objects.filter(pk=pk).exists():
+        inmueble = Casa.objects.get(pk=pk)
+        form_class = FormularioCasa
+    elif Local.objects.filter(pk=pk).exists():
+        inmueble = Local.objects.get(pk=pk)
+        form_class = FormularioLocal
+    elif Cochera.objects.filter(pk=pk).exists():
+        inmueble = Cochera.objects.get(pk=pk)
+        form_class = FormularioCochera
+    else:
+        inmueble = inmueble_base
+        form_class = InmuebleForm
+
+    # Si se envió el formulario (POST)
     if request.method == 'POST':
-        if not inmueble.activo:
-            inmueble.activo = True
-            inmueble.save()
+        if not inmueble_base.activo:
+            inmueble_base.activo = True
+            inmueble_base.save()
             return redirect('listado_inmuebles_admin')
 
-        form = InmuebleForm(request.POST, request.FILES, instance=inmueble)
+        form = form_class(request.POST, request.FILES, instance=inmueble)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Inmueble editado exitosamente.')
             return redirect('listado_inmuebles_admin')
     else:
-        form = InmuebleForm(instance=inmueble)
+        form = form_class(instance=inmueble)
 
-    return render(request, 'gestion_inmuebles/editar_inmueble.html', {'form': form, 'inmueble': inmueble})
+    return render(request, 'gestion_inmuebles/editar_inmueble.html', {
+        'form': form,
+        'inmueble': inmueble_base  # Para que el template pueda acceder al campo .activo y a la imagen
+    })
+
 def get_real_instance(inmueble):
     for subclass in [Departamento, Casa, Local, Cochera]:
         try:

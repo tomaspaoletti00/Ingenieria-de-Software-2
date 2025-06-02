@@ -70,7 +70,7 @@ def login_usuario(request):
 @login_required
 def logout_usuario(request):
     logout(request)
-    return redirect('home')
+    return redirect('listaInmuebles')
 
 def es_empleado(user):
     return user.is_authenticated and user.is_staff
