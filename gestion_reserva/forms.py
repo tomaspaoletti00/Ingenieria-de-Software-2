@@ -38,7 +38,7 @@ class ReservaNormalForm(forms.ModelForm):
             raise ValidationError("La fecha de fin debe ser posterior a la de inicio.")
 
         if (fin - inicio).days > 30:
-            raise ValidationError("La duración máxima de una reserva normal debe ser de al menos un mes.")
+            raise ValidationError("La duración máxima de reserva es de 30 dias.")
 
         if self.inmueble:
             conflictos = Reserva.objects.filter(
