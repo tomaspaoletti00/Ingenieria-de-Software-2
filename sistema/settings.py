@@ -131,4 +131,9 @@ AUTH_USER_MODEL = 'gestion_usuarios.Usuario'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = '38e60134999296'
+EMAIL_HOST_PASSWORD = 'c695773c683ead'
+EMAIL_PORT = '2525'

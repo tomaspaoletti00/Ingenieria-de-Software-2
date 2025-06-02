@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const edad = div.querySelector("input[name='edad']").value.trim();
             const dni = div.querySelector("input[name='dni']").value.trim();
 
-            if (!nombre || !edad || !dni) {
+            if (!nombre || !edad || !dni || parseInt(edad, 10) < 0) {
                 campos_incompletos = true;
             } else {
                 personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (personas.length === 0 || campos_incompletos) {
             e.preventDefault();
-            alert("Debe completar todos los campos de al menos un inquilino.");
+            alert("Se deben completar todos los campos y estos deben ser validos");
         } else {
             input_oculto.value = JSON.stringify(personas);
         }
