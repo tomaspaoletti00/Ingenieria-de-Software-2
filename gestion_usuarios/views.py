@@ -202,11 +202,13 @@ def alta_empleado(request):
 @user_passes_test(es_admin)
 def baja_empleado(request, user_id):
     empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
+    
     if request.method == 'POST':
         empleado.is_active = False
         empleado.save()
         messages.success(request, 'Empleado dado de baja correctamente.')
-        return redirect('lista-empleados')
+        return redirect('lista-empleados')  # Redirigís correctamente luego de dar de baja
+    
     return render(request, 'gestion_usuarios/baja-empleado.html', {'empleado': empleado})
 
 @login_required

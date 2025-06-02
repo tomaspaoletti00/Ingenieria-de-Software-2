@@ -26,10 +26,12 @@
         {% if empleado.is_active %}
         <form method="post" action="{% url 'baja_empleado' empleado.id %}">
           {% csrf_token %}
-          <button type="submit" onclick="return confirm('¿Estás seguro de que querés dar de baja a este empleado?')"
-            style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
-            Dar de baja
+          <a href="{% url 'baja_empleado' empleado.id %}">
+            <button type="submit"
+          style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
+              Dar de baja
           </button>
+        </a>
         </form>
         {% else %}
           <span style="color: red; font-weight: bold;">Inactivo</span>

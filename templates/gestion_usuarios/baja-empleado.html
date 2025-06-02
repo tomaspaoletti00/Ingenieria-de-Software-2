@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
-{% block content %}
-  <h2>¿Seguro que querés dar de baja al empleado <strong>{{ empleado.username }}</strong>?</h2>
 
-  <form method="post">
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; padding: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; font-family: 'Segoe UI', sans-serif;">
+  
+  <h2 style="color: #dc2626; margin-bottom: 20px;">
+    ¿Seguro que querés dar de baja al empleado <strong>{{ empleado.username }}</strong>?
+  </h2>
+
+  <form method="post" style="margin-top: 30px;">
     {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Sí, dar de baja</button>
-    <a href="{% url 'lista-empleados' %}" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-danger" style="padding: 10px 20px; margin-right: 10px;">
+      Sí, dar de baja
+    </button>
+    <a href="{% url 'lista-empleados' %}" class="btn btn-secondary" style="padding: 10px 20px;">
+      Cancelar
+    </a>
   </form>
+
+</div>
 {% endblock %}

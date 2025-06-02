@@ -76,7 +76,7 @@
     </a>
     <br>
     <br>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and inmueble.estado == "Disponible" %}
     <a href="{% url 'hacer_reserva' inmueble.id %}">
         <button>Realizar reserva</button>
     </a>
