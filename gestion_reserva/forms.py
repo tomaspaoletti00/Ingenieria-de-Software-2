@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 from .models import Reserva
 from datetime import datetime, timedelta, date
-
+from gestion_inmuebles.models import Cochera
 class PagoForm(forms.Form):
     numero = forms.CharField(max_length=16, label="Número de tarjeta")
     titular = forms.CharField(max_length=100, label="Titular de la tarjeta")
@@ -122,7 +122,7 @@ class ReservaCocheraForm(forms.ModelForm):
 
         cleaned_data["fecha_inicio"] = fecha_inicio
         cleaned_data["fecha_fin"] = fecha_fin
-
+       
         if self.inmueble:
             conflictos = Reserva.objects.filter(
                 inmueble=self.inmueble,
@@ -130,10 +130,11 @@ class ReservaCocheraForm(forms.ModelForm):
                 fecha_fin__gt=fecha_inicio,
                 estado="aceptada"
             )
+            cochera = Cochera.objects.get(pk=self.inmueble.pk)
+            if conflictos.count() >= cochera.plazas:
+                 raise ValidationError("No hay plazas disponibles en ese horario.")
             if self.instance.pk:
                 conflictos = conflictos.exclude(pk=self.instance.pk)
-            if conflictos.exists():
-                raise ValidationError("Ya hay una reserva aceptada para ese horario.")
 
         return cleaned_data
 
