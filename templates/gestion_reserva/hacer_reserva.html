@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
 <h2>Reservar {{ tipo_inmueble }}</h2>
 
@@ -10,11 +9,11 @@
     
     <!-- errores generales -->
     {{ form.as_p }}
-
+    {% if tipo_inmueble != 'Cochera' %}
     <div>
         <label>Máximo de inquilinos: {{ cant_inquilino }}</label>
     </div>
-
+    {% endif %}
     <div id="container-persona" data-max="{{ cant_inquilino }}">
         <div class="persona">
             <input type="text" name="nombre" placeholder="ADMIN no tiene nombre" value="{{ usuario.first_name }}" readonly>
@@ -27,8 +26,12 @@
         </div>
         <!-- Acá se insertan los inquilinos -->
     </div>
-
-    <button type="button" id="agregar-persona">+ Agregar inquilino</button>
+    
+    {% if tipo_inmueble == 'Cochera' %}
+        <button type="button" id="agregar-persona" style="display: none;">+ Agregar inquilino</button>
+    {% else %}
+        <button type="button" id="agregar-persona">+ Agregar inquilino</button>
+    {% endif %}
 
     <input type="hidden" name="datos_inquilinos" id="datos-inquilinos-hidden">
 
