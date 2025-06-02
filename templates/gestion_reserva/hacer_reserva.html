@@ -1,32 +1,56 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 {% block content %}
-    <p>tipo inmueble: {{ tipo_inmueble }}</p>
-    <div class="container">
-        <form id="formulario-reserva" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" id="tipo-inmueble" value="{{ tipo_inmueble }}"> <!-- agrege esto -->
-            {{ form }}
-        </form>
-        <div style="flex: none;">
-            <p>Maximo: </p>
-            <p id="max-inquilino">{{ cant_inquilino }}</p>
-        </div>
-        <div id="container-persona">
-            <!-- Aca se agregan dinamicamente el/los inquilino(s) -->
-        </div>
-        <button id="agregar-persona" type="button"> + </button>
-        <button id="completar-reserva" type="button"> Completar reserva </button>
-    </div>
+<h2>Reservar {{ tipo_inmueble }}</h2>
 
-    <!-- Plantilla oculta para inquilino -->
-    <div id="formulario-persona-plantilla" style="display: none;">
-        <div class="persona">
-            <input type="text" name="nombre" placeholder="Nombre completo">
-            <input type="number" name="edad" placeholder="Edad">
-            <input type="text" name="dni" placeholder="DNI">
-            <button type="button" class="eliminar-persona">Eliminar</button>
-        </div>
+<form id="formulario-reserva" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="tipo-inmueble" value="{{ tipo_inmueble }}">
+    
+    <!-- errores generales -->
+    {{ form.as_p }}
+    {% if tipo_inmueble != 'Cochera' %}
+    <div>
+        <label>Máximo de inquilinos: {{ cant_inquilino }}</label>
     </div>
-    <script src="{% static 'js/solicitar_reserva.js' %}"></script>
+    {% endif %}
+    <div id="container-persona" data-max="{{ cant_inquilino }}">
+        <div class="persona">
+            <input type="text" name="nombre" placeholder="ADMIN no tiene nombre" value="{{ usuario.first_name }}" readonly>
+            {% if tipo_inmueble == 'Cochera' %}
+                <input type="text" name="edad" placeholder="Patente">
+            {% else %}
+                <input type="number" name="edad" placeholder="Edad">
+            {% endif %}
+            <input type="text" name="dni" placeholder="ADMIN no tiene DNI" value="{{ usuario.dni }}" readonly>
+        </div>
+        <!-- Acá se insertan los inquilinos -->
+    </div>
+    
+    {% if tipo_inmueble == 'Cochera' %}
+        <button type="button" id="agregar-persona" style="display: none;">+ Agregar inquilino</button>
+    {% else %}
+        <button type="button" id="agregar-persona">+ Agregar inquilino</button>
+    {% endif %}
+
+    <input type="hidden" name="datos_inquilinos" id="datos-inquilinos-hidden">
+
+    <button type="submit">Enviar reserva</button>
+</form>
+
+<!-- Plantilla para clon -->
+<div id="formulario-persona-plantilla" style="display: none;">
+    <div class="persona">
+        <input type="text" name="nombre" placeholder="Nombre completo">
+        {% if tipo_inmueble == 'Cochera' %}
+            <input type="text" name="edad" placeholder="Patente">
+        {% else %}
+            <input type="number" name="edad" placeholder="Edad">
+        {% endif %}
+        <input type="text" name="dni" placeholder="DNI">
+        <button type="button" class="eliminar-persona">Eliminar</button>
+    </div>
+</div>
+
+<script src="{% static 'js/solicitar_reserva.js' %}"></script>
 {% endblock %}
