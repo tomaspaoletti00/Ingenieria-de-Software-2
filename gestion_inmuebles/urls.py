@@ -7,7 +7,7 @@ urlpatterns = [
     path('adminInmuebles/', views.adminInmuebles, name='adminInmuebles'),
     path('listaInmuebles/', views.listar_Inmuebles, name='listaInmuebles'),
     path('formularioInmueble/', views.formulario_inmueble, name='formularioInmueble'),
-    path('formulario/', views.crear_formulario),
+    path('formulario/', views.crear_formulario, name='crear_formulario'),  # <- esta línea corregida
     path('inmuebles/', views.listar_Inmuebles, name='listar_Inmuebles'),
     path('inmuebles/<int:pk>/', views.inmueble_detalle, name='inmueble_detalle'),
     path('inmuebles/<int:pk>/editar/', views.editar_inmueble, name='editar_inmueble'),

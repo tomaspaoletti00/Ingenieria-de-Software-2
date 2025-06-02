@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ReservaNormalForm, ReservaCocheraForm
-from gestion_inmuebles.models import Inmueble, Casa, Departamento
+from gestion_inmuebles.models import Inmueble, Casa, Departamento, Local, Cochera
 from django.http import JsonResponse
 from .models import Reserva,Tarjeta
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,7 @@ from .forms import  PagoForm
 from django.http import HttpResponseForbidden
 from decimal import Decimal
 from gestion_reserva.models import Tarjeta
+from django.core.mail import send_mail
 
 from django.shortcuts import render
 
@@ -47,6 +48,7 @@ def hacer_reserva(request, id_inmueble):
                 else:
                     reserva.datos_inquilinos = datos_inquilinos
                     reserva.save()
+                    messages.success(request, 'Reserva exitosa.')
                     return redirect("inmueble_detalle", pk=inmueble.id)
             except json.JSONDecodeError:
                 form.add_error(None, "Error al procesar los datos de los inquilinos.")
@@ -68,7 +70,7 @@ def listar_reservas(request):
         reservas = Reserva.objects.all()
         puede_cambiar_estado = True
         tarjeta = Tarjeta.objects.get(numero="5555444433331111")
-        tarjeta.monto_disponible = 50000
+        tarjeta.monto_disponible = 100000000
         tarjeta.save()
         # Create your views here.
     else:
@@ -86,37 +88,80 @@ def cambiar_estado_reserva(request, reserva_id):
         reserva = get_object_or_404(Reserva, id=reserva_id)
         nuevo_estado = request.POST.get('nuevo_estado')
         inmueble_id = request.POST.get('inmueble_id')
+        usuario = request.user
 
         if nuevo_estado == 'aceptada' and reserva.estado == 'pendiente':
             reserva.estado = 'pendiente_pago'
             reserva.save()
+            send_mail(
+        'Estado de Reserva:',
+        'Su solicitud de reserva queda pendiente de pago.',
+        'no-reply@tuapp.com',
+        [usuario.email],
+        fail_silently=False,
+    )
         elif nuevo_estado == 'rechazada' and reserva.estado == 'pendiente':
             reserva.estado = 'rechazada'
             reserva.save()
+            send_mail(
+        'Estado de Reserva:',
+        'Su solicitud de reserva ha sido rechazada.',
+        'no-reply@tuapp.com',
+        [usuario.email],
+        fail_silently=False,
+    )
         return redirect('inmueble_detalle', pk=inmueble_id)
 
-@login_required
-def inmueble_detalle(request, pk):
-    inmueble = get_object_or_404(Inmueble, pk=pk)
-    puede_cambiar_estado = request.user.is_staff or request.user.is_superuser
 
-    if request.user.is_staff:  # Admin o empleado
-        reservas = Reserva.objects.filter(inmueble=inmueble)
-        puede_cambiar_estado = True
-    else:  # Usuario común
-        reservas = Reserva.objects.filter(inmueble=inmueble, usuario=request.user, estado__in=['pendiente_pago', 'aceptada','pendiente'])
-        puede_cambiar_estado = False
+def inmueble_detalle(request, pk):
+    inmueble_base = get_object_or_404(Inmueble, pk=pk)
+    inmueble = get_object_or_404(Inmueble, pk=pk)
+    puede_cambiar_estado = False  # valor por defecto
+
+    # Determinar tipo específico del inmueble
+    try:
+        tipo_obj = Departamento.objects.get(pk=pk)
+        tipo = "Departamento"
+    except Departamento.DoesNotExist:
+        try:
+            tipo_obj = Casa.objects.get(pk=pk)
+            tipo = "Casa"
+        except Casa.DoesNotExist:
+            try:
+                tipo_obj = Local.objects.get(pk=pk)
+                tipo = "Local"
+            except Local.DoesNotExist:
+                try:
+                    tipo_obj = Cochera.objects.get(pk=pk)
+                    tipo = "Cochera"
+                except Cochera.DoesNotExist:
+                    tipo_obj = inmueble_base
+                    tipo = "Desconocido"
+
+    # Cargar reservas
+    reservas = Reserva.objects.none()  # Default para no autenticados
+
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            reservas = Reserva.objects.filter(inmueble=inmueble)
+            puede_cambiar_estado = True
+        else:
+            reservas = Reserva.objects.filter(
+                inmueble=inmueble,
+                usuario=request.user,
+                estado__in=['pendiente_pago', 'aceptada', 'pendiente']
+            )
 
     reservas_aceptadas = reservas.filter(estado='aceptada')
     reservas_pendientes = reservas.filter(estado__in=['pendiente_pago', 'pendiente'])
 
     context = {
-        'inmueble': inmueble,
+        'inmueble': tipo_obj,
         'reservas_aceptadas': reservas_aceptadas,
         'reservas_pendientes': reservas_pendientes,
         'puede_cambiar_estado': puede_cambiar_estado,
         'user': request.user,
-        'estados_cancelables': ['pendiente', 'pendiente_pago','aceptada'],
+        'estados_cancelables': ['pendiente', 'pendiente_pago', 'aceptada'],
     }
     return render(request, 'gestion_inmuebles/detalle_inmueble.html', context)
 
@@ -129,6 +174,7 @@ def pagar_reserva(request, reserva_id):
 
     if request.method == "POST":
         form = PagoForm(request.POST)
+        usuario = request.user
         if form.is_valid():
             numero = form.cleaned_data["numero"]
             titular = form.cleaned_data["titular"]
@@ -153,7 +199,13 @@ def pagar_reserva(request, reserva_id):
 
             reserva.estado = "aceptada"
             reserva.save()
-
+            send_mail(
+        'Estado de Pago:',
+        'Se ha acreditado el pago de la reserva correctamente',
+        'no-reply@tuapp.com',
+        [usuario.email],
+        fail_silently=False,
+    )
             conflictos = Reserva.objects.filter(
                 inmueble=reserva.inmueble,
                 estado__in=['pendiente', 'pendiente_pago'],
@@ -176,10 +228,29 @@ def pagar_reserva(request, reserva_id):
 def cancelar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
 
+    
+    usuario = request.user
     if reserva.estado in ['pendiente', 'pendiente_pago','aceptada']:
-        reserva.estado = 'cancelada'
-        reserva.save()
+        
         messages.success(request, "Reserva cancelada correctamente.")
+        if (reserva.estado == 'aceptada'):
+             send_mail(
+             'Estado de Reserva:',
+             'Su reserva ha sido cancelada. Poltica de Cancelacion: ' + reserva.inmueble.politica_cancelacion,
+             'no-reply@tuapp.com',
+             [usuario.email],
+             fail_silently=False,
+    )        
+        else:
+             send_mail(
+             'Estado de Reserva:',
+             'Su reserva ha sido cancelada.',
+             'no-reply@tuapp.com',
+             [usuario.email],
+             fail_silently=False,
+    )          
+        reserva.estado = 'cancelada'
+        reserva.save()     
     else:
         messages.error(request, "No se puede cancelar esta reserva.")
 

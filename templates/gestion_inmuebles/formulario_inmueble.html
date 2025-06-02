@@ -121,36 +121,24 @@
         <button class="form-button" data-tipo="local" type="button" aria-pressed="false">Local</button>
         <button class="form-button" data-tipo="cochera" type="button" aria-pressed="false">Cochera</button>
     </nav>
-    <section id="container-form" tabindex="-1" aria-live="polite" aria-relevant="additions">
-        <!-- Aquí se cargará el formulario correspondiente -->
-        <form method="post" enctype="multipart/form-data" novalidate>
-          {% csrf_token %}
-
-          {% if form.non_field_errors %}
-            <div style="color: #e74c3c; font-weight: bold; margin-bottom: 12px;">
-              {{ form.non_field_errors }}
-            </div>
-          {% endif %}
-
-          {% if form.errors %}
-            <div style="color: #e74c3c; font-weight: bold; margin-bottom: 12px;">
-              Por favor, corregí los errores antes de continuar.
-            </div>
-          {% endif %}
-
-          {% for field in form %}
-            <div>
-              {{ field.label_tag }}
-              {{ field }}
-              {% if field.errors %}
-                <div class="field-error">{{ field.errors }}</div>
-              {% endif %}
-            </div>
-          {% endfor %}
-
-         
+    <section id="container-form">
+    {% if form %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="tipo" value="{{ tipo }}">
+            {% for field in form %}
+                <div>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit">Enviar</button>
         </form>
-    </section>
+    {% endif %}
+</section>
 </main>
 
 <script src="{% static 'js/formulario_ajax.js' %}"></script>

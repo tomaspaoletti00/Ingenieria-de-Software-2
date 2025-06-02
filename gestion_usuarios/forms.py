@@ -11,6 +11,12 @@ class RegistroUsuarioForm(UserCreationForm):
                   'password2':'Repetir Contraseña', 'first_name':"Nombre y Apellido",'dni':'DNI',
                   'telefono':'Nro de Telefono'}
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in first_name):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return first_name
+
 
 
     def clean_email(self):
