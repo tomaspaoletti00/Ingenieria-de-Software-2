@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <h2>Clientes Registrados</h2>
 <table>
   <thead>
@@ -25,7 +26,7 @@
         {% if usuario.is_active %}
         <form method="post" action="{% url 'deshabilitar_usuario' usuario.id %}">
           {% csrf_token %}
-          <button type="submit" onclick="return confirm('¿Estás seguro de que querés deshabilitar esta cuenta?')"
+          <button type="submit" class="btn-deshabilitar"
             style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
             Deshabilitar cuenta
           </button>
@@ -40,4 +41,29 @@
     {% endfor %}
   </tbody>
 </table>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".btn-deshabilitar").forEach(boton => {
+          const form = boton.closest("form");
+
+          boton.addEventListener("click", (e) => {
+              e.preventDefault();
+
+              Swal.fire({
+                  title: '¿Estás seguro?',
+                  text: "Esta acción deshabilitará la cuenta.",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sí, deshabilitar',
+                  animation: false,
+                  cancelButtonText: 'Cancelar'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      form.submit();
+                  }
+              });
+          });
+      });
+  });
+</script>
 {% endblock %}

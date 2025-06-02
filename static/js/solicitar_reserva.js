@@ -7,7 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     agregar_persona.addEventListener("click", () => {
         if (container_persona.querySelectorAll(".persona").length >= max) {
-            alert("Máximo alcanzado.");
+            Swal.fire({
+                icon: 'info', // success, warning, info, question
+                title: 'Maximo alcanzado',
+                text: 'La cantidad de inquilinos ya es la maxima.',
+                animation: false,
+            });
             return;
         }
 
@@ -35,7 +40,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (personas.length === 0 || campos_incompletos) {
             e.preventDefault();
-            alert("Se deben completar todos los campos y estos deben ser validos");
+            Swal.fire({
+                icon: 'error', // success, warning, info, question
+                title: 'Campos invalidos',
+                text: 'Se deben completar todos los campos y estos deben ser validos.',
+                animation: false,
+            });
         } else {
             input_oculto.value = JSON.stringify(personas);
         }
