@@ -70,7 +70,7 @@ def listar_reservas(request):
         reservas = Reserva.objects.all()
         puede_cambiar_estado = True
         tarjeta = Tarjeta.objects.get(numero="5555444433331111")
-        tarjeta.monto_disponible = 100000000
+        tarjeta.monto_disponible = 9999999999999
         tarjeta.save()
         # Create your views here.
     else:
