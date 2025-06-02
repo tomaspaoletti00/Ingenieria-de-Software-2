@@ -31,65 +31,97 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function completarReserva(container_persona) {
-        const personas = [];
-        const campos = container_persona.querySelectorAll(".persona");
+    const personas = [];
+    const campos = container_persona.querySelectorAll(".persona");
 
-        if (campos.length === 0) {
-            alert("¡Debe agregar al menos una persona!");
-            return;
-        }
-
-        for (let campo of campos) {
-            const nombre = campo.querySelector("input[name='nombre']").value.trim();
-            const edad = campo.querySelector("input[name='edad']").value.trim();
-            const dni = campo.querySelector("input[name='dni']").value.trim();
-
-            if (!nombre || !edad || !dni) {
-                alert("¡Complete todos los campos de cada persona!");
-                return;
-            }
-
-            personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
-        }
-
-        // Obtenemos fechas y método de pago del formulario
-        const fecha_inicio = document.querySelector("input[name='fecha_inicio']").value;
-        const fecha_fin = document.querySelector("input[name='fecha_fin']").value;
-        const metodo_pago = document.querySelector("select[name='metodo_pago']").value;
-
-        if (!fecha_inicio || !fecha_fin || !metodo_pago) {
-            alert("Complete todos los campos del formulario.");
-            return;
-        }
-
-        // Construimos objeto para enviar
-        const datosForm = new FormData();
-        datosForm.append("csrfmiddlewaretoken", document.querySelector("input[name='csrfmiddlewaretoken']").value);
-        datosForm.append("fecha_inicio", fecha_inicio);
-        datosForm.append("fecha_fin", fecha_fin);
-        datosForm.append("metodo_pago", metodo_pago);
-        datosForm.append("datos_inquilinos", JSON.stringify(personas)); // JSON serializado
-
-        // Enviamos el form manualmente
-        fetch(window.location.href, {
-            method: "POST",
-            body: datosForm
-        })
-        .then(res => {
-            if (res.redirected) {
-                window.location.href = res.url;
-            } else {
-                return res.json().then(data => {
-                    const errores = JSON.parse(data.error); // el backend manda los errores como string JSON
-                    const mensajes = Object.values(errores)
-                        .flat()
-                        .map(err => err.message);
-                    alert(mensajes.join("\n"));
-                });
-            }
-        })
-        .catch(err => console.error("Error al enviar reserva:", err));
+    if (campos.length === 0) {
+        alert("¡Debe agregar al menos una persona!");
+        return;
     }
+    
+    for (let campo of campos) {
+        const nombre = campo.querySelector("input[name='nombre']").value.trim();
+        const edad = campo.querySelector("input[name='edad']").value.trim();
+        const dni = campo.querySelector("input[name='dni']").value.trim();
+
+        if (!nombre || !edad || !dni) {
+            alert("¡Complete todos los campos de cada persona!");
+            return;
+        }
+
+        personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
+    }
+
+    const metodo_pago = document.querySelector("select[name='metodo_pago']").value;
+    if (!metodo_pago) {
+        alert("Seleccione un método de pago.");
+        return;
+    }
+
+    // 🔍 Detectar tipo de inmueble
+    const tipoInmueble = document.getElementById("tipo-inmueble")?.value;
+
+    let fecha_inicio_iso, fecha_fin_iso;
+    if (tipoInmueble === "Cochera") {
+        const dia = document.querySelector("input[name='dia']").value;
+        const hora_inicio = document.querySelector("select[name='hora_inicio']").value;
+        const horas = parseInt(document.querySelector("input[name='horas']").value, 10);
+
+        if (!dia || !hora_inicio || isNaN(horas)) {
+            alert("Debe completar el día, hora de inicio y cantidad de horas.");
+            return;
+        }
+
+        const fecha_inicio = new Date(`${dia}T${hora_inicio}:00`);
+        const fecha_fin = new Date(fecha_inicio.getTime() + horas * 60 * 60 * 1000);
+
+        fecha_inicio_iso = fecha_inicio.toISOString().slice(0, 16);
+        fecha_fin_iso = fecha_fin.toISOString().slice(0, 16);
+    } else {
+        // Departamento (reserva por día)
+        fecha_inicio_iso = document.querySelector("input[name='fecha_inicio']").value;
+        fecha_fin_iso = document.querySelector("input[name='fecha_fin']").value;
+
+        if (!fecha_inicio_iso || !fecha_fin_iso) {
+            alert("Debe completar fecha de inicio y fin.");
+            return;
+        }
+    }
+
+    const datosForm = new FormData();
+    console.log("hola");
+    console.log("Fecha fin ISO:", fecha_fin_iso);
+    datosForm.append("csrfmiddlewaretoken", document.querySelector("input[name='csrfmiddlewaretoken']").value);
+    datosForm.append("fecha_inicio", fecha_inicio_iso);
+    datosForm.append("fecha_fin", fecha_fin_iso);
+    datosForm.append("metodo_pago", metodo_pago);
+    datosForm.append("datos_inquilinos", JSON.stringify(personas));
+    console.log("Enviando datos:");
+    console.log("fecha_inicio", fecha_inicio_iso);
+    console.log("fecha_fin", fecha_fin_iso);
+    console.log("metodo_pago", metodo_pago);
+    console.log("personas", personas);
+    
+    fetch(window.location.href, {
+        method: "POST",
+        body: datosForm
+    })
+    .then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else {
+            return res.json().then(data => {
+                const errores = JSON.parse(data.error);
+                const mensajes = Object.values(errores)
+                    .flat()
+                    .map(err => err.message);
+                alert(mensajes.join("\n"));
+            });
+        }
+    })
+    .catch(err => console.error("Error al enviar reserva:", err));
+}
+
 
     /* MAIN */
 
