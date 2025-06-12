@@ -23,19 +23,23 @@
           </button>
         </a>
 
-        {% if empleado.is_active %}
+     {% if empleado.is_active %}
         <form method="post" action="{% url 'baja_empleado' empleado.id %}">
-          {% csrf_token %}
-          <a href="{% url 'baja_empleado' empleado.id %}">
-            <button type="submit"
-          style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
-              Dar de baja
-          </button>
-        </a>
-        </form>
-        {% else %}
-          <span style="color: red; font-weight: bold;">Inactivo</span>
-        {% endif %}
+         {% csrf_token %}
+         <button type="submit"
+         style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
+         Dar de baja
+         </button>
+         </form>
+     {% else %}
+         <form method="post" action="{% url 'habilitar_empleado' empleado.id %}">
+         {% csrf_token %}
+         <button type="submit"
+         style="padding: 6px 12px; background-color: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer;">
+         Dar de alta
+        </button>
+  </form>
+{% endif %}
       </td>
     </tr>
     {% empty %}

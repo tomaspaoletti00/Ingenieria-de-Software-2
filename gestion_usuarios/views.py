@@ -213,6 +213,19 @@ def baja_empleado(request, user_id):
 
 @login_required
 @user_passes_test(es_admin)
+def habilitar_empleado(request, user_id):
+    empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
+
+    if request.method == 'POST':
+        empleado.is_active = True
+        empleado.save()
+        messages.success(request, 'Empleado habilitado correctamente.')
+        return redirect('lista-empleados')
+    
+    return render(request, 'gestion_usuarios/habilitar-empleado.html', {'empleado': empleado})
+
+@login_required
+@user_passes_test(es_admin)
 def editar_empleado(request, user_id):
     empleado = get_object_or_404(Usuario, id=user_id, is_staff=True, is_superuser=False)
     if request.method == 'POST':
@@ -237,3 +250,20 @@ def deshabilitar_usuario(request, user_id):
         else:
             messages.warning(request, f'La cuenta de {usuario.username} ya estaba deshabilitada.')
     return redirect('lista-clientes')  
+
+@login_required
+@user_passes_test(es_admin)
+def habilitar_usuario(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id, is_superuser=False)
+
+    if usuario.is_active:
+        messages.warning(request, f'La cuenta de {usuario.username} ya está habilitada.')
+        return redirect('lista-clientes')
+
+    if request.method == 'POST':
+        usuario.is_active = True
+        usuario.save()
+        messages.success(request, f'Cuenta de {usuario.username} habilitada correctamente.')
+        return redirect('lista-clientes')
+
+    return redirect('lista-clientes')

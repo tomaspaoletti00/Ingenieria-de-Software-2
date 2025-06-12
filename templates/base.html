@@ -15,20 +15,47 @@
             <a href="/" class="nav-logo">
                 <img src="{% static 'img/logoAlquilerExpress.png' %}" alt="Logo" class="logo-img">Alquiler Express</a>
             <ul class="nav-links">
+                {% if user.is_superuser %}
+            <li>
+            <span style="
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #bbf7d0;
+            color: #166534;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;">🛡️ Administrador</span>
+            </li>
+                {% endif%}
+                
+                {% if user.is_staff and not user.is_superuser %}
+                <li>
+                <span style="display: inline-flex; align-items: center;gap: 
+                6px;background-color: #bae6fd;color: #075985;
+                font-weight: bold;padding: 6px 12px;border-radius: 20px; font-size: 0.9rem; 
+                text-transform: uppercase; letter-spacing: 0.5px ">🛠️ Empleado</span></li>
+
+                {% endif %}
+
+                {% if user.is_authenticated and not user.is_staff %}
+                    <li><span>Hola, {{ user.first_name|default:user.username }} !</span></li>
+                {% endif %}
+                
                 <li><a href="/">Home</a></li>
                
-
                 {% if user.is_superuser %}
                     <li><a href="/usuarios/panel-admin">Panel de Administrador</a></li>
                 {% endif %}
                 {% if user.is_authenticated %}
-                
                     <li><a href="/usuarios/perfil">Perfil</a></li>
                     <li><a href="/usuarios/logout">Cerrar Sesión</a></li>
                 {% else %}
                     <li><a href="/usuarios/registro">Registro</a></li>
                     <li><a href="/usuarios/login">Iniciar Sesión</a></li>                    
-
                 {% endif %}
                 
 
