@@ -24,30 +24,49 @@ document.addEventListener("DOMContentLoaded", () => {
     // Antes del submit, construir JSON de personas
     document.getElementById("formulario-reserva").addEventListener("submit", (e) => {
         const personas = [];
-        let campos_incompletos = false;
+        const campos = container_persona.querySelectorAll(".persona");
 
-        container_persona.querySelectorAll(".persona").forEach(div => {
+        const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+        const soloNumeros = /^[0-9]+$/;
+
+        for (const div of campos) {
             const nombre = div.querySelector("input[name='nombre']").value.trim();
             const edad = div.querySelector("input[name='edad']").value.trim();
             const dni = div.querySelector("input[name='dni']").value.trim();
 
-            if (!nombre || !edad || !dni || parseInt(edad, 10) < 0) {
-                campos_incompletos = true;
-            } else {
-                personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
+            if (
+                !nombre ||
+                !edad ||
+                !dni ||
+                isNaN(edad) ||
+                parseInt(edad, 10) < 0 ||
+                !soloLetras.test(nombre) ||
+                !soloNumeros.test(dni)
+            ) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campos inválidos',
+                    text: 'Todos los campos deben estar completos y ser válidos.',
+                    animation: false,
+                });
+                return;  // ⚠️ muy importante, evitamos seguir el flujo
             }
-        });
 
-        if (personas.length === 0 || campos_incompletos) {
+            personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
+        }
+
+        if (personas.length === 0) {
             e.preventDefault();
             Swal.fire({
-                icon: 'error', // success, warning, info, question
-                title: 'Campos invalidos',
-                text: 'Se deben completar todos los campos y estos deben ser validos.',
+                icon: 'error',
+                title: 'Faltan inquilinos',
+                text: 'Debe agregar al menos un inquilino válido.',
                 animation: false,
             });
-        } else {
-            input_oculto.value = JSON.stringify(personas);
+            return;
         }
+
+        input_oculto.value = JSON.stringify(personas);
     });
 });
