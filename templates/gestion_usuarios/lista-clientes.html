@@ -24,16 +24,24 @@
         </a>
 
         {% if usuario.is_active %}
-        <form method="post" action="{% url 'deshabilitar_usuario' usuario.id %}">
-          {% csrf_token %}
-          <button type="submit" class="btn-deshabilitar"
+           <form method="post" action="{% url 'deshabilitar_usuario' usuario.id %}">
+           {% csrf_token %}
+            <button type="submit" class="btn-deshabilitar"
             style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
-            Deshabilitar cuenta
-          </button>
-        </form>
+             Deshabilitar cuenta
+           </button>
+          </form>
         {% else %}
-          <span style="color: red; font-weight: bold;">Cuenta deshabilitada</span>
-        {% endif %}
+        <form method="post" action="{% url 'habilitar_usuario' usuario.id %}">
+         {% csrf_token %}
+         <button type="submit" class="btn-habilitar"
+         style="padding: 6px 12px; background-color: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer;">
+         Habilitar cuenta
+         </button>
+           </form>
+             {% endif %}
+
+
       </td>
     </tr>
     {% empty %}

@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Lista de Inmuebles</title>
     <link rel="stylesheet" href="{% static 'styles/listaInmuebles.css' %}">
     <style>
         .filtros {
-            background-color: #007bff; 
+            background-color: #062e59; 
             padding: 20px;
             border-radius: 10px;
             margin: 20px auto;
@@ -69,9 +68,7 @@
     </style>
 </head>
 <body>
-    <div class="titulo">
-        <h1>Inmuebles</h1>
-    </div>
+
 
     <div class="filtros">
         <form method="get" class="filtro-form">
@@ -228,5 +225,5 @@
 </script>
 
 </body>
-</html>
+
 {% endblock %}

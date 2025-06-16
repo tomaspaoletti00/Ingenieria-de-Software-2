@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     agregar_persona.addEventListener("click", () => {
         if (container_persona.querySelectorAll(".persona").length >= max) {
             Swal.fire({
-                icon: 'info', // success, warning, info, question
-                title: 'Maximo alcanzado',
-                text: 'La cantidad de inquilinos ya es la maxima.',
+                icon: 'info',
+                title: 'Máximo alcanzado',
+                text: 'La cantidad de inquilinos ya es la máxima.',
                 animation: false,
             });
             return;
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container_persona.appendChild(clon);
     });
 
-    // Antes del submit, construir JSON de personas
+    // Validación y armado del JSON antes del submit
     document.getElementById("formulario-reserva").addEventListener("submit", (e) => {
         const personas = [];
         const campos = container_persona.querySelectorAll(".persona");
@@ -34,34 +34,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const edad = div.querySelector("input[name='edad']").value.trim();
             const dni = div.querySelector("input[name='dni']").value.trim();
 
-            if (
-                !nombre ||
-                !edad ||
-                !dni ||
-                isNaN(edad) ||
-                parseInt(edad, 10) < 0 ||
-                !soloLetras.test(nombre) ||
-                !soloNumeros.test(dni)
-            ) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Campos inválidos',
-                    text: 'Todos los campos deben estar completos y ser válidos.',
-                    animation: false,
-                });
-                return;  // ⚠️ muy importante, evitamos seguir el flujo
-            }
+            const nombreValido = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+$/.test(nombre);
+            const dniValido = /^\d+$/.test(dni);
+            const edadValida = /^\d+$/.test(edad) && parseInt(edad, 10) >= 0;
 
-            personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
-        }
+            if (!nombre || !edad || !dni || !nombreValido || !dniValido || !edadValida) {
+                campos_incompletos = true;
+            } else {
+                personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
+            }
+        });
 
         if (personas.length === 0) {
             e.preventDefault();
             Swal.fire({
                 icon: 'error',
-                title: 'Faltan inquilinos',
-                text: 'Debe agregar al menos un inquilino válido.',
+                title: 'Campos inválidos',
+                text: 'Completá todos los campos con datos válidos (nombre solo letras, DNI solo números).',
                 animation: false,
             });
             return;
