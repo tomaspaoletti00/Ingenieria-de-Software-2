@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+<h1>Menú de Estadísticas</h1>
+
+<style>
+    .admin-button {
+        display: inline-block;
+        padding: 10px;
+        background-color: rgba(30, 41, 59, 1);
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        margin: 5px 0;
+    }
+
+    details {
+        margin-bottom: 20px;
+    }
+
+    summary {
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+</style>
+
+    <div class="d-flex flex-column">
+        <a href="{% url 'menu-estadisticas' %}" class="admin-button">Ingresos Totales</a>
+        <a href="{% url 'menu-estadisticas' %}" class="admin-button">Ingresos por Inmueble</a>
+    </div>
+
+
+
+{% endblock %}
+
