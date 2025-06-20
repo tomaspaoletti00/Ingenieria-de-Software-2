@@ -172,6 +172,8 @@ def pagar_reserva(request, reserva_id):
     if reserva.estado != 'pendiente_pago':
         return HttpResponseForbidden("Esta reserva no se puede pagar.")
 
+    total_a_pagar = calcular_total_reserva(reserva)
+
     if request.method == "POST":
         form = PagoForm(request.POST)
         usuario = request.user
@@ -184,29 +186,31 @@ def pagar_reserva(request, reserva_id):
                 tarjeta = Tarjeta.objects.get(numero=numero, titular=titular, codigo=codigo)
             except Tarjeta.DoesNotExist:
                 form.add_error(None, "Los datos de la tarjeta son incorrectos.")
-                return render(request, "gestion_reserva/pagar_reserva.html", {"form": form, "reserva": reserva})
+                return render(request, "gestion_reserva/pagar_reserva.html", {
+                    "form": form, "reserva": reserva, "total": total_a_pagar
+                })
             
-            # Suponiendo que el monto a pagar es una propiedad del inmueble
-            monto_reserva = reserva.inmueble.precio
-
-            if tarjeta.monto_disponible < monto_reserva:
+            if tarjeta.monto_disponible < total_a_pagar:
                 form.add_error(None, "Saldo insuficiente en la tarjeta.")
-                return render(request, "gestion_reserva/pagar_reserva.html", {"form": form, "reserva": reserva})
+                return render(request, "gestion_reserva/pagar_reserva.html", {
+                    "form": form, "reserva": reserva, "total": total_a_pagar
+                })
 
-            # Descontar y aceptar la reserva
-            tarjeta.monto_disponible -= monto_reserva
+            tarjeta.monto_disponible -= total_a_pagar
             tarjeta.save()
 
             reserva.estado = "aceptada"
             reserva.save()
+
             send_mail(
-        'Estado de Pago:',
-        'Se ha acreditado el pago de la reserva correctamente',
-        'no-reply@tuapp.com',
-        [usuario.email],
-        fail_silently=False,
-    )
-            if(reserva.inmueble.tipo != "Cochera"):
+                'Estado de Pago:',
+                'Se ha acreditado el pago de la reserva correctamente',
+                'no-reply@tuapp.com',
+                [usuario.email],
+                fail_silently=False,
+            )
+
+            if reserva.inmueble.tipo != "Cochera":
                 conflictos = Reserva.objects.filter(
                     inmueble=reserva.inmueble,
                     estado__in=['pendiente', 'pendiente_pago'],
@@ -226,19 +230,25 @@ def pagar_reserva(request, reserva_id):
                     fecha_fin__gt=reserva.fecha_inicio).exclude(pk=reserva.pk)
                 aceptadas = Reserva.objects.filter(
                     inmueble=reserva.inmueble,
-                    estado__in=['aceptada'],
+                    estado='aceptada',
                     fecha_inicio__lt=reserva.fecha_fin,
                     fecha_fin__gt=reserva.fecha_inicio)
-                if (aceptadas.count() == cochera.plazas):
-                  for r in conflictos:
-                     r.estado = 'rechazada'
-                     r.save()
-            # Aca podrías llamar a una función para rechazar reservas en conflicto
+                if aceptadas.count() == cochera.plazas:
+                    for r in conflictos:
+                        r.estado = 'rechazada'
+                        r.save()
+
             return redirect("inmueble_detalle", pk=reserva.inmueble.id)
     else:
         form = PagoForm()
 
-    return render(request, "gestion_reserva/pagar_reserva.html", {"form": form, "reserva": reserva})
+    return render(request, "gestion_reserva/pagar_reserva.html", {
+        "form": form,
+        "reserva": reserva,
+        "total": total_a_pagar
+    })
+
+
 
 @login_required
 def cancelar_reserva(request, reserva_id):
@@ -271,3 +281,25 @@ def cancelar_reserva(request, reserva_id):
         messages.error(request, "No se puede cancelar esta reserva.")
 
     return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+
+from datetime import timedelta
+
+def calcular_total_reserva(reserva):
+    duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
+    duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
+    if duracion_dias == 0:
+        duracion_dias = 1
+
+    precio = float(reserva.inmueble.precio)
+    tiempo = reserva.inmueble.tiempo
+
+    if tiempo == 'Por_hora':
+        return round(precio * duracion_horas, 2)
+    elif tiempo == 'Por_noche':
+        return round(precio * duracion_dias, 2)
+    elif tiempo == 'Por_semana':
+        return round(precio * (duracion_dias / 7), 2)
+    elif tiempo == 'Por_mes':
+        return round(precio * (duracion_dias / 30), 2)
+    else:
+        return round(precio * duracion_dias, 2)
