@@ -62,53 +62,71 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const fechaInicioInput = document.getElementById("id_fecha_inicio");
-        const fechaFinInput = document.getElementById("id_fecha_fin");
         const totalSpan = document.getElementById("total-estimado");
         const inmuebleInfo = document.getElementById("info-inmueble");
-
-        if (!fechaInicioInput || !fechaFinInput || !inmuebleInfo) return;
-
+        const tipoInmueble = document.getElementById("tipo-inmueble").value;
         const precio = parseFloat(inmuebleInfo.dataset.precio);
         const tiempo = inmuebleInfo.dataset.tiempo;
 
-        function calcularTotal() {
-            const inicio = new Date(fechaInicioInput.value);
-            const fin = new Date(fechaFinInput.value);
+        if (!inmuebleInfo || isNaN(precio)) return;
 
-            if (!fechaInicioInput.value || !fechaFinInput.value || isNaN(inicio) || isNaN(fin)) {
-                totalSpan.textContent = "0.00";
-                return;
+        if (tipoInmueble === "Cochera") {
+            const diaInput = document.getElementById("id_dia");
+            const horasInput = document.getElementById("id_horas");
+
+            function calcularCochera() {
+                const horas = parseInt(horasInput.value);
+                if (!diaInput.value || isNaN(horas) || horas <= 0) {
+                    totalSpan.textContent = "0.00";
+                    return;
+                }
+                const total = precio * horas;
+                totalSpan.textContent = total.toFixed(2);
             }
 
-            const msPorDia = 1000 * 60 * 60 * 24;
-            const duracionMs = fin - inicio;
-            const duracionDias = Math.ceil(duracionMs / msPorDia);
+            diaInput.addEventListener("change", calcularCochera);
+            horasInput.addEventListener("input", calcularCochera);
+        } else {
+            const fechaInicioInput = document.getElementById("id_fecha_inicio");
+            const fechaFinInput = document.getElementById("id_fecha_fin");
 
-            if (duracionDias <= 0) {
-                totalSpan.textContent = "0.00";
-                return;
+            function calcularGeneral() {
+                const inicio = new Date(fechaInicioInput.value);
+                const fin = new Date(fechaFinInput.value);
+
+                if (!fechaInicioInput.value || !fechaFinInput.value || isNaN(inicio) || isNaN(fin)) {
+                    totalSpan.textContent = "0.00";
+                    return;
+                }
+
+                const msPorDia = 1000 * 60 * 60 * 24;
+                const duracionMs = fin - inicio;
+                const duracionDias = Math.ceil(duracionMs / msPorDia);
+
+                if (duracionDias <= 0) {
+                    totalSpan.textContent = "0.00";
+                    return;
+                }
+
+                let total = 0;
+                if (tiempo === "Por_hora") {
+                    total = precio * duracionDias * 24;
+                } else if (tiempo === "Por_noche") {
+                    total = precio * duracionDias;
+                } else if (tiempo === "Por_semana") {
+                    total = precio * (duracionDias / 7);
+                } else if (tiempo === "Por_mes") {
+                    total = precio * (duracionDias / 30);
+                } else {
+                    total = precio * duracionDias;
+                }
+
+                totalSpan.textContent = total.toFixed(2);
             }
 
-            let total = 0;
-
-            if (tiempo === "Por_hora") {
-                total = precio * duracionDias * 24;
-            } else if (tiempo === "Por_noche") {
-                total = precio * duracionDias;
-            } else if (tiempo === "Por_semana") {
-                total = precio * (duracionDias / 7);
-            } else if (tiempo === "Por_mes") {
-                total = precio * (duracionDias / 30);
-            } else {
-                total = precio * duracionDias;
-            }
-
-            totalSpan.textContent = total.toFixed(2);
+            fechaInicioInput.addEventListener("change", calcularGeneral);
+            fechaFinInput.addEventListener("change", calcularGeneral);
         }
-
-        fechaInicioInput.addEventListener("change", calcularTotal);
-        fechaFinInput.addEventListener("change", calcularTotal);
     });
 </script>
 

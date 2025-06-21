@@ -40,6 +40,10 @@ class Inmueble(models.Model):
     def __str__(self):
         return f"{self.nombre} - ${self.precio}"
     
+    @property
+    def reservas_pendientes(self):
+        return self.reserva_set.filter(estado='pendiente').count()
+    
 
 
 class InmueblesSimilares(Inmueble):
