@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Ingresos Mensuales</h2>
+
+<div>
+    <h3>Ingresos Totales: ${{ total_ingresos|floatformat:2 }}</h3>
+</div>
+
+<canvas id="graficoIngresos" width="700" height="350"></canvas>
+
+<!-- Pasamos los datos con json_script para evitar problemas -->
+{{ labels|json_script:"labels-data" }}
+{{ valores|json_script:"valores-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels = JSON.parse(document.getElementById('labels-data').textContent);
+  const valores = JSON.parse(document.getElementById('valores-data').textContent);
+
+  const ctx = document.getElementById('graficoIngresos').getContext('2d');
+  const grafico = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Ingresos ($)',
+              data: valores,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderRadius: 5,
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true,
+                  ticks: {
+                    // stepSize: 1000  // opcional
+                  }
+              }
+          }
+      }
+  });
+</script>
+{% endblock %}
