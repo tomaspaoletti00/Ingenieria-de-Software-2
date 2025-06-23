@@ -151,53 +151,60 @@
 </div>
 
 <div class="container">
-    {% for inmueble in inmuebles %}
-        {% if inmueble.objeto.estado == 'Disponible' %}
-            {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
-                <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
-                    <div class="card">
-                         {% if user.is_staff and inmueble.reservas_pendientes %}
-                             <div class="notificacion">{{ inmueble.reservas_pendientes }}</div>
-                         {% endif %}
-                        {% if inmueble.imagen %}
-                            <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
-                        {% endif %}
-                        <div class="card-content">
-                            <h3>{{ inmueble.nombre }}</h3>
-                            <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
-                            <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-                            <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
-                            <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
-                            <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+    {% if inmuebles %}
+        {% for inmueble in inmuebles %}
+            {% if inmueble.objeto.estado == 'Disponible' %}
+                {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
+                    <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
+                        <div class="card">
+                            {% if user.is_staff and inmueble.reservas_pendientes %}
+                                <div class="notificacion">{{ inmueble.reservas_pendientes }}</div>
+                            {% endif %}
+                            {% if inmueble.imagen %}
+                                <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+                            {% endif %}
+                            <div class="card-content">
+                                <h3>{{ inmueble.nombre }}</h3>
+                                <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
+                                <p><strong>Precio:</strong> ${{ inmueble.precio }}<em>({{ inmueble.get_tiempo_display }})</em></p>
+                                <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
+                                <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
+                                <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            {% endwith %}
-        {% endif %}
-    {% endfor %}
+                    </a>
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
 
-    {% for inmueble in inmuebles %}
-        {% if inmueble.objeto.estado != 'Disponible' %}
-            {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
-                <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
-                    <div class="card no-disponible" data-estado="{{ inmueble.estado }}">
-                        {% if inmueble.imagen %}
-                            <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
-                        {% endif %}
-                        <div class="card-content">
-                            <h3>{{ inmueble.nombre }}</h3>
-                            <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
-                            <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-                            <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
-                            <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
-                            <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+        {% for inmueble in inmuebles %}
+            {% if inmueble.objeto.estado != 'Disponible' %}
+                {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
+                    <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
+                        <div class="card no-disponible" data-estado="{{ inmueble.estado }}">
+                            {% if inmueble.imagen %}
+                                <img src="{{ inmueble.imagen.url }}" alt="Imagen de {{ inmueble.nombre }}">
+                            {% endif %}
+                            <div class="card-content">
+                                <h3>{{ inmueble.nombre }}</h3>
+                                <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
+                                <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
+                                <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
+                                <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
+                                <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            {% endwith %}
-        {% endif %}
-    {% endfor %}
+                    </a>
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; margin-top: 40px; font-size: 1.2rem; font-weight: bold; color: #dc0202;">
+            No se encontraron inmuebles con los filtros aplicados.
+        </div>
+    {% endif %}
 </div>
+
 
 <script>
     const tipoSelect = document.getElementById('tipo');
