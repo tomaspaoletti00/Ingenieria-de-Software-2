@@ -24,9 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Validación y armado del JSON antes del submit
     document.getElementById("formulario-reserva").addEventListener("submit", (e) => {
         const personas = [];
-        let campos_incompletos = false;
+        const campos = container_persona.querySelectorAll(".persona");
 
-        container_persona.querySelectorAll(".persona").forEach(div => {
+        const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+        const soloNumeros = /^[0-9]+$/;
+
+        for (const div of campos) {
             const nombre = div.querySelector("input[name='nombre']").value.trim();
             const edad = div.querySelector("input[name='edad']").value.trim();
             const dni = div.querySelector("input[name='dni']").value.trim();
@@ -42,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        if (personas.length === 0 || campos_incompletos) {
+        if (personas.length === 0) {
             e.preventDefault();
             Swal.fire({
                 icon: 'error',
@@ -50,8 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 text: 'Completá todos los campos con datos válidos (nombre solo letras, DNI solo números).',
                 animation: false,
             });
-        } else {
-            input_oculto.value = JSON.stringify(personas);
+            return;
         }
+
+        input_oculto.value = JSON.stringify(personas);
     });
 });

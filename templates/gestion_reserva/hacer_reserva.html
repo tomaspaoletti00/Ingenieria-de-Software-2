@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <h2>Reservar {{ tipo_inmueble }}</h2>
 
@@ -61,7 +65,14 @@
 <script src="{% static 'js/solicitar_reserva.js' %}"></script>
 
 <script>
+
     document.addEventListener("DOMContentLoaded", () => {
+        const fechasOcupadas = {{ fechas_ocupadas|safe }};
+        flatpickr(".datepicker", {
+            dateFormat: "Y-m-d",
+            disable: fechasOcupadas
+        });
+        
         const totalSpan = document.getElementById("total-estimado");
         const inmuebleInfo = document.getElementById("info-inmueble");
         const tipoInmueble = document.getElementById("tipo-inmueble").value;

@@ -31,6 +31,18 @@ def hacer_reserva(request, id_inmueble):
     tipo_inmueble = inmueble.tipo
     cant_inquilino = obtener_cant_inquilino(tipo_inmueble, inmueble.id)
 
+    conflictos = Reserva.objects.filter(
+    inmueble=inmueble,
+    estado="aceptada"
+    ).values_list('fecha_inicio', 'fecha_fin')
+
+    fechas_ocupadas = set()
+    for inicio, fin in conflictos:
+        actual = inicio.date()
+        while actual <= fin.date():
+            fechas_ocupadas.add(actual.isoformat())
+            actual += timedelta(days=1)
+
     FormClase = ReservaCocheraForm if tipo_inmueble == "Cochera" else ReservaNormalForm
 
     if request.method == "POST":
@@ -60,7 +72,8 @@ def hacer_reserva(request, id_inmueble):
         "cant_inquilino": cant_inquilino,
         "tipo_inmueble": tipo_inmueble,
         "inmueble": inmueble,
-        "usuario": request.user
+        "usuario": request.user,
+        "fechas_ocupadas": list(fechas_ocupadas)
     })
 
 
