@@ -22,12 +22,19 @@ def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
     orden_superficie = request.GET.get("orden_superficie")
     orden_precio = request.GET.get("orden_precio")
-    largo_plaza = request.GET.get("largo_plaza")  # Nuevo filtro para cochera
+    largo_plaza = request.GET.get("largo_plaza")
     ancho_plaza = request.GET.get("ancho_plaza")
+    noches = request.GET.get("noches", "1")
+
+    try:
+        noches = int(noches)
+        if noches < 1:
+            noches = 1
+    except ValueError:
+        noches = 1
 
     inmuebles_base = Inmueble.objects.exclude(activo="0")
 
-    # Aplicar ordenamientos
     if orden_superficie == "asc":
         inmuebles_base = inmuebles_base.order_by("superficie")
     elif orden_superficie == "desc":
@@ -38,7 +45,6 @@ def listar_Inmuebles(request):
     elif orden_precio == "desc":
         inmuebles_base = inmuebles_base.order_by("-precio")
 
-    # Filtrar por tipo
     if tipo_filtro:
         inmuebles_base = inmuebles_base.filter(tipo=tipo_filtro)
 
@@ -64,35 +70,38 @@ def listar_Inmuebles(request):
                         continue
 
         if tipo.lower() == "cochera":
-        # Largo
             if largo_plaza:
                 try:
                     largo_plaza_val = float(largo_plaza)
+                    if tipo_obj.largo_plaza < largo_plaza_val:
+                        continue
                 except ValueError:
-                    largo_plaza_val = None
-
-                if largo_plaza_val is not None and tipo_obj.largo_plaza < largo_plaza_val:
-                    continue
-
-            # Ancho
+                    pass
             if ancho_plaza:
                 try:
                     ancho_plaza_val = float(ancho_plaza)
+                    if tipo_obj.ancho_plaza < ancho_plaza_val:
+                        continue
                 except ValueError:
-                    ancho_plaza_val = None
+                    pass
 
-                if ancho_plaza_val is not None and tipo_obj.ancho_plaza < ancho_plaza_val:
-                    continue
-
-        # Solo agregar si coincide con filtro de tipo o no hay filtro
-        if not tipo_filtro or tipo.lower() == tipo_filtro.lower():
-            inmuebles.append({'tipo': tipo, 'objeto': tipo_obj})
+        inmuebles.append({
+            'tipo': tipo,
+            'objeto': tipo_obj,
+            'precio_total': tipo_obj.precio * noches,
+        })
+    
+    precio_total = tipo_obj.precio * noches if tipo_obj.precio else 0
 
     return render(request, 'gestion_inmuebles/listaInmuebles.html', {
         'inmuebles': inmuebles,
         'tipo': tipo_filtro,
-        'largo_plaza': largo_plaza,  # Pasar al template para mantener selección en el filtro
+        'largo_plaza': largo_plaza,
+        'ancho_plaza': ancho_plaza,
+        'noches': noches,
     })
+
+
 
 # Esto es todo lo de la parte para agregar inmuebles de los cuatro tipos
 # Hay varios def con codigo muy parecido, si fuera oo2 seria como un homicidio triple

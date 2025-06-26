@@ -7,14 +7,20 @@
     <title>Lista de Inmuebles</title>
     <link rel="stylesheet" href="{% static 'styles/listaInmuebles.css' %}">
     <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .filtros {
-            background-color: #062e59; 
+            background-color: #062e59;
             padding: 20px;
             border-radius: 10px;
             margin: 20px auto;
             max-width: 1000px;
             color: white;
-            font-family: Arial, sans-serif;
         }
 
         .filtro-form label,
@@ -45,9 +51,55 @@
             background-color: #003d80;
         }
 
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-decoration: none;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            color: #333;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-content h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .card-content p {
+            font-size: 0.95rem;
+            color: #555;
+            margin: 0;
+        }
+
         .card.no-disponible {
             filter: grayscale(10%);
-            background-color: rgba(240, 240, 240, 0.38); /* Fondo más claro y semi-transparente */
+            background-color: rgba(240, 240, 240, 0.38);
             position: relative;
         }
 
@@ -67,48 +119,52 @@
         }
     </style>
 </head>
+
 <body>
 
+<div class="filtros">
+    <form method="get" class="filtro-form">
+        <label for="tipo">Tipo:</label>
+        <select name="tipo" id="tipo">
+            <option value="">Todos</option>
+            <option value="Departamento" {% if request.GET.tipo == "Departamento" %}selected{% endif %}>Departamento</option>
+            <option value="Casa" {% if request.GET.tipo == "Casa" %}selected{% endif %}>Casa</option>
+            <option value="Local" {% if request.GET.tipo == "Local" %}selected{% endif %}>Local</option>
+            <option value="Cochera" {% if request.GET.tipo == "Cochera" %}selected{% endif %}>Cochera</option>
+        </select>
 
-    <div class="filtros">
-        <form method="get" class="filtro-form">
-            <label for="tipo">Tipo:</label>
-            <select name="tipo" id="tipo">
-                <option value="">Todos</option>
-                <option value="Departamento" {% if request.GET.tipo == "Departamento" %}selected{% endif %}>Departamento</option>
-                <option value="Casa" {% if request.GET.tipo == "Casa" %}selected{% endif %}>Casa</option>
-                <option value="Local" {% if request.GET.tipo == "Local" %}selected{% endif %}>Local</option>
-                <option value="Cochera" {% if request.GET.tipo == "Cochera" %}selected{% endif %}>Cochera</option>
-            </select>
+        <label for="orden_precio">Ordenar por precio:</label>
+        <select name="orden_precio" id="orden_precio">
+            <option value="">---</option>
+            <option value="asc" {% if request.GET.orden_precio == "asc" %}selected{% endif %}>Menor a mayor</option>
+            <option value="desc" {% if request.GET.orden_precio == "desc" %}selected{% endif %}>Mayor a menor</option>
+        </select>     
 
-            <label for="orden_precio">Ordenar por precio:</label>
-            <select name="orden_precio" id="orden_precio">
-                <option value="">---</option>
-                <option value="asc" {% if request.GET.orden_precio == "asc" %}selected{% endif %}>Menor a mayor</option>
-                <option value="desc" {% if request.GET.orden_precio == "desc" %}selected{% endif %}>Mayor a menor</option>
-            </select>     
+        <label for="orden_superficie">Ordenar por superficie:</label>
+        <select name="orden_superficie" id="orden_superficie">
+            <option value="">---</option>
+            <option value="asc" {% if request.GET.orden_superficie == "asc" %}selected{% endif %}>Menor a mayor</option>
+            <option value="desc" {% if request.GET.orden_superficie == "desc" %}selected{% endif %}>Mayor a menor</option>
+        </select>
 
-            <label for="orden_superficie">Ordenar por superficie:</label>
-            <select name="orden_superficie" id="orden_superficie">
-                <option value="">---</option>
-                <option value="asc" {% if request.GET.orden_superficie == "asc" %}selected{% endif %}>Menor a mayor</option>
-                <option value="desc" {% if request.GET.orden_superficie == "desc" %}selected{% endif %}>Mayor a menor</option>
-            </select>
+        <label for="largo_plaza" id="label_largo_plaza" style="display:none;">Largo de Plaza mínimo (m):</label>
+        <input type="number" step="0.1" min="0" name="largo_plaza" id="largo_plaza" 
+               value="{{ largo_plaza|default:'' }}" style="display:none;">
 
-            <label for="largo_plaza" id="label_largo_plaza" style="display:none;">Largo de Plaza mínimo (m):</label>
-            <input type="number" step="0.1" min="0" name="largo_plaza" id="largo_plaza" 
-                   value="{{ largo_plaza|default:'' }}" style="display:none;">
+        <label for="ancho_plaza" id="label_ancho_plaza" style="display:none;">Ancho de Plaza mínimo (m):</label>
+        <input type="number" step="0.1" min="0" name="ancho_plaza" id="ancho_plaza" 
+               value="{{ ancho_plaza|default:'' }}" style="display:none;">
+         
+        </br>       
+        <label for="noches">Noches:</label>
+    <input type="number" min="1" name="noches" id="noches" value="{{ noches|default:1 }}">
 
-            <label for="ancho_plaza" id="label_ancho_plaza" style="display:none;">Ancho de Plaza mínimo (m):</label>
-            <input type="number" step="0.1" min="0" name="ancho_plaza" id="ancho_plaza" 
-                   value="{{ ancho_plaza|default:'' }}" style="display:none;">
+        <button type="submit">Filtrar</button>
+    </form>
+</div>
 
-            <button type="submit">Filtrar</button>
-        </form>
-    </div>
-
-    <div class="container">
-    {# Mostrar primero los inmuebles DISPONIBLES #}
+<div class="container">
+    {# Inmuebles disponibles #}
     {% for inmueble in inmuebles %}
         {% if inmueble.objeto.estado == 'Disponible' %}
             {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
@@ -119,32 +175,7 @@
                         {% endif %}
                         <div class="card-content">
                             <h2>{{ inmueble.nombre }}</h2>
-                            <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
-                            <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-                            <p><strong>Calle:</strong> {{ inmueble.calle }}</p>
-                            <p><strong>Número:</strong> {{ inmueble.numero }}</p>
-                            <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
-                            <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
-                            <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
-                            <p><strong>Superficie:</strong> {{ inmueble.superficie }} m²</p>
-                            {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
-                                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
-                                <p><strong>Baños:</strong> {{ inmueble.banios }}</p>
-                                <p><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</p>
-                                <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
-                            {% elif inmueble.tipo == "Local" %}
-                                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
-                                <p><strong>Frente:</strong> {{ inmueble.frente }} m</p>
-                                <p><strong>Fondo:</strong> {{ inmueble.fondo }} m</p>                        
-                            {% elif inmueble.tipo == "Cochera" %}
-                                <p><strong>Tipo de Cochera:</strong> {{ inmueble.tipo_cochera }}</p>
-                                <p><strong>Largo plaza:</strong> {{ inmueble.largo_plaza }} m</p>
-                                <p><strong>Ancho plaza:</strong> {{ inmueble.ancho_plaza }} m</p>
-                                <p><strong>Plazas:</strong> {{ inmueble.plazas }}</p>
-                            {% endif %}
-                            {% if inmueble.descripcion %}
-                                <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
-                            {% endif %}
+                            <p><strong>${{ inmueble.precio }}</strong> por noche</p>
                         </div>
                     </div>
                 </a>
@@ -152,9 +183,9 @@
         {% endif %}
     {% endfor %}
 
-    {# Luego los NO DISPONIBLES y MANTENIMIENTO #}
+    {# Inmuebles no disponibles (grisados) #}
     {% for inmueble in inmuebles %}
-        {% if inmueble.objeto.estado != 'Disponible' %}
+        {% if inmueble.objeto.estado == 'Mantenimiento' %}
             {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
                 <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
                     <div class="card no-disponible" data-estado="{{ inmueble.estado }}">
@@ -163,32 +194,7 @@
                         {% endif %}
                         <div class="card-content">
                             <h2>{{ inmueble.nombre }}</h2>
-                            <p><strong>Tipo:</strong> {{ inmueble.tipo }}</p>
-                            <p><strong>Precio:</strong> ${{ inmueble.precio }}</p>
-                            <p><strong>Calle:</strong> {{ inmueble.calle }}</p>
-                            <p><strong>Número:</strong> {{ inmueble.numero }}</p>
-                            <p><strong>Provincia:</strong> {{ inmueble.provincia }}</p>
-                            <p><strong>Ciudad:</strong> {{ inmueble.ciudad }}</p>
-                            <p><strong>Estado:</strong> {{ inmueble.get_estado_display }}</p>
-                            <p><strong>Superficie:</strong> {{ inmueble.superficie }} m²</p>
-                            {% if inmueble.tipo == "Departamento" or inmueble.tipo == "Casa" %}
-                                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
-                                <p><strong>Baños:</strong> {{ inmueble.banios }}</p>
-                                <p><strong>Cochera:</strong> {{ inmueble.tiene_cochera|yesno:"Sí,No" }}</p>
-                                <p><strong>Internet:</strong> {{ inmueble.tiene_internet|yesno:"Sí,No" }}</p>
-                            {% elif inmueble.tipo == "Local" %}
-                                <p><strong>Habitaciones:</strong> {{ inmueble.habitaciones }}</p>
-                                <p><strong>Frente:</strong> {{ inmueble.frente }} m</p>
-                                <p><strong>Fondo:</strong> {{ inmueble.fondo }} m</p>                        
-                            {% elif inmueble.tipo == "Cochera" %}
-                                <p><strong>Tipo de Cochera:</strong> {{ inmueble.tipo_cochera }}</p>
-                                <p><strong>Largo plaza:</strong> {{ inmueble.largo_plaza }} m</p>
-                                <p><strong>Ancho plaza:</strong> {{ inmueble.ancho_plaza }} m</p>
-                                <p><strong>Plazas:</strong> {{ inmueble.plazas }}</p>
-                            {% endif %}
-                            {% if inmueble.descripcion %}
-                                <p><strong>Descripción:</strong> {{ inmueble.descripcion }}</p>
-                            {% endif %}
+                            <p>${{ inmueble.precio }} por noche</p>
                         </div>
                     </div>
                 </a>

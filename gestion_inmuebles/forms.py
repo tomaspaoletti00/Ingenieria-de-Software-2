@@ -1,12 +1,6 @@
 from django import forms
 from .models import Inmueble, Departamento, Casa, Local, Cochera
 
-TIEMPO_GENERAL = [
-    ('Por_semana', 'Por semana'),
-    ('Por_mes', 'Por mes'),
-    ('Por_noche', 'Por noche'),
-]
-
 TIEMPO_COCHERA = [
     ('Por_hora', 'Por hora'),
 ]
@@ -54,7 +48,6 @@ class FormularioDepartamento(InmuebleForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['tiempo'].choices = TIEMPO_GENERAL
         self.fields['banios'].label = "Baños"
 
 
@@ -65,7 +58,6 @@ class FormularioCasa(InmuebleForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['tiempo'].choices = TIEMPO_GENERAL
         self.fields['banios'].label = "Baños"
 
 
@@ -77,7 +69,6 @@ class FormularioLocal(InmuebleForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['tiempo'].choices = TIEMPO_GENERAL
         self.fields['banios'].label = "Baños"
         self.fields['frente'].label = "Frente (m²)"
         self.fields['fondo'].label = "Fondo (m²)"
