@@ -38,6 +38,14 @@ class Inmueble(models.Model):
     def reservas_pendientes(self):
         return self.reserva_set.filter(estado='pendiente').count()
     
+    def get_subclass(self):
+        for subclass in [Departamento, Casa, Local, Cochera]:
+           try:
+               return subclass.objects.get(id=self.id)
+           except subclass.DoesNotExist:
+               continue
+        return self  # por si no es ninguno (ej: quedó como Inmueble solo)
+    
 
 
 class InmueblesSimilares(Inmueble):

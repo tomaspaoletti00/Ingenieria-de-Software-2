@@ -1,0 +1,47 @@
+#graficoTipo {
+  width: 100% !important;
+  max-width: 500px;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+  align-content: center;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  gap: 100px; /* más espacio entre botón y título */
+  justify-content: left; /* centra todo el conjunto */
+  margin-bottom: 20px;
+}
+
+.btn-volver {
+  background-color: #0056b3;
+  color: white;
+  border: none;
+  padding: 10px 20px; /* un poco más ancho para que no quede apretado */
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+  /* agrego un margen derecho para más separación */
+  margin-right: 370px;
+}
+
+.btn-volver:hover {
+  background-color: #003d80;
+}
+
+h1 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 2.8rem;
+  color: #0a3d62;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  text-align: center;
+  margin-left: -50px; /* menos corrido que antes */
+}
