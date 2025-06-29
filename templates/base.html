@@ -12,8 +12,9 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="nav-logo">
-                <img src="{% static 'img/logoAlquilerExpress.png' %}" alt="Logo" class="logo-img">Alquiler Express</a>
+            <a href="{% if user.is_superuser %}{% url 'listado_inmuebles_admin' %}{% else %}/{% endif %}" class="nav-logo">
+                <img src="{% static 'img/logoAlquilerExpress.png' %}" alt="Logo" class="logo-img">Alquiler Express
+            </a>
             <ul class="nav-links">
                 {% if user.is_superuser %}
             <li>
@@ -48,8 +49,6 @@
                 letter-spacing: 0.5px ">¡Hola, {{ user.first_name|default:user.username }}!</li>
 
                 {% endif %}
-                
-                <li><a href="/">Home</a></li>
                
                 {% if user.is_superuser %}
                     <li><a href="/usuarios/panel-admin">Panel de Administrador</a></li>

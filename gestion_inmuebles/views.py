@@ -95,6 +95,8 @@ def listar_Inmuebles(request):
             if largo_plaza:
                 try:
                     largo_plaza_val = float(largo_plaza)
+                    if tipo_obj.largo_plaza < largo_plaza_val:
+                        continue
                 except ValueError:
                     largo_plaza_val = None
                 if largo_plaza_val is not None and tipo_obj.largo_plaza < largo_plaza_val:
@@ -103,6 +105,8 @@ def listar_Inmuebles(request):
             if ancho_plaza:
                 try:
                     ancho_plaza_val = float(ancho_plaza)
+                    if tipo_obj.ancho_plaza < ancho_plaza_val:
+                        continue
                 except ValueError:
                     ancho_plaza_val = None
                 if ancho_plaza_val is not None and tipo_obj.ancho_plaza < ancho_plaza_val:
@@ -118,7 +122,7 @@ def listar_Inmuebles(request):
             'tipo': tipo,
             'objeto': tipo_obj,
         })
-
+ 
     return render(request, 'gestion_inmuebles/listaInmuebles.html', {
         'inmuebles': inmuebles,
         'tipo': tipo_filtro,
@@ -128,6 +132,8 @@ def listar_Inmuebles(request):
         'solo_con_reservas': solo_con_reservas,
         'orden_reservas': orden_reservas,
     })
+
+
 
 # Esto es todo lo de la parte para agregar inmuebles de los cuatro tipos
 # Hay varios def con codigo muy parecido, si fuera oo2 seria como un homicidio triple

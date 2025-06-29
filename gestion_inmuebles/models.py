@@ -3,12 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 
-TIEMPO_CHOICES = [
-    ('Por_hora', 'Por hora'),
-    ('Por_semana', 'Por semana'),
-    ('Por_mes', 'Por mes'),
-    ('Por_noche', 'Por noche'),
-]
+
 
 ESTADO_CHOICES = [
     ('Disponible', 'Disponible'),
@@ -33,7 +28,6 @@ class Inmueble(models.Model):
     politica_cancelacion = models.TextField(blank=True)
     estado = models.CharField(default='Disponible', choices=ESTADO_CHOICES)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    tiempo = models.CharField(default='-', choices=TIEMPO_CHOICES)
     imagen = models.ImageField(upload_to='inmuebles/', blank=True, null=True)
     superficie = models.PositiveIntegerField(default=0) 
 
