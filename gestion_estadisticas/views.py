@@ -1,12 +1,17 @@
 from django.shortcuts import render
 from django.db import models
 from gestion_reserva.models import Reserva
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from gestion_usuarios.models import Usuario
 from django.db.models import F, ExpressionWrapper, FloatField, DurationField
 import math
 from datetime import datetime
+from gestion_inmuebles.models import Inmueble
+from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Cast
+from datetime import timedelta
+from django.db.models import F, ExpressionWrapper, DurationField, FloatField, DecimalField, Sum, Q, Value
 
 
 def menu_estadisticas(request):
@@ -61,4 +66,44 @@ def ingresos_mensuales(request):
         "labels": labels,
         "valores": valores,
         "total_ingresos": total_ingresos,
+    })
+
+
+
+
+
+def ingresos_por_inmueble(request):
+    query = request.GET.get('q', '')
+
+    reservas = Reserva.objects.filter(
+        inmueble__nombre__icontains=query
+    )
+
+    reservas = reservas.annotate(
+        dias=ExpressionWrapper(
+            F('fecha_fin') - F('fecha_inicio'),
+            output_field=DurationField()
+        )
+    )
+
+    reservas = reservas.annotate(
+        dias_float=Cast(F('dias'), output_field=FloatField()) / (24 * 3600)
+    )
+
+    reservas = reservas.annotate(
+        monto_estimado=ExpressionWrapper(
+            F('inmueble__precio') * F('dias_float'),
+            output_field=DecimalField(max_digits=12, decimal_places=2)
+        )
+    )
+
+    ingresos = (
+        reservas.values('inmueble__id', 'inmueble__nombre')
+        .annotate(monto_total=Sum('monto_estimado'))
+        .order_by('-monto_total')
+    )
+
+    return render(request, 'gestion_estadisticas/ingresos-inmueble.html', {
+        'ingresos': ingresos,
+        'query': query,
     })

@@ -1,0 +1,22 @@
+.tabla-ingresos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #f5f5f5;
+}
+
+.tabla-ingresos th,
+.tabla-ingresos td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.tabla-ingresos th {
+    background-color: #062e59;
+    color: white;
+}
+input[type="text"] {
+    width: 250px;
+    font-size: 14px;
+}

@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
             }
-        });
+        };
 
         if (personas.length === 0) {
             e.preventDefault();
