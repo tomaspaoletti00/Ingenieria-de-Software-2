@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from gestion_inmuebles.models import Departamento, Casa, Local, Cochera
 from .forms import InmuebleForm, FormularioDepartamento, FormularioCasa, FormularioLocal, FormularioCochera
 from .models import Inmueble
+from django.db.models import Count, Q
+from gestion_usuarios.views import es_empleado
 
 def adminInmuebles(request):
     return render(request, 'gestion_inmuebles/adminInmuebles.html')
@@ -18,32 +20,52 @@ def crear_inmueble(request):
         form = InmuebleForm()
     return render(request, 'gestion_inmuebles/formulario_inmueble.html', {'form': form})
 
+from django.db.models import Count, Q
+
+
 def listar_Inmuebles(request):
     tipo_filtro = request.GET.get('tipo')
     orden_superficie = request.GET.get("orden_superficie")
     orden_precio = request.GET.get("orden_precio")
     largo_plaza = request.GET.get("largo_plaza")
     ancho_plaza = request.GET.get("ancho_plaza")
-    noches = request.GET.get("noches", "1")
 
-    try:
-        noches = int(noches)
-        if noches < 1:
-            noches = 1
-    except ValueError:
-        noches = 1
+    usuario = request.user
+    puede_ver_reservas = es_empleado(usuario)
+    solo_con_reservas = request.GET.get("solo_con_reservas") if puede_ver_reservas else None
+    orden_reservas = request.GET.get("orden_reservas") if puede_ver_reservas else None
 
     inmuebles_base = Inmueble.objects.exclude(activo="0")
 
+    # Anotar reservas pendientes con otro nombre para no pisar property
+    if puede_ver_reservas:
+        inmuebles_base = inmuebles_base.annotate(
+            reservas_pendientes_count=Count('reserva', filter=Q(reserva__estado='pendiente'))
+        )
+        if solo_con_reservas == "si":
+            inmuebles_base = inmuebles_base.filter(reservas_pendientes_count__gt=0)
+
+    # Preparar ordenamientos
+    orden_fields = []
+
+    # Ordenar por cantidad de reservas pendientes si se selecciona
+    if orden_reservas == "desc":
+        orden_fields.append("-reservas_pendientes_count")
+    elif orden_reservas == "asc":
+        orden_fields.append("reservas_pendientes_count")
+
     if orden_superficie == "asc":
-        inmuebles_base = inmuebles_base.order_by("superficie")
+        orden_fields.append("superficie")
     elif orden_superficie == "desc":
-        inmuebles_base = inmuebles_base.order_by("-superficie")
+        orden_fields.append("-superficie")
 
     if orden_precio == "asc":
-        inmuebles_base = inmuebles_base.order_by("precio")
+        orden_fields.append("precio")
     elif orden_precio == "desc":
-        inmuebles_base = inmuebles_base.order_by("-precio")
+        orden_fields.append("-precio")
+
+    if orden_fields:
+        inmuebles_base = inmuebles_base.order_by(*orden_fields)
 
     if tipo_filtro:
         inmuebles_base = inmuebles_base.filter(tipo=tipo_filtro)
@@ -76,29 +98,39 @@ def listar_Inmuebles(request):
                     if tipo_obj.largo_plaza < largo_plaza_val:
                         continue
                 except ValueError:
-                    pass
+                    largo_plaza_val = None
+                if largo_plaza_val is not None and tipo_obj.largo_plaza < largo_plaza_val:
+                    continue
+
             if ancho_plaza:
                 try:
                     ancho_plaza_val = float(ancho_plaza)
                     if tipo_obj.ancho_plaza < ancho_plaza_val:
                         continue
                 except ValueError:
-                    pass
+                    ancho_plaza_val = None
+                if ancho_plaza_val is not None and tipo_obj.ancho_plaza < ancho_plaza_val:
+                    continue
+
+        if puede_ver_reservas:
+            count = getattr(inmueble, 'reservas_pendientes_count', 0)
+            setattr(tipo_obj, 'reservas_pendientes_annotated', count)
+        else:
+            setattr(tipo_obj, 'reservas_pendientes_annotated', 0)
 
         inmuebles.append({
             'tipo': tipo,
             'objeto': tipo_obj,
-            'precio_total': tipo_obj.precio * noches,
         })
-    
-    precio_total = tipo_obj.precio * noches if tipo_obj.precio else 0
-
+ 
     return render(request, 'gestion_inmuebles/listaInmuebles.html', {
         'inmuebles': inmuebles,
         'tipo': tipo_filtro,
         'largo_plaza': largo_plaza,
         'ancho_plaza': ancho_plaza,
-        'noches': noches,
+        'puede_ver_reservas': puede_ver_reservas,
+        'solo_con_reservas': solo_con_reservas,
+        'orden_reservas': orden_reservas,
     })
 
 

@@ -2,7 +2,8 @@
 {% block content %}
 <h2>Pago de Reserva</h2>
 <p>Inmueble: {{ reserva.inmueble.nombre }}</p>
-<p>Monto a pagar: {{ reserva.inmueble.precio }}</p>
+<p>Fechas: {{ reserva.fecha_inicio|date:"d/m/Y H:i" }} - {{ reserva.fecha_fin|date:"d/m/Y H:i" }}</p>
+<p>Monto a pagar: <strong>${{ total }}</strong></p>
 
 <form method="post">
     {% csrf_token %}

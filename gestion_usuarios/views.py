@@ -78,7 +78,6 @@ def es_admin(user):
     return user.is_authenticated and user.is_superuser
 
 @user_passes_test(es_empleado)
-
 def panelEmp(request):
     return render(request, 'gestion_usuarios/panel-emp.html')
 
