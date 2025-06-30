@@ -36,7 +36,6 @@
                                  <button type="submit">Pagar</button>
                               </form>
                             {% endif %}
-
                             {% if reserva.estado in estados_cancelables %}
                                <!-- Botón cancelar -->
                               <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">

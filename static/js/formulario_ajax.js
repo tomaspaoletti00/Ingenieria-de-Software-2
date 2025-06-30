@@ -4,7 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Array.from(botones).forEach(element => {
         element.addEventListener("click", () => {
-            const tipo = element.dataset.tipo
+            // Quitar la clase "active" a todos los botones
+            Array.from(botones).forEach(btn => btn.classList.remove("active"));
+            // Agregar la clase "active" solo al botón presionado
+            element.classList.add("active");
+
+            const tipo = element.dataset.tipo;
             fetch(`/inmuebles/formulario/?tipo=${tipo}`)
                 .then(response => response.text())
                 .then(data => {

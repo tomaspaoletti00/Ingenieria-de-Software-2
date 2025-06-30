@@ -111,15 +111,19 @@
     background-color: #0056b3;
     outline: none;
   }
+  .form-button.active {
+    background-color: #0056b3 !important;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+  }
 </style>
 
 <main class="container" role="main" aria-label="Formulario de carga de inmuebles">
     <h1>Formulario para cada tipo de inmueble</h1>
     <nav class="form-buttons" aria-label="Seleccionar tipo de inmueble">
-        <button class="form-button" data-tipo="departamento" type="button" aria-pressed="false">Departamento</button>
-        <button class="form-button" data-tipo="casa" type="button" aria-pressed="false">Casa</button>
-        <button class="form-button" data-tipo="local" type="button" aria-pressed="false">Local</button>
-        <button class="form-button" data-tipo="cochera" type="button" aria-pressed="false">Cochera</button>
+      <button class="form-button {% if tipo == 'departamento' %}active{% endif %}" data-tipo="departamento" type="submit" name="tipo" value="departamento">Departamento</button>
+      <button class="form-button {% if tipo == 'casa' %}active{% endif %}" data-tipo="casa" type="submit" name="tipo" value="casa">Casa</button>
+      <button class="form-button {% if tipo == 'local' %}active{% endif %}" data-tipo="local" type="submit" name="tipo" value="local">Local</button>
+      <button class="form-button {% if tipo == 'cochera' %}active{% endif %}" data-tipo="cochera" type="submit" name="tipo" value="cochera">Cochera</button>
     </nav>
     <section id="container-form">
     {% if form %}

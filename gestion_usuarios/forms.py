@@ -42,6 +42,13 @@ class EditarPerfilForm(forms.ModelForm):
         model = Usuario
         fields = ['first_name', 'email', 'dni', 'telefono']
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in first_name):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return first_name
+
+
 class RegistroEmpleadoForm(UserCreationForm):
     class Meta:
         model = Usuario
@@ -67,6 +74,12 @@ class RegistroEmpleadoForm(UserCreationForm):
         if len(password) < 6:
             raise forms.ValidationError("La contraseña debe tener mínimo 6 caracteres.")
         return password
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in first_name):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return first_name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -92,3 +105,10 @@ class EditarEmpleadoForm(forms.ModelForm):
             'dni': 'DNI',
             'telefono': 'Teléfono'
         }
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in first_name):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return first_name
+        

@@ -18,8 +18,8 @@ class ReservaNormalForm(forms.ModelForm):
         model = Reserva
         fields = ['fecha_inicio', 'fecha_fin', 'metodo_pago']
         widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_inicio': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}),
+            'fecha_fin': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}),
             'metodo_pago': forms.Select(),
         }
 
@@ -51,6 +51,8 @@ class ReservaNormalForm(forms.ModelForm):
 
         inicio_dt = datetime.combine(inicio, datetime.min.time())
         fin_dt = datetime.combine(fin, datetime.min.time())
+        if (fin - inicio).days > 30:
+            raise ValidationError("La duración máxima de una reserva es de 30 días.")
 
         if self.inmueble:
             conflictos = Reserva.objects.filter(

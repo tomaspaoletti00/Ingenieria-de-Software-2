@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <h2>Clientes Registrados</h2>
+
+<!-- Buscador por nombre -->
+<input type="text" id="buscador" placeholder="Buscar por nombre..." style="margin-bottom: 15px; padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 6px;">
+
+<!-- Mensaje si no hay coincidencias -->
+<p id="no-result" style="display: none; color: #dc2626; font-weight: bold; margin-bottom: 10px;">
+  No se encontraron clientes con ese nombre.
+</p>
+
 <table>
   <thead>
     <tr>
@@ -10,7 +21,7 @@
       <th>Acciones</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="tabla-clientes">
     {% for usuario in usuarios %}
     <tr>
       <td>{{ usuario.username }}</td>
@@ -25,13 +36,19 @@
         {% if usuario.is_active %}
         <form method="post" action="{% url 'deshabilitar_usuario' usuario.id %}">
           {% csrf_token %}
-          <button type="submit" onclick="return confirm('¿Estás seguro de que querés deshabilitar esta cuenta?')"
+          <button type="submit" class="btn-deshabilitar"
             style="padding: 6px 12px; background-color: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">
             Deshabilitar cuenta
           </button>
         </form>
         {% else %}
-          <span style="color: red; font-weight: bold;">Cuenta deshabilitada</span>
+        <form method="post" action="{% url 'habilitar_usuario' usuario.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-habilitar"
+            style="padding: 6px 12px; background-color: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Habilitar cuenta
+          </button>
+        </form>
         {% endif %}
       </td>
     </tr>
@@ -40,4 +57,52 @@
     {% endfor %}
   </tbody>
 </table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const buscador = document.getElementById("buscador");
+    const filas = document.querySelectorAll("#tabla-clientes tr");
+    const mensajeNoResultado = document.getElementById("no-result");
+
+    buscador.addEventListener("input", () => {
+      const texto = buscador.value.toLowerCase();
+      let hayCoincidencias = false;
+
+      filas.forEach(fila => {
+        const nombre = fila.querySelector("td")?.textContent.toLowerCase() || "";
+
+        if (nombre.includes(texto)) {
+          fila.style.display = "";
+          hayCoincidencias = true;
+        } else {
+          fila.style.display = "none";
+        }
+      });
+
+      mensajeNoResultado.style.display = hayCoincidencias ? "none" : "block";
+    });
+
+    // Confirmación SweetAlert
+    document.querySelectorAll(".btn-deshabilitar").forEach(boton => {
+      const form = boton.closest("form");
+
+      boton.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: "Esta acción deshabilitará la cuenta.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, deshabilitar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    });
+  });
+</script>
 {% endblock %}

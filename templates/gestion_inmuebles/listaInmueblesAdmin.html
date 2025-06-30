@@ -117,7 +117,7 @@
       <td>{{ inmueble.nombre }}</td>
       <td>{{ inmueble.calle }} - Nro: {{ inmueble.numero }}</td>        
       <td>{{ inmueble.tipo }}</td>
-      <td>${{ inmueble.precio }}</td>
+      <td>${{ inmueble.precio }} <em>({{ inmueble.get_tiempo_display }})</em>
       <td>{{ inmueble.provincia }}</td>
       <td>{{ inmueble.ciudad }}</td>
       <td>
@@ -136,8 +136,14 @@
           <button class="btn btn-detalle">Ver Detalle</button>
         </a>
         <a href="{% url 'editar_inmueble' inmueble.id %}">
-          <button class="btn btn-editar">Editar</button>
-        </a>
+          <button class="btn btn-editar">
+          {% if inmueble.activo %}
+            Editar
+          {% else %}
+            Reestablecer
+          {% endif %}
+        </button>
+</a>
         {% if inmueble.activo %}
         <a href="{% url 'baja_inmueble' inmueble.id %}">
           <button class="btn btn-baja">Dar de baja</button>

@@ -3,7 +3,7 @@ body {
     background-color: #0f172a;
     color: #f8fafc;
     margin: 0;
-    padding: 40px;
+   /* padding: 2px 10px 20px 10px;*/
 }
 
 .titulo {
@@ -15,10 +15,13 @@ body {
 }
 
 .container {
+     max-width: 1600x;
+  margin: 0 auto;
+  padding: 20px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 10px;
 }
 
 .card {
@@ -26,7 +29,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    width: 320px;
+    width: 260px;
     transition: transform 0.2s ease;
 }
 
@@ -41,7 +44,7 @@ body {
 }
 
 .card-content {
-    padding: 20px;
+    padding: 10px 15px;
 }
 
 .card h2 {
@@ -103,3 +106,62 @@ body {
     text-decoration: none !important;
 }
 
+
+        .filtros {
+            background-color: #062e59; 
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 1000px;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .filtro-form label,
+        .filtro-form select,
+        .filtro-form input {
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+
+        .filtro-form select,
+        .filtro-form input {
+            padding: 6px 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .filtro-form button {
+            padding: 8px 15px;
+            background-color: #0056b3;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .filtro-form button:hover {
+            background-color: #003d80;
+        }
+
+        .card.no-disponible {
+            filter: grayscale(10%);
+            background-color: rgba(240, 240, 240, 0.38); /* Fondo más claro y semi-transparente */
+            position: relative;
+        }
+
+        .card.no-disponible::before {
+            content: attr(data-estado);
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 1;
+            text-transform: uppercase;
+        }

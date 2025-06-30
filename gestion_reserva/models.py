@@ -15,8 +15,7 @@ class Reserva(models.Model):
         ('aceptada', 'Aceptada'),
         ('rechazada', 'Rechazada'),
     ]
-    
-
+    fecha_pendiente_pago = models.DateTimeField(null=True, blank=True)##nuevo
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     usuario = models.ForeignKey('gestion_usuarios.Usuario', on_delete=models.CASCADE)
     inmueble = models.ForeignKey('gestion_inmuebles.Inmueble', on_delete=models.CASCADE)

@@ -122,21 +122,7 @@
     </form>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const labelImagen = document.querySelector('label[for="id_imagen"]');
-    if (labelImagen) {
-      const nextNode = labelImagen.nextSibling;
-      if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim() === ":") {
-        nextNode.textContent = "";
-      }
-      const enlace = labelImagen.nextElementSibling;
-      if (enlace && enlace.tagName === 'A') {
-        enlace.style.display = 'none';
-      }
-    }
-  });
-</script>
+
 
 </body>
 </html>
