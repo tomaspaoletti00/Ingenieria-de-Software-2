@@ -86,15 +86,14 @@ def hacer_reserva(request, id_inmueble):
     else:
         form = FormClase(inmueble=inmueble)
 
-    return render(request, "gestion_reserva/hacer_reserva.html", {
+    return render (request, "gestion_reserva/hacer_reserva.html",{
         "form": form,
         "cant_inquilino": cant_inquilino,
         "tipo_inmueble": tipo_inmueble,
         "inmueble": inmueble,
         "usuario": request.user,
-        "fechas_ocupadas": list(fechas_ocupadas)
+        "fechas_ocupadas": list(fechas_ocupadas),
         "usuario": request.user,
-        "fechas_ocupadas": list(fechas_ocupadas)
     })
 
 
@@ -200,15 +199,13 @@ def inmueble_detalle(request, pk):
     }
     return render(request, 'gestion_inmuebles/detalle_inmueble.html', context)
 from datetime import timedelta
+
 @login_required
 def pagar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
 
-
     if reserva.estado != 'pendiente_pago':
         return HttpResponseForbidden("Esta reserva no se puede pagar.")
-
-    total_a_pagar = calcular_total_reserva(reserva)
 
     total_a_pagar = calcular_total_reserva(reserva)
 
@@ -227,37 +224,20 @@ def pagar_reserva(request, reserva_id):
                 return render(request, "gestion_reserva/pagar_reserva.html", {
                     "form": form, "reserva": reserva, "total": total_a_pagar
                 })
-                return render(request, "gestion_reserva/pagar_reserva.html", {
-                    "form": form, "reserva": reserva, "total": total_a_pagar
-                })
             
-            if tarjeta.monto_disponible < total_a_pagar:
             if tarjeta.monto_disponible < total_a_pagar:
                 form.add_error(None, "Saldo insuficiente en la tarjeta.")
                 return render(request, "gestion_reserva/pagar_reserva.html", {
                     "form": form, "reserva": reserva, "total": total_a_pagar
                 })
-                return render(request, "gestion_reserva/pagar_reserva.html", {
-                    "form": form, "reserva": reserva, "total": total_a_pagar
-                })
 
-            tarjeta.monto_disponible -= total_a_pagar
             tarjeta.monto_disponible -= total_a_pagar
             tarjeta.save()
 
             reserva.estado = "aceptada"
             reserva.save()
 
-
             send_mail(
-                'Estado de Pago:',
-                'Se ha acreditado el pago de la reserva correctamente',
-                'no-reply@tuapp.com',
-                [usuario.email],
-                fail_silently=False,
-            )
-
-            if reserva.inmueble.tipo != "Cochera":
                 'Estado de Pago:',
                 'Se ha acreditado el pago de la reserva correctamente',
                 'no-reply@tuapp.com',
@@ -286,14 +266,8 @@ def pagar_reserva(request, reserva_id):
                 aceptadas = Reserva.objects.filter(
                     inmueble=reserva.inmueble,
                     estado='aceptada',
-                    estado='aceptada',
                     fecha_inicio__lt=reserva.fecha_fin,
                     fecha_fin__gt=reserva.fecha_inicio)
-                if aceptadas.count() == cochera.plazas:
-                    for r in conflictos:
-                        r.estado = 'rechazada'
-                        r.save()
-
                 if aceptadas.count() == cochera.plazas:
                     for r in conflictos:
                         r.estado = 'rechazada'
@@ -308,15 +282,6 @@ def pagar_reserva(request, reserva_id):
         "reserva": reserva,
         "total": total_a_pagar
     })
-
-
-    return render(request, "gestion_reserva/pagar_reserva.html", {
-        "form": form,
-        "reserva": reserva,
-        "total": total_a_pagar
-    })
-
-
 
 @login_required
 def cancelar_reserva(request, reserva_id):
