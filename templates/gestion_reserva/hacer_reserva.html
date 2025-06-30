@@ -30,7 +30,7 @@
             {% if tipo_inmueble == 'Cochera' %}
                 <input type="text" name="edad" placeholder="Patente">
             {% else %}
-                <input type="number" name="edad" placeholder="Edad">
+                <input type="text" name="edad" value="{{ usuario.telefono }}" placeholder="Edad" readonly>
             {% endif %}
             <input type="text" name="dni" placeholder="ADMIN no tiene DNI" value="{{ usuario.dni }}" readonly>
         </div>
