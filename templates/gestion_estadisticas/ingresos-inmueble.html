@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <link rel="stylesheet" href="{% static 'styles/ingresos-inmueble.css' %}">
+  <h1>Ingresos por Inmueble</h1>
+
+  <form method="get" style="margin-bottom: 20px;">
+    <input type="text" name="q" placeholder="Buscar inmueble..." value="{{ query }}">
+    <button type="submit">Buscar</button>
+  </form>
+
+  {% if ingresos %}
+    <table>
+      <thead>
+        <tr>
+          <th>Inmueble</th>
+          <th>Ingresos Totales (ARS)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in ingresos %}
+          <tr>
+            <td>
+             <a class="nombre-inmueble-link" href="{% url 'inmueble_detalle' item.inmueble.id %}">{{ item.inmueble.nombre }}</a>
+            </td>  
+            <td>${{ item.total|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No se encontraron resultados.</p>
+  {% endif %}
+{% endblock %}

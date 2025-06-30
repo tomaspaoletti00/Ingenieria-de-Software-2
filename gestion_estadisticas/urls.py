@@ -3,5 +3,8 @@ from . import views
 
 urlpatterns = [
     path('', views.menu_estadisticas, name='menu-estadisticas'),
-    path('ingresos/', views.ingresos_mensuales, name='ingresos-mensuales'),
+    path('ingresos/mensuales', views.ingresos_mensuales, name='ingresos-mensuales'),
+    path('ingresos/inmuebles', views.ingresos_por_inmueble, name='ingresos-inmueble'),
+    path('ingresos/tipo', views.ingresos_por_tipo, name='ingresos-tipo'),
+
 ]

@@ -3,12 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 
-TIEMPO_CHOICES = [
-    ('Por_hora', 'Por hora'),
-    ('Por_semana', 'Por semana'),
-    ('Por_mes', 'Por mes'),
-    ('Por_noche', 'Por noche'),
-]
+
 
 ESTADO_CHOICES = [
     ('Disponible', 'Disponible'),
@@ -33,7 +28,6 @@ class Inmueble(models.Model):
     politica_cancelacion = models.TextField(blank=True)
     estado = models.CharField(default='Disponible', choices=ESTADO_CHOICES)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    tiempo = models.CharField(default='-', choices=TIEMPO_CHOICES)
     imagen = models.ImageField(upload_to='inmuebles/', blank=True, null=True)
     superficie = models.PositiveIntegerField(default=0) 
 
@@ -43,6 +37,14 @@ class Inmueble(models.Model):
     @property
     def reservas_pendientes(self):
         return self.reserva_set.filter(estado='pendiente').count()
+    
+    def get_subclass(self):
+        for subclass in [Departamento, Casa, Local, Cochera]:
+           try:
+               return subclass.objects.get(id=self.id)
+           except subclass.DoesNotExist:
+               continue
+        return self  # por si no es ninguno (ej: quedó como Inmueble solo)
     
 
 

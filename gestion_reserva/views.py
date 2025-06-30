@@ -93,6 +93,8 @@ def hacer_reserva(request, id_inmueble):
         "inmueble": inmueble,
         "usuario": request.user,
         "fechas_ocupadas": list(fechas_ocupadas)
+        "usuario": request.user,
+        "fechas_ocupadas": list(fechas_ocupadas)
     })
 
 
@@ -208,6 +210,8 @@ def pagar_reserva(request, reserva_id):
 
     total_a_pagar = calcular_total_reserva(reserva)
 
+    total_a_pagar = calcular_total_reserva(reserva)
+
     if request.method == "POST":
         form = PagoForm(request.POST)
         usuario = request.user
@@ -223,20 +227,37 @@ def pagar_reserva(request, reserva_id):
                 return render(request, "gestion_reserva/pagar_reserva.html", {
                     "form": form, "reserva": reserva, "total": total_a_pagar
                 })
+                return render(request, "gestion_reserva/pagar_reserva.html", {
+                    "form": form, "reserva": reserva, "total": total_a_pagar
+                })
             
+            if tarjeta.monto_disponible < total_a_pagar:
             if tarjeta.monto_disponible < total_a_pagar:
                 form.add_error(None, "Saldo insuficiente en la tarjeta.")
                 return render(request, "gestion_reserva/pagar_reserva.html", {
                     "form": form, "reserva": reserva, "total": total_a_pagar
                 })
+                return render(request, "gestion_reserva/pagar_reserva.html", {
+                    "form": form, "reserva": reserva, "total": total_a_pagar
+                })
 
+            tarjeta.monto_disponible -= total_a_pagar
             tarjeta.monto_disponible -= total_a_pagar
             tarjeta.save()
 
             reserva.estado = "aceptada"
             reserva.save()
 
+
             send_mail(
+                'Estado de Pago:',
+                'Se ha acreditado el pago de la reserva correctamente',
+                'no-reply@tuapp.com',
+                [usuario.email],
+                fail_silently=False,
+            )
+
+            if reserva.inmueble.tipo != "Cochera":
                 'Estado de Pago:',
                 'Se ha acreditado el pago de la reserva correctamente',
                 'no-reply@tuapp.com',
@@ -265,8 +286,14 @@ def pagar_reserva(request, reserva_id):
                 aceptadas = Reserva.objects.filter(
                     inmueble=reserva.inmueble,
                     estado='aceptada',
+                    estado='aceptada',
                     fecha_inicio__lt=reserva.fecha_fin,
                     fecha_fin__gt=reserva.fecha_inicio)
+                if aceptadas.count() == cochera.plazas:
+                    for r in conflictos:
+                        r.estado = 'rechazada'
+                        r.save()
+
                 if aceptadas.count() == cochera.plazas:
                     for r in conflictos:
                         r.estado = 'rechazada'
@@ -275,6 +302,13 @@ def pagar_reserva(request, reserva_id):
             return redirect("inmueble_detalle", pk=reserva.inmueble.id)
     else:
         form = PagoForm()
+
+    return render(request, "gestion_reserva/pagar_reserva.html", {
+        "form": form,
+        "reserva": reserva,
+        "total": total_a_pagar
+    })
+
 
     return render(request, "gestion_reserva/pagar_reserva.html", {
         "form": form,
@@ -315,6 +349,29 @@ def cancelar_reserva(request, reserva_id):
         messages.error(request, "No se puede cancelar esta reserva.")
 
     return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+
+from datetime import timedelta
+
+def calcular_total_reserva(reserva):
+    duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
+    duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
+    if duracion_dias == 0:
+        duracion_dias = 1
+
+    precio = float(reserva.inmueble.precio)
+    tiempo = reserva.inmueble.tiempo
+
+    if tiempo == 'Por_hora':
+        return round(precio * duracion_horas, 2)
+    elif tiempo == 'Por_noche':
+        return round(precio * duracion_dias, 2)
+    elif tiempo == 'Por_semana':
+        return round(precio * (duracion_dias / 7), 2)
+    elif tiempo == 'Por_mes':
+        return round(precio * (duracion_dias / 30), 2)
+    else:
+        return round(precio * duracion_dias, 2)
+
 
 from datetime import timedelta
 

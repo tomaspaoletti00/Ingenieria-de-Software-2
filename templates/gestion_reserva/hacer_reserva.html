@@ -68,7 +68,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const fechasOcupadas = {{ fechas_ocupadas|safe }};
-        console.log("Fechas ocupadas recibidas:", fechasOcupadas);
         flatpickr(".datepicker", {
             dateFormat: "Y-m-d",
             disable: fechasOcupadas
