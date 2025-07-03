@@ -1,0 +1,45 @@
+<table border="1">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Fecha inicio</th>
+            <th>Fecha fin</th>
+            <th>Método de pago</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.usuario.username }}</td>
+                <td>{{ reserva.fecha_inicio }}</td>
+                <td>{{ reserva.fecha_fin }}</td>
+                <td>{{ reserva.metodo_pago }}</td>
+                <td>{{ reserva.get_estado_display }}</td>
+                <td>
+                    {% if reserva.usuario == user %}
+                        {% if reserva.estado == 'pendiente_pago' %}
+                            <form method="post" action="{% url 'pagar_reserva' reserva.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit">Pagar</button>
+                            </form>
+                        {% endif %}
+                        {% if reserva.estado in estados_cancelables %}
+                            <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">No hay reservas.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
