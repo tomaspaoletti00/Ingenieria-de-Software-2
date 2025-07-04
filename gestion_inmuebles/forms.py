@@ -93,7 +93,6 @@ class FormularioCochera(InmuebleForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['tiempo'].choices = TIEMPO_COCHERA
         self.fields['largo_plaza'].label = "Largo de la plaza (m²)"
         self.fields['ancho_plaza'].label = "Ancho de la plaza (m²)"
 
