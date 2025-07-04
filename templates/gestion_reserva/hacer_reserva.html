@@ -67,12 +67,39 @@
 <script>
 
     document.addEventListener("DOMContentLoaded", () => {
-        const fechasOcupadas = {{ fechas_ocupadas|safe }};
-        flatpickr(".datepicker", {
-            dateFormat: "Y-m-d",
-            disable: fechasOcupadas
+         const fechasOcupadas = {{ fechas_ocupadas|safe }};
+         const diasBloqueados = {{ dias_bloqueados|safe }};
+         const diasFinales = fechasOcupadas.concat(diasBloqueados);
+
+          flatpickr(".datepicker", {
+              dateFormat: "Y-m-d",
+              disable: diasFinales
+             });
+         const diaInput = document.querySelector('#id_dia');
+    const horaInicio = document.querySelector('#id_hora_inicio');
+    const horaFin = document.querySelector('#id_hora_fin');
+
+    if (diaInput && horaInicio && horaFin) {
+        diaInput.addEventListener("change", function () {
+            const diaSeleccionado = this.value;
+
+            fetch(`/reservas/horas_ocupadas/{{ inmueble.id }}?dia=${diaSeleccionado}`)
+                .then(response => response.json())
+                .then(data => {
+                    const horasOcupadas = data.horas_ocupadas.map(h => parseInt(h));
+
+                    for (let opt of horaInicio.options) {
+                        const hora = parseInt(opt.value.split(':')[0]);
+                        opt.disabled = horasOcupadas.includes(hora);
+                    }
+
+                    for (let opt of horaFin.options) {
+                        const hora = parseInt(opt.value.split(':')[0]);
+                        opt.disabled = horasOcupadas.includes(hora);
+                    }
+                });
         });
-        
+    }
         const totalSpan = document.getElementById("total-estimado");
         const inmuebleInfo = document.getElementById("info-inmueble");
         const tipoInmueble = document.getElementById("tipo-inmueble").value;

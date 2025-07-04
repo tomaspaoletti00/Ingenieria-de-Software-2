@@ -79,6 +79,17 @@ class ReservaNormalForm(forms.ModelForm):
         return instancia
 
 
+from django import forms
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta, date
+from collections import defaultdict
+from .models import Reserva
+from gestion_inmuebles.models import Cochera
+
+HORAS_CHOICES = [
+    (f"{h:02}:00", f"{h:02}:00") for h in range(8, 22)
+]
+
 class ReservaCocheraForm(forms.ModelForm):
     dia = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
@@ -88,10 +99,9 @@ class ReservaCocheraForm(forms.ModelForm):
         choices=HORAS_CHOICES,
         label="Hora de inicio"
     )
-    horas = forms.IntegerField(
-        min_value=1,
-        max_value=24,
-        label="Duración (horas)"
+    hora_fin = forms.ChoiceField(
+        choices=HORAS_CHOICES,
+        label="Hora de fin"
     )
 
     class Meta:
@@ -102,41 +112,71 @@ class ReservaCocheraForm(forms.ModelForm):
         self.inmueble = kwargs.pop('inmueble', None)
         super().__init__(*args, **kwargs)
 
+        self.dias_bloqueados = []
+        if self.inmueble:
+            cochera = Cochera.objects.get(pk=self.inmueble.pk)
+            reservas = Reserva.objects.filter(
+                inmueble=self.inmueble,
+                estado="aceptada"
+            )
+
+            horas_por_dia = defaultdict(lambda: defaultdict(int))
+            for r in reservas:
+                dia_reserva = r.fecha_inicio.date()
+                h_inicio = r.fecha_inicio.hour
+                h_fin = r.fecha_fin.hour
+                for h in range(h_inicio, h_fin):
+                    horas_por_dia[dia_reserva][h] += 1
+
+            horas_posibles = range(8, 22)
+            for dia, horas in horas_por_dia.items():
+                if all(horas.get(h, 0) >= cochera.plazas for h in horas_posibles):
+                    self.dias_bloqueados.append(dia.strftime("%Y-%m-%d"))
+
     def clean(self):
         cleaned_data = super().clean()
         dia = cleaned_data.get("dia")
         hora_inicio_str = cleaned_data.get("hora_inicio")
-        horas = cleaned_data.get("horas")
+        hora_fin_str = cleaned_data.get("hora_fin")
 
-        if not dia or not hora_inicio_str or not horas:
-            raise ValidationError("Complete día, hora y duración.")
+        if not dia or not hora_inicio_str or not hora_fin_str:
+            raise ValidationError("Complete día y rango horario.")
 
         hora_inicio = datetime.strptime(hora_inicio_str, "%H:%M").time()
+        hora_fin = datetime.strptime(hora_fin_str, "%H:%M").time()
         fecha_inicio = datetime.combine(dia, hora_inicio)
-        fecha_fin = fecha_inicio + timedelta(hours=horas)
+        fecha_fin = datetime.combine(dia, hora_fin)
 
         ayer = date.today() - timedelta(days=1)
-
         if dia <= ayer:
-            raise ValidationError("La fecha de reserva no puede estar en el pasado.")
+            raise ValidationError("La fecha no puede estar en el pasado.")
         if fecha_fin <= fecha_inicio:
             raise ValidationError("La hora de fin debe ser posterior a la de inicio.")
 
         cleaned_data["fecha_inicio"] = fecha_inicio
         cleaned_data["fecha_fin"] = fecha_fin
-       
+
         if self.inmueble:
+            cochera = Cochera.objects.get(pk=self.inmueble.pk)
             conflictos = Reserva.objects.filter(
                 inmueble=self.inmueble,
                 fecha_inicio__lt=fecha_fin,
                 fecha_fin__gt=fecha_inicio,
                 estado="aceptada"
             )
-            cochera = Cochera.objects.get(pk=self.inmueble.pk)
-            if conflictos.count() >= cochera.plazas:
-                 raise ValidationError("No hay plazas disponibles en ese horario.")
             if self.instance.pk:
                 conflictos = conflictos.exclude(pk=self.instance.pk)
+
+            horas_conflicto = defaultdict(int)
+            for r in conflictos:
+                h_inicio = r.fecha_inicio.hour
+                h_fin = r.fecha_fin.hour
+                for h in range(h_inicio, h_fin):
+                    horas_conflicto[h] += 1
+
+            for h in range(hora_inicio.hour, hora_fin.hour):
+                if horas_conflicto.get(h, 0) >= cochera.plazas:
+                    raise ValidationError("Horario ya sin plazas disponibles.")
 
         return cleaned_data
 

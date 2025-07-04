@@ -19,6 +19,36 @@ from django.db.models import Q
 
 from django.shortcuts import render
 
+from django.http import JsonResponse
+from datetime import datetime
+from django.shortcuts import get_object_or_404
+from .models import Reserva
+from gestion_inmuebles.models import Inmueble, Cochera
+from collections import defaultdict
+
+def obtener_horas_ocupadas(request, inmueble_id):
+    dia_str = request.GET.get("dia")
+    dia = datetime.strptime(dia_str, "%Y-%m-%d").date()
+
+    inmueble = get_object_or_404(Inmueble, pk=inmueble_id)
+    cochera = get_object_or_404(Cochera, pk=inmueble.pk)
+
+    reservas = Reserva.objects.filter(
+        inmueble=inmueble,
+        estado="aceptada",
+        fecha_inicio__date=dia
+    )
+
+    horas_ocupadas = defaultdict(int)
+    for r in reservas:
+        h_inicio = r.fecha_inicio.hour
+        h_fin = r.fecha_fin.hour
+        for h in range(h_inicio, h_fin):
+            horas_ocupadas[h] += 1
+
+    horas_completas = [h for h, cant in horas_ocupadas.items() if cant >= cochera.plazas]
+    return JsonResponse({"horas_ocupadas": horas_completas})
+
 def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
     if tipo_inmueble == "Casa":
         return Casa.objects.get(pk=id_inmueble).cantidad_inquilinos
@@ -33,11 +63,9 @@ def hacer_reserva(request, id_inmueble):
     tipo_inmueble = inmueble.tipo
     cant_inquilino = obtener_cant_inquilino(tipo_inmueble, inmueble.id)
 
+    limite_minutos = 3
+    tiempo_limite_pago = timezone.now() - timedelta(minutes=limite_minutos)
 
-    limite_minutos = 3##nuevo
-    tiempo_limite_pago = timezone.now() - timedelta(minutes=limite_minutos)##nuevo
-
-##nuevo
     expiradas = Reserva.objects.filter(
         estado='pendiente_pago',
         fecha_pendiente_pago__lt=tiempo_limite_pago
@@ -46,15 +74,12 @@ def hacer_reserva(request, id_inmueble):
         res.estado = 'cancelada'
         res.save()
 
-    
-##nuevo
     conflictos = Reserva.objects.filter(
-    inmueble=inmueble,
+        inmueble=inmueble
     ).filter(
         Q(estado='aceptada') | Q(estado='pendiente_pago', fecha_pendiente_pago__gte=tiempo_limite_pago)
-    ).values_list('fecha_inicio', 'fecha_fin')##nuevo
+    ).values_list('fecha_inicio', 'fecha_fin')
 
-    
     fechas_ocupadas = set()
     for inicio, fin in conflictos:
         actual = inicio.date()
@@ -86,15 +111,19 @@ def hacer_reserva(request, id_inmueble):
     else:
         form = FormClase(inmueble=inmueble)
 
-    return render (request, "gestion_reserva/hacer_reserva.html",{
+    # ✅ Ahora que el form ya existe, puedo acceder a .dias_bloqueados
+    dias_bloqueados = form.dias_bloqueados if tipo_inmueble == "Cochera" else []
+
+    return render(request, "gestion_reserva/hacer_reserva.html", {
         "form": form,
         "cant_inquilino": cant_inquilino,
         "tipo_inmueble": tipo_inmueble,
         "inmueble": inmueble,
         "usuario": request.user,
         "fechas_ocupadas": list(fechas_ocupadas),
-        "usuario": request.user,
+        "dias_bloqueados": dias_bloqueados,
     })
+
 
 
 @login_required
@@ -221,7 +250,8 @@ from datetime import timedelta
 @login_required
 def pagar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
-
+    reserva.estado = "aceptada"
+    reserva.save()
     if reserva.estado != 'pendiente_pago':
         return HttpResponseForbidden("Esta reserva no se puede pagar.")
 
