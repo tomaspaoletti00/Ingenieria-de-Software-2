@@ -14,6 +14,11 @@ from django.views.decorators.csrf import csrf_protect
 from django.utils import timezone
 from .models import TokenVerificacion
 from django.contrib import messages
+from django.utils.crypto import get_random_string
+from .forms import AltaManualUsuarioForm
+import secrets
+import string
+import random
 
 
 def home(request):
@@ -266,3 +271,42 @@ def habilitar_usuario(request, user_id):
         return redirect('lista-clientes')
 
     return redirect('lista-clientes')
+
+@login_required
+@user_passes_test(es_empleado)
+def generar_password_aleatoria(longitud=8):
+    caracteres = string.ascii_letters + string.digits
+    return ''.join(random.choice(caracteres) for _ in range(longitud))
+
+
+
+@login_required
+@user_passes_test(es_empleado)
+def alta_manual_usuario(request):
+    if request.method == 'POST':
+        form = AltaManualUsuarioForm(request.POST)
+        if form.is_valid():
+            usuario = form.save(commit=False)
+
+            # Generar contraseña aleatoria
+            contraseña_generada = secrets.token_urlsafe(8)
+            usuario.set_password(contraseña_generada)
+            usuario.save()
+
+            # Enviar mail con la contraseña
+            send_mail(
+                subject='Bienvenido a Alquiler Express',
+                message=f'Hola {usuario.first_name},\n\nTu cuenta fue creada exitosamente.\nTu Usuario es: {usuario.username}\n\nTu contraseña es: {contraseña_generada}\n\nPor favor, cambiala luego de ingresar.',
+                from_email='tu-correo@ejemplo.com',
+                recipient_list=[usuario.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, 'Usuario creado y notificado por correo.')
+            form = AltaManualUsuarioForm()  # Limpio el formulario después de guardar
+        else:
+            messages.error(request, 'Por favor corregí los errores.')
+    else:
+        form = AltaManualUsuarioForm()
+    
+    return render(request, 'gestion_usuarios/alta_manual.html', {'form': form})

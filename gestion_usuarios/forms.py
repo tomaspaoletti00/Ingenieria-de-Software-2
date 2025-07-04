@@ -112,3 +112,26 @@ class EditarEmpleadoForm(forms.ModelForm):
             raise forms.ValidationError("El nombre no puede contener números.")
         return first_name
         
+class AltaManualUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['username', 'email', 'first_name', 'dni', 'telefono']
+        widgets = {
+            'email': forms.EmailInput(attrs={'placeholder': 'Correo electrónico'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'Nombre'}),
+            'dni': forms.NumberInput(attrs={'placeholder': 'DNI'}),
+            'telefono': forms.NumberInput(attrs={'placeholder': 'Teléfono'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Nombre de usuario'}),
+        }
+
+        def clean_email(self):
+            email = self.cleaned_data['email']
+            if Usuario.objects.filter(email=email).exists():
+                raise forms.ValidationError('El correo ya está registrado.')
+            return email
+ 
+        def clean_username(self):
+             username = self.cleaned_data['username']
+             if Usuario.objects.filter(username=username).exists():
+                 raise forms.ValidationError('Ya existe un usuario con este nombre.')
+             return username
