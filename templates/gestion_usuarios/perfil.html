@@ -11,9 +11,10 @@
     <li><strong>DNI:</strong> {{ usuario.dni}}</li>
     <li><strong>Telefono:</strong> {{ usuario.telefono}}</li>
 </div>
-<a href="{% url 'editar_perfil' %}">
-    <button>Editar Perfil</button>
-</a>
+<a href="{% url 'editar_perfil' %}"><button>Editar Perfil</button></a>
+
+<a href="{% url 'cambiar_password' %}"><button>Cambiar contraseña</button></a>
+
 
 
 {% endblock %}

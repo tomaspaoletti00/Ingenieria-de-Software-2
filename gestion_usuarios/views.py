@@ -19,6 +19,9 @@ from .forms import AltaManualUsuarioForm
 import secrets
 import string
 import random
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib import messages
+from django.urls import reverse_lazy
 
 
 def home(request):
@@ -310,3 +313,12 @@ def alta_manual_usuario(request):
         form = AltaManualUsuarioForm()
     
     return render(request, 'gestion_usuarios/alta_manual.html', {'form': form})
+
+
+class MiPasswordChangeView(PasswordChangeView):
+    template_name = 'gestion_usuarios/cambiar_password.html'
+    success_url = reverse_lazy('perfil_usuario')  # o donde quieras redirigir
+
+    def form_valid(self, form):
+        messages.success(self.request, '¡Tu contraseña fue actualizada correctamente!')
+        return super().form_valid(form)
