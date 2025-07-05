@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block head %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
+
 {% block content %}
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <h2>Reservar {{ tipo_inmueble }}</h2>
 
 <div id="info-inmueble"
@@ -15,31 +15,28 @@
 
 <form id="formulario-reserva" method="POST">
     {% csrf_token %}
-    <input type="hidden" id="tipo-inmueble" value="{{ tipo_inmueble }}">
-    
-    <!-- errores generales -->
+    <input type="hidden" id="tipo-inmueble" value="{{ tipo_inmueble }}" data-inmueble-id="{{ inmueble.id }}">
     {{ form.as_p }}
+
     {% if tipo_inmueble != 'Cochera' %}
     <div>
         <label>Máximo de inquilinos: {{ cant_inquilino }}</label>
     </div>
     {% endif %}
+
     <div id="container-persona" data-max="{{ cant_inquilino }}">
         <div class="persona">
-            <input type="text" name="nombre" placeholder="ADMIN no tiene nombre" value="{{ usuario.first_name }}" readonly>
+            <input type="text" name="nombre" value="{{ usuario.first_name }}" readonly>
             {% if tipo_inmueble == 'Cochera' %}
                 <input type="text" name="edad" placeholder="Patente">
             {% else %}
-                <input type="text" name="edad" value="{{ usuario.telefono }}" placeholder="Edad" readonly>
+                <input type="text" name="edad" value="{{ usuario.telefono }}" readonly>
             {% endif %}
-            <input type="text" name="dni" placeholder="ADMIN no tiene DNI" value="{{ usuario.dni }}" readonly>
+            <input type="text" name="dni" value="{{ usuario.dni }}" readonly>
         </div>
-        <!-- Acá se insertan los inquilinos -->
     </div>
-    
-    {% if tipo_inmueble == 'Cochera' %}
-        <button type="button" id="agregar-persona" style="display: none;">+ Agregar inquilino</button>
-    {% else %}
+
+    {% if tipo_inmueble != 'Cochera' %}
         <button type="button" id="agregar-persona">+ Agregar inquilino</button>
     {% endif %}
 
@@ -48,7 +45,7 @@
     <button type="submit">Enviar reserva</button>
 </form>
 
-<!-- Plantilla para clon -->
+<!-- plantilla para clon -->
 <div id="formulario-persona-plantilla" style="display: none;">
     <div class="persona">
         <input type="text" name="nombre" placeholder="Nombre completo">
@@ -62,110 +59,98 @@
     </div>
 </div>
 
-<script src="{% static 'js/solicitar_reserva.js' %}"></script>
-
 <script>
-
     document.addEventListener("DOMContentLoaded", () => {
-         const fechasOcupadas = {{ fechas_ocupadas|safe }};
-         const diasBloqueados = {{ dias_bloqueados|safe }};
-         const diasFinales = fechasOcupadas.concat(diasBloqueados);
+        const fechasOcupadas = {{ fechas_ocupadas|safe }};
+        const diasBloqueados = {{ dias_bloqueados|safe }};
+        const diasFinales = fechasOcupadas.concat(diasBloqueados);
 
-          flatpickr(".datepicker", {
-              dateFormat: "Y-m-d",
-              disable: diasFinales
-             });
-         const diaInput = document.querySelector('#id_dia');
-    const horaInicio = document.querySelector('#id_hora_inicio');
-    const horaFin = document.querySelector('#id_hora_fin');
-
-    if (diaInput && horaInicio && horaFin) {
-        diaInput.addEventListener("change", function () {
-            const diaSeleccionado = this.value;
-
-            fetch(`/reservas/horas_ocupadas/{{ inmueble.id }}?dia=${diaSeleccionado}`)
-                .then(response => response.json())
-                .then(data => {
-                    const horasOcupadas = data.horas_ocupadas.map(h => parseInt(h));
-
-                    for (let opt of horaInicio.options) {
-                        const hora = parseInt(opt.value.split(':')[0]);
-                        opt.disabled = horasOcupadas.includes(hora);
-                    }
-
-                    for (let opt of horaFin.options) {
-                        const hora = parseInt(opt.value.split(':')[0]);
-                        opt.disabled = horasOcupadas.includes(hora);
-                    }
-                });
+        // Activar flatpickr sobre todos los inputs con clase .datepicker
+        flatpickr(".datepicker", {
+            dateFormat: "Y-m-d",
+            disable: diasFinales
         });
-    }
+
+        // Selección de elementos
+        const diaInput = document.querySelector('#id_dia');
+        const horaInicio = document.querySelector('#id_hora_inicio');
+        const horaFin = document.querySelector('#id_hora_fin');
         const totalSpan = document.getElementById("total-estimado");
         const inmuebleInfo = document.getElementById("info-inmueble");
         const tipoInmueble = document.getElementById("tipo-inmueble").value;
         const precio = parseFloat(inmuebleInfo.dataset.precio);
-        const tiempo = inmuebleInfo.dataset.tiempo;
 
-        if (!inmuebleInfo || isNaN(precio)) return;
+        if (!diaInput || !horaInicio || !horaFin) {
+            console.error("Faltan campos del formulario. Verificá los ID.");
+            return;
+        }
 
-        if (tipoInmueble === "Cochera") {
-            const diaInput = document.getElementById("id_dia");
-            const horasInput = document.getElementById("id_horas");
+        // Reemplazar las opciones de hora según disponibilidad
+        diaInput.addEventListener("change", function () {
+            const diaSeleccionado = this.value;
+            const inmuebleId = document.getElementById("tipo-inmueble").dataset.inmuebleId;
 
-            function calcularCochera() {
-                const horas = parseInt(horasInput.value);
-                if (!diaInput.value || isNaN(horas) || horas <= 0) {
+            if (!diaSeleccionado || !inmuebleId) return;
+
+            fetch(`/reservas/horas_ocupadas/${inmuebleId}?dia=${diaSeleccionado}`)
+                .then(response => response.json())
+                .then(data => {
+                    const horasOcupadas = data.horas_ocupadas.map(h => parseInt(h));
+
+                    [horaInicio, horaFin].forEach(select => {
+                        const valorAnterior = select.value;
+                        select.innerHTML = "";  // limpiar todo
+
+                        for (let h = 0; h < 24; h++) {
+                            if (!horasOcupadas.includes(h)) {
+                                const valor = `${h.toString().padStart(2, '0')}:00`;
+                                const opt = document.createElement("option");
+                                opt.value = valor;
+                                opt.textContent = valor;
+                                select.appendChild(opt);
+                            }
+                        }
+
+                        if (Array.from(select.options).some(opt => opt.value === valorAnterior)) {
+                            select.value = valorAnterior;
+                        }
+                    });
+
+                    calcularTotal();  // recalcular precio en vivo si cambió algo
+                });
+        });
+
+        // Cálculo del total estimado
+        function calcularTotal() {
+            if (tipoInmueble === "Cochera") {
+                const hIni = horaInicio.value;
+                const hFin = horaFin.value;
+
+                if (!hIni || !hFin) {
                     totalSpan.textContent = "0.00";
                     return;
                 }
+
+                const inicio = parseInt(hIni.split(":")[0]);
+                const fin = parseInt(hFin.split(":")[0]);
+                const horas = fin - inicio;
+
+                if (horas <= 0) {
+                    totalSpan.textContent = "0.00";
+                    return;
+                }
+
                 const total = precio * horas;
                 totalSpan.textContent = total.toFixed(2);
             }
-
-            diaInput.addEventListener("change", calcularCochera);
-            horasInput.addEventListener("input", calcularCochera);
-        } else {
-            const fechaInicioInput = document.getElementById("id_fecha_inicio");
-            const fechaFinInput = document.getElementById("id_fecha_fin");
-
-            function calcularGeneral() {
-                const inicio = new Date(fechaInicioInput.value);
-                const fin = new Date(fechaFinInput.value);
-
-                if (!fechaInicioInput.value || !fechaFinInput.value || isNaN(inicio) || isNaN(fin)) {
-                    totalSpan.textContent = "0.00";
-                    return;
-                }
-
-                const msPorDia = 1000 * 60 * 60 * 24;
-                const duracionMs = fin - inicio;
-                const duracionDias = Math.ceil(duracionMs / msPorDia);
-
-                if (duracionDias <= 0) {
-                    totalSpan.textContent = "0.00";
-                    return;
-                }
-
-                let total = 0;
-                if (tiempo === "Por_hora") {
-                    total = precio * duracionDias * 24;
-                } else if (tiempo === "Por_noche") {
-                    total = precio * duracionDias;
-                } else if (tiempo === "Por_semana") {
-                    total = precio * (duracionDias / 7);
-                } else if (tiempo === "Por_mes") {
-                    total = precio * (duracionDias / 30);
-                } else {
-                    total = precio * duracionDias;
-                }
-
-                totalSpan.textContent = total.toFixed(2);
-            }
-
-            fechaInicioInput.addEventListener("change", calcularGeneral);
-            fechaFinInput.addEventListener("change", calcularGeneral);
         }
+
+        horaInicio.addEventListener("change", calcularTotal);
+        horaFin.addEventListener("change", calcularTotal);
     });
 </script>
 
+<script src="{% static 'js/solicitar_reserva.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}

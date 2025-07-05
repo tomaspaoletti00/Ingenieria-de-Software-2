@@ -86,22 +86,20 @@ from collections import defaultdict
 from .models import Reserva
 from gestion_inmuebles.models import Cochera
 
-HORAS_CHOICES = [
-    (f"{h:02}:00", f"{h:02}:00") for h in range(8, 22)
-]
-
 class ReservaCocheraForm(forms.ModelForm):
     dia = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}),
+        widget=forms.DateInput(attrs={'id': 'id_dia', 'type': 'text', 'class': 'datepicker'}),
         label="Día de reserva"
     )
     hora_inicio = forms.ChoiceField(
-        choices=HORAS_CHOICES,
-        label="Hora de inicio"
+    choices=HORAS_CHOICES,
+    label="Hora de inicio",
+    widget=forms.Select(attrs={'id': 'id_hora_inicio'})
     )
     hora_fin = forms.ChoiceField(
         choices=HORAS_CHOICES,
-        label="Hora de fin"
+        label="Hora de fin",
+        widget=forms.Select(attrs={'id': 'id_hora_fin'})
     )
 
     class Meta:
@@ -128,7 +126,7 @@ class ReservaCocheraForm(forms.ModelForm):
                 for h in range(h_inicio, h_fin):
                     horas_por_dia[dia_reserva][h] += 1
 
-            horas_posibles = range(8, 22)
+            horas_posibles = range(0, 24)
             for dia, horas in horas_por_dia.items():
                 if all(horas.get(h, 0) >= cochera.plazas for h in horas_posibles):
                     self.dias_bloqueados.append(dia.strftime("%Y-%m-%d"))
