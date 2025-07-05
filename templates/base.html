@@ -50,7 +50,9 @@
                 letter-spacing: 0.5px ">¡Hola, {{ user.first_name|default:user.username }}!</li>
 
                 {% endif %}
-               
+                {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+                     <li><a href="/reserva/reservas">Mis reservas</a></li>
+                {% endif %}
                 {% if user.is_superuser %}
                     <li><a href="/usuarios/panel-admin">Panel de Administrador</a></li>
                 {% endif %}
@@ -61,6 +63,8 @@
                     <li><a href="/usuarios/registro">Registro</a></li>
                     <li><a href="/usuarios/login">Iniciar Sesión</a></li>                    
                 {% endif %}
+               
+                    
                 
 
                 
