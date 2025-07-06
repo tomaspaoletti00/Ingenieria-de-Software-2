@@ -40,9 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const nombreValido = soloLetras.test(nombre);
             const dniValido = soloNumeros.test(dni);
-            const edadValida = soloNumeros.test(edad) && parseInt(edad, 10) >= 0;
 
-            if (!nombre || !edad || !dni || !nombreValido || !dniValido || !edadValida) {
+            if (!nombre || !edad || !dni || !nombreValido || !dniValido) {
                 camposIncompletos = true;
             } else {
                 personas.push({ nombre_completo: nombre, edad: edad, dni: dni });

@@ -30,15 +30,10 @@ def obtener_horas_ocupadas(request, inmueble_id):
     dia_str = request.GET.get("dia")
     if not dia_str:
         return JsonResponse({"horas_ocupadas": []})
-
     try:
         dia = datetime.strptime(dia_str, "%Y-%m-%d").date()
-    except ValueError:
-        return JsonResponse({"horas_ocupadas": []})
-
-    try:
         cochera = Cochera.objects.get(pk=inmueble_id)
-    except Cochera.DoesNotExist:
+    except (ValueError, Cochera.DoesNotExist):
         return JsonResponse({"horas_ocupadas": []})
 
     reservas = Reserva.objects.filter(
@@ -49,13 +44,10 @@ def obtener_horas_ocupadas(request, inmueble_id):
 
     horas = defaultdict(int)
     for r in reservas:
-        h_inicio = r.fecha_inicio.hour
-        h_fin = r.fecha_fin.hour
-        for h in range(h_inicio, h_fin):
+        for h in range(r.fecha_inicio.hour, r.fecha_fin.hour):
             horas[h] += 1
 
     horas_ocupadas = [h for h, count in horas.items() if count >= cochera.plazas]
-
     return JsonResponse({"horas_ocupadas": horas_ocupadas})
 
 def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
@@ -70,7 +62,7 @@ def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
 def hacer_reserva(request, id_inmueble):
     inmueble = get_object_or_404(Inmueble, pk=id_inmueble)
     tipo_inmueble = inmueble.tipo
-    cant_inquilino = 1  # ajustá si lo sacás de modelos externos
+    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)  # cambiar si lo sacás de otro lado
 
     FormClase = ReservaCocheraForm if tipo_inmueble == "Cochera" else ReservaNormalForm
 
@@ -94,7 +86,21 @@ def hacer_reserva(request, id_inmueble):
     else:
         form = FormClase(inmueble=inmueble)
 
+    # Obtener días bloqueados para cochera
     dias_bloqueados = getattr(form, "dias_bloqueados", [])
+
+    # Obtener fechas ocupadas para reservas normales
+    fechas_ocupadas = []
+    if tipo_inmueble != "Cochera":
+        reservas_existentes = Reserva.objects.filter(
+            inmueble=inmueble,
+            estado="aceptada"
+        )
+        for reserva in reservas_existentes:
+            inicio = reserva.fecha_inicio.date()
+            fin = reserva.fecha_fin.date()
+            for i in range((fin - inicio).days + 1):
+                fechas_ocupadas.append((inicio + timedelta(days=i)).isoformat())
 
     return render(request, "gestion_reserva/hacer_reserva.html", {
         "form": form,
@@ -102,10 +108,9 @@ def hacer_reserva(request, id_inmueble):
         "tipo_inmueble": tipo_inmueble,
         "inmueble": inmueble,
         "usuario": request.user,
-        "fechas_ocupadas": [],  # si las usás también en normales, completalo
+        "fechas_ocupadas": fechas_ocupadas,
         "dias_bloqueados": dias_bloqueados,
     })
-
 @login_required
 def listar_reservas(request):
     reservas_aceptadas = Reserva.objects.filter(usuario=request.user, estado='aceptada')
@@ -132,20 +137,51 @@ def cambiar_estado_reserva(request, reserva_id):
         usuario = request.user
 
         if nuevo_estado == 'aceptada' and reserva.estado == 'pendiente':
-            # ✅ Validar si hay otra en pendiente_pago que se superponga
-            bloqueo = Reserva.objects.filter(
-                inmueble=reserva.inmueble,
-                estado='pendiente_pago',
-                fecha_inicio__lt=reserva.fecha_fin,
-                fecha_fin__gt=reserva.fecha_inicio
-            ).exclude(pk=reserva.pk).first()
+            # --- LÓGICA ESPECIAL PARA COCHERA ---
+            if reserva.inmueble.tipo == "Cochera":
+                try:
+                    cochera = Cochera.objects.get(pk=reserva.inmueble.pk)
+                except Cochera.DoesNotExist:
+                    messages.error(request, "Cochera no encontrada.")
+                    return redirect('inmueble_detalle', pk=inmueble_id)
 
-            if bloqueo:
-                tiempo_restante = bloqueo.fecha_pendiente_pago + timedelta(minutes=3) - now()
-                minutos = int(tiempo_restante.total_seconds() // 60)
-                segundos = int(tiempo_restante.total_seconds() % 60)
-                messages.error(request, f"Ya hay una reserva pendiente de pago que bloquea estas fechas. Esperá {minutos}m {segundos}s.")
-                return redirect('inmueble_detalle', pk=inmueble_id)
+                # Reservas aceptadas o pendiente_pago, excepto la actual
+                reservas = Reserva.objects.filter(
+                    inmueble=reserva.inmueble,
+                    estado__in=["aceptada", "pendiente_pago"],
+                    fecha_inicio__lt=reserva.fecha_fin,
+                    fecha_fin__gt=reserva.fecha_inicio
+                ).exclude(pk=reserva.pk)
+
+                horas_ocupadas = defaultdict(int)
+                for r in reservas:
+                    h_ini = r.fecha_inicio.hour
+                    h_fin = r.fecha_fin.hour
+                    for h in range(h_ini, h_fin):
+                        horas_ocupadas[h] += 1
+
+                h_reserva_ini = reserva.fecha_inicio.hour
+                h_reserva_fin = reserva.fecha_fin.hour
+                for h in range(h_reserva_ini, h_reserva_fin):
+                    if horas_ocupadas[h] >= cochera.plazas:
+                        messages.error(request, f"Ya hay reservas pendientes o aceptadas que completan las plazas en la franja {h:02}:00.")
+                        return redirect('inmueble_detalle', pk=inmueble_id)
+
+            else:
+                # --- LÓGICA GENERAL PARA NO COCHERAS ---
+                bloqueo = Reserva.objects.filter(
+                    inmueble=reserva.inmueble,
+                    estado='pendiente_pago',
+                    fecha_inicio__lt=reserva.fecha_fin,
+                    fecha_fin__gt=reserva.fecha_inicio
+                ).exclude(pk=reserva.pk).first()
+
+                if bloqueo:
+                    tiempo_restante = bloqueo.fecha_pendiente_pago + timedelta(minutes=3) - now()
+                    minutos = int(tiempo_restante.total_seconds() // 60)
+                    segundos = int(tiempo_restante.total_seconds() % 60)
+                    messages.error(request, f"Ya hay una reserva pendiente de pago que bloquea estas fechas. Esperá {minutos}m {segundos}s.")
+                    return redirect('inmueble_detalle', pk=inmueble_id)
 
             # ✅ Si no hay conflicto, aceptar como pendiente de pago
             reserva.estado = 'pendiente_pago'
@@ -171,7 +207,6 @@ def cambiar_estado_reserva(request, reserva_id):
             )
 
         return redirect('inmueble_detalle', pk=inmueble_id)
-
 
 def inmueble_detalle(request, pk):
     inmueble_base = get_object_or_404(Inmueble, pk=pk)
@@ -343,29 +378,6 @@ def cancelar_reserva(request, reserva_id):
         return redirect('inmueble_detalle', pk=reserva.inmueble.id)
     else:
         return redirect('listar_reservas')
-
-from datetime import timedelta
-
-def calcular_total_reserva(reserva):
-    duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
-    duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
-    if duracion_dias == 0:
-        duracion_dias = 1
-
-    precio = float(reserva.inmueble.precio)
-    tiempo = reserva.inmueble.tiempo
-
-    if tiempo == 'Por_hora':
-        return round(precio * duracion_horas, 2)
-    elif tiempo == 'Por_noche':
-        return round(precio * duracion_dias, 2)
-    elif tiempo == 'Por_semana':
-        return round(precio * (duracion_dias / 7), 2)
-    elif tiempo == 'Por_mes':
-        return round(precio * (duracion_dias / 30), 2)
-    else:
-        return round(precio * duracion_dias, 2)
-
 
 from datetime import timedelta
 

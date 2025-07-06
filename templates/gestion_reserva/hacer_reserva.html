@@ -60,95 +60,110 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const fechasOcupadas = {{ fechas_ocupadas|safe }};
-        const diasBloqueados = {{ dias_bloqueados|safe }};
-        const diasFinales = fechasOcupadas.concat(diasBloqueados);
+document.addEventListener("DOMContentLoaded", () => {
+    const fechasOcupadas = {{ fechas_ocupadas|safe }};
+    const diasBloqueados = {{ dias_bloqueados|safe }};
+    const diasFinales = fechasOcupadas.concat(diasBloqueados);
 
-        // Activar flatpickr sobre todos los inputs con clase .datepicker
-        flatpickr(".datepicker", {
-            dateFormat: "Y-m-d",
-            disable: diasFinales
-        });
-
-        // Selección de elementos
-        const diaInput = document.querySelector('#id_dia');
-        const horaInicio = document.querySelector('#id_hora_inicio');
-        const horaFin = document.querySelector('#id_hora_fin');
-        const totalSpan = document.getElementById("total-estimado");
-        const inmuebleInfo = document.getElementById("info-inmueble");
-        const tipoInmueble = document.getElementById("tipo-inmueble").value;
-        const precio = parseFloat(inmuebleInfo.dataset.precio);
-
-        if (!diaInput || !horaInicio || !horaFin) {
-            console.error("Faltan campos del formulario. Verificá los ID.");
-            return;
-        }
-
-        // Reemplazar las opciones de hora según disponibilidad
-        diaInput.addEventListener("change", function () {
-            const diaSeleccionado = this.value;
-            const inmuebleId = document.getElementById("tipo-inmueble").dataset.inmuebleId;
-
-            if (!diaSeleccionado || !inmuebleId) return;
-
-            fetch(`/reservas/horas_ocupadas/${inmuebleId}?dia=${diaSeleccionado}`)
-                .then(response => response.json())
-                .then(data => {
-                    const horasOcupadas = data.horas_ocupadas.map(h => parseInt(h));
-
-                    [horaInicio, horaFin].forEach(select => {
-                        const valorAnterior = select.value;
-                        select.innerHTML = "";  // limpiar todo
-
-                        for (let h = 0; h < 24; h++) {
-                            if (!horasOcupadas.includes(h)) {
-                                const valor = `${h.toString().padStart(2, '0')}:00`;
-                                const opt = document.createElement("option");
-                                opt.value = valor;
-                                opt.textContent = valor;
-                                select.appendChild(opt);
-                            }
-                        }
-
-                        if (Array.from(select.options).some(opt => opt.value === valorAnterior)) {
-                            select.value = valorAnterior;
-                        }
-                    });
-
-                    calcularTotal();  // recalcular precio en vivo si cambió algo
-                });
-        });
-
-        // Cálculo del total estimado
-        function calcularTotal() {
-            if (tipoInmueble === "Cochera") {
-                const hIni = horaInicio.value;
-                const hFin = horaFin.value;
-
-                if (!hIni || !hFin) {
-                    totalSpan.textContent = "0.00";
-                    return;
-                }
-
-                const inicio = parseInt(hIni.split(":")[0]);
-                const fin = parseInt(hFin.split(":")[0]);
-                const horas = fin - inicio;
-
-                if (horas <= 0) {
-                    totalSpan.textContent = "0.00";
-                    return;
-                }
-
-                const total = precio * horas;
-                totalSpan.textContent = total.toFixed(2);
-            }
-        }
-
-        horaInicio.addEventListener("change", calcularTotal);
-        horaFin.addEventListener("change", calcularTotal);
+    // Activar flatpickr sobre todos los inputs con clase .datepicker
+    flatpickr(".datepicker", {
+        dateFormat: "Y-m-d",
+        disable: diasFinales
     });
+
+    // Selección de elementos
+    const diaInput = document.querySelector('#id_dia');
+    const horaInicio = document.querySelector('#id_hora_inicio');
+    const horaFin = document.querySelector('#id_hora_fin');
+    const totalSpan = document.getElementById("total-estimado");
+    const inmuebleInfo = document.getElementById("info-inmueble");
+    const tipoInmueble = document.getElementById("tipo-inmueble").value;
+    const precio = parseFloat(inmuebleInfo.dataset.precio);
+
+    if (!diaInput || !horaInicio || !horaFin) {
+        console.error("Faltan campos del formulario. Verificá los ID.");
+        return;
+    }
+
+    // Reemplazar las opciones de hora según disponibilidad
+    diaInput.addEventListener("change", function () {
+        const diaSeleccionado = this.value;
+        const inmuebleId = document.getElementById("tipo-inmueble").dataset.inmuebleId;
+
+        if (!diaSeleccionado || !inmuebleId) return;
+
+        fetch(`/reserva/reservas/horas_ocupadas/${inmuebleId}?dia=${diaSeleccionado}`)
+            .then(response => response.json())
+            .then(data => {
+                const horasOcupadas = data.horas_ocupadas.map(h => parseInt(h));
+
+                [horaInicio, horaFin].forEach(select => {
+                    const valorAnterior = select.value;
+                    while (select.firstChild) {
+                        select.removeChild(select.firstChild);
+                    }
+
+                    for (let h = 0; h < 24; h++) {
+                        const opt = document.createElement("option");
+                        const valor = `${h.toString().padStart(2, '0')}:00`;
+                        opt.value = valor;
+                        opt.textContent = valor;
+
+                        if (horasOcupadas.includes(h)) {
+                            opt.disabled = true;
+                            opt.style.color = "red";  // 👈 marca visual
+                            opt.textContent += " (ocupado)";
+                        }
+
+                        select.appendChild(opt);
+                    }
+
+                    // Restaurar valor anterior si es válido
+                    if (Array.from(select.options).some(opt => opt.value === valorAnterior && !opt.disabled)) {
+                        select.value = valorAnterior;
+                    } else {
+                        select.selectedIndex = 0; // por defecto al primero habilitado
+                    }
+                });
+                calcularTotal()
+            });
+    });
+
+    if (diaInput.value) {
+        const evento = new Event('change');
+        diaInput.dispatchEvent(evento);
+    }
+
+    // Cálculo del total estimado
+    function calcularTotal() {
+        if (tipoInmueble === "Cochera") {
+            const hIni = horaInicio.value;
+            const hFin = horaFin.value;
+
+            if (!hIni || !hFin) {
+                totalSpan.textContent = "0.00";
+                return;
+            }
+
+            const inicio = parseInt(hIni.split(":")[0]);
+            const fin = parseInt(hFin.split(":")[0]);
+            const horas = fin - inicio;
+
+            if (horas <= 0) {
+                totalSpan.textContent = "0.00";
+                return;
+            }
+
+            const total = precio * horas;
+            totalSpan.textContent = total.toFixed(2);
+        }
+    }
+
+    horaInicio.addEventListener("change", calcularTotal);
+    horaFin.addEventListener("change", calcularTotal);
+});
 </script>
+
 
 <script src="{% static 'js/solicitar_reserva.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
