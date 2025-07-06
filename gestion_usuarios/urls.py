@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth import views as auth_views
+from .views import MiPasswordChangeView
 
 urlpatterns = [
     path('registro/', views.registrar_usuario, name='registro'),
@@ -24,6 +26,8 @@ urlpatterns = [
     path('deshabilitar/<int:user_id>/', views.deshabilitar_usuario, name='deshabilitar_usuario'),
     path('usuarios/habilitar/<int:user_id>/', views.habilitar_usuario, name='habilitar_usuario'),
     path('empleados/<int:user_id>/habilitar/', views.habilitar_empleado, name='habilitar_empleado'),
+    path('alta-manual/', views.alta_manual_usuario, name= 'alta-manual'),
+    path('cambiar-password/', MiPasswordChangeView.as_view(), name='cambiar_password'),
 
 
 

@@ -1,49 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h2>Listado de Reservas</h2>
+<link rel="stylesheet" href="{% static 'styles/detalle_inmueble.css' %}">
+<!-- Pestañas -->
+<div class="pestana-selector">
+    <button onclick="mostrarPestaña('aceptadas')">Mis reservas</button>
+    <button onclick="mostrarPestaña('pendientes')">Reservas pendientes</button>
+    <button onclick="mostrarPestaña('canceladas')">Reservas canceladas</button>
+</div>
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Inmueble</th>
-            <th>Usuario</th>
-            <th>Fecha inicio</th>
-            <th>Fecha fin</th>
-            <th>Método de pago</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for reserva in reservas %}
-            <tr>
-                <td>{{ reserva.id }}</td>
-                <td>{{ reserva.inmueble.nombre }}</td>
-                <td>{{ reserva.usuario.username }}</td>
-                <td>{{ reserva.fecha_inicio }}</td>
-                <td>{{ reserva.fecha_fin }}</td>
-                <td>{{ reserva.metodo_pago }}</td>
-                <td>
-                      {% if puede_cambiar_estado %}
-                         <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
-                          {% csrf_token %}
-                          <select name="nuevo_estado">
-                               <option value="pendiente" {% if reserva.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                               <option value="aceptada" {% if reserva.estado == 'aceptada' %}selected{% endif %}>Aceptada</option>
-                               <option value="rechazada" {% if reserva.estado == 'rechazada' %}selected{% endif %}>Rechazada</option>
-                         </select>
-                               <button type="submit">Cambiar</button>
-                         </form>
-                      {% else %}
-                          {{ reserva.estado }}
-                     {% endif %}
-               </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="7">No hay reservas.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div id="pestana-aceptadas" class="pestana" style="margin-top: 1rem;">
+    <h3>Mis reservas (aceptadas)</h3>
+    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_aceptadas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+</div>
+
+<div id="pestana-pendientes" class="pestana" style="display:none; margin-top: 1rem;">
+    <h3>Reservas pendientes</h3>
+    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_pendientes user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+</div>
+
+<div id="pestana-canceladas" class="pestana" style="display:none; margin-top: 1rem;">
+    <h3>Reservas canceladas</h3>
+    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_canceladas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+</div>
+
+<script>
+function mostrarPestaña(nombre) {
+    const pestañas = ['aceptadas', 'pendientes', 'canceladas'];
+    pestañas.forEach(p => {
+        document.getElementById('pestana-' + p).style.display = 'none';
+    });
+    document.getElementById('pestana-' + nombre).style.display = 'block';
+}
+</script>
+
 {% endblock %}

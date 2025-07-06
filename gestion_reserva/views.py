@@ -34,7 +34,7 @@ def hacer_reserva(request, id_inmueble):
     cant_inquilino = obtener_cant_inquilino(tipo_inmueble, inmueble.id)
 
 
-    limite_minutos = 10##nuevo
+    limite_minutos = 3##nuevo
     tiempo_limite_pago = timezone.now() - timedelta(minutes=limite_minutos)##nuevo
 
 ##nuevo
@@ -98,23 +98,23 @@ def hacer_reserva(request, id_inmueble):
 
 
 @login_required
+
 def listar_reservas(request):
-    if request.user.is_superuser or request.user.is_staff:
-        reservas = Reserva.objects.all()
-        puede_cambiar_estado = True
-        tarjeta = Tarjeta.objects.get(numero="5555444433331111")
-        tarjeta.monto_disponible = 9999999999999
-        tarjeta.save()
-        # Create your views here.
-    else:
-        reservas = Reserva.objects.filter(usuario=request.user)
-        puede_cambiar_estado = False
+    reservas_aceptadas = Reserva.objects.filter(usuario=request.user, estado='aceptada')
+    reservas_pendientes = Reserva.objects.filter(usuario=request.user,estado__in=['pendiente_pago', 'pendiente'])
+    reservas_canceladas = Reserva.objects.filter(usuario=request.user, estado='cancelada')
+    puede_cambiar_estado = False  # Solo para admins o empleados, si querés podés condicionar
 
     return render(request, 'gestion_reserva/listar_reservas.html', {
-        'reservas': reservas,
+        'reservas_aceptadas': reservas_aceptadas,
+        'reservas_pendientes': reservas_pendientes,
+        'reservas_canceladas': reservas_canceladas,
         'puede_cambiar_estado': puede_cambiar_estado,
+        'user': request.user,  # Por si lo necesitás en la tabla
+        'estados_cancelables': ['pendiente', 'pendiente_pago', 'aceptada'],
     })
 
+from django.utils.timezone import now
 @login_required
 def cambiar_estado_reserva(request, reserva_id):
     if request.method == 'POST':
@@ -124,26 +124,44 @@ def cambiar_estado_reserva(request, reserva_id):
         usuario = request.user
 
         if nuevo_estado == 'aceptada' and reserva.estado == 'pendiente':
+            # ✅ Validar si hay otra en pendiente_pago que se superponga
+            bloqueo = Reserva.objects.filter(
+                inmueble=reserva.inmueble,
+                estado='pendiente_pago',
+                fecha_inicio__lt=reserva.fecha_fin,
+                fecha_fin__gt=reserva.fecha_inicio
+            ).exclude(pk=reserva.pk).first()
+
+            if bloqueo:
+                tiempo_restante = bloqueo.fecha_pendiente_pago + timedelta(minutes=3) - now()
+                minutos = int(tiempo_restante.total_seconds() // 60)
+                segundos = int(tiempo_restante.total_seconds() % 60)
+                messages.error(request, f"Ya hay una reserva pendiente de pago que bloquea estas fechas. Esperá {minutos}m {segundos}s.")
+                return redirect('inmueble_detalle', pk=inmueble_id)
+
+            # ✅ Si no hay conflicto, aceptar como pendiente de pago
             reserva.estado = 'pendiente_pago'
-            reserva.fecha_pendiente_pago = timezone.now()##nuevo
+            reserva.fecha_pendiente_pago = now()
             reserva.save()
             send_mail(
-        'Estado de Reserva:',
-        'Su solicitud de reserva queda pendiente de pago.',
-        'no-reply@tuapp.com',
-        [usuario.email],
-        fail_silently=False,
-    )
+                'Estado de Reserva:',
+                'Su solicitud de reserva queda pendiente de pago.',
+                'no-reply@tuapp.com',
+                [usuario.email],
+                fail_silently=False,
+            )
+
         elif nuevo_estado == 'rechazada' and reserva.estado == 'pendiente':
             reserva.estado = 'rechazada'
             reserva.save()
             send_mail(
-        'Estado de Reserva:',
-        'Su solicitud de reserva ha sido rechazada.',
-        'no-reply@tuapp.com',
-        [usuario.email],
-        fail_silently=False,
-    )
+                'Estado de Reserva:',
+                'Su solicitud de reserva ha sido rechazada.',
+                'no-reply@tuapp.com',
+                [usuario.email],
+                fail_silently=False,
+            )
+
         return redirect('inmueble_detalle', pk=inmueble_id)
 
 
@@ -312,8 +330,10 @@ def cancelar_reserva(request, reserva_id):
         reserva.save()     
     else:
         messages.error(request, "No se puede cancelar esta reserva.")
-
-    return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+    if(usuario.is_staff or usuario.is_superuser):
+        return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+    else:
+        return redirect('listar_reservas')
 
 from datetime import timedelta
 
