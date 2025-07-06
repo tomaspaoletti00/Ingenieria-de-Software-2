@@ -1,4 +1,6 @@
-<table border="1">
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/tabla_reservas.css' %}">
+<table class="tabla-reservas">
     <thead>
         <tr>
             <th>Usuario</th>
@@ -6,7 +8,7 @@
             <th>Fecha fin</th>
             <th>Método de pago</th>
             <th>Estado</th>
-            <th>Acciones</th> <!-- Nueva columna -->
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -18,35 +20,39 @@
                 <td>{{ reserva.metodo_pago }}</td>
                 <td>{{ reserva.get_estado_display }}</td>
                 <td>
-                    {% if puede_cambiar_estado and reserva.estado == 'pendiente' %}
-                        <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}" style="display:inline;">
-                            {% csrf_token %}
+                    <div class="acciones-reserva">
+                        {% if puede_cambiar_estado and reserva.estado == 'pendiente' %}
+                             <div class="acciones-reserva">
+                               <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+                               {% csrf_token %}
+                               <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
+                               <input type="hidden" name="nuevo_estado" value="aceptada">
+                               <button type="submit" class="btn-reserva aceptar">Aceptar</button>
+                               </form>
+                              <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+                             {% csrf_token %}
                             <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
-                            <select name="nuevo_estado" required>
-                                <option value="aceptada">Aceptar</option>
-                                <option value="rechazada">Rechazar</option>
-                            </select>
-                            <button type="submit">Cambiar</button>
-                        </form>
-                     {% elif reserva.usuario == user %}
-                           {% if reserva.estado == 'pendiente_pago' %}
-                              <!-- Botón pagar -->
-                              <form method="post" action="{% url 'pagar_reserva' reserva.id %}" style="display:inline;">
-                                 {% csrf_token %}
-                                 <button type="submit">Pagar</button>
-                              </form>
+                            <input type="hidden" name="nuevo_estado" value="rechazada">
+                             <button type="submit" class="btn-reserva rechazar">Rechazar</button>
+                            </form>
+                            </div>
+                        {% elif reserva.usuario == user %}
+                            {% if reserva.estado == 'pendiente_pago' %}
+                                <form method="post" action="{% url 'pagar_reserva' reserva.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-reserva pagar">Pagar</button>
+                                </form>
                             {% endif %}
                             {% if reserva.estado in estados_cancelables %}
-                               <!-- Botón cancelar -->
-                              <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">
-                                 {% csrf_token %}
-                                 <button type="submit" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
-                              </form>
+                                <form method="post" action="{% url 'cancelar_reserva' reserva.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-reserva cancelar" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
+                                </form>
                             {% endif %}
-                    {% else %}
-                        <!-- Sin acciones disponibles -->
-                        -
-                    {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         {% empty %}
