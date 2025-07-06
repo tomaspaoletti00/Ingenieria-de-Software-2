@@ -323,39 +323,8 @@ def calcular_total_reserva(reserva):
     if duracion_dias == 0:
         duracion_dias = 1
 
-    precio = float(reserva.inmueble.precio)
-    tiempo = reserva.inmueble.tiempo
+    precio = float(reserva.inmueble.precio)*duracion_dias
 
-    if tiempo == 'Por_hora':
-        return round(precio * duracion_horas, 2)
-    elif tiempo == 'Por_noche':
-        return round(precio * duracion_dias, 2)
-    elif tiempo == 'Por_semana':
-        return round(precio * (duracion_dias / 7), 2)
-    elif tiempo == 'Por_mes':
-        return round(precio * (duracion_dias / 30), 2)
-    else:
-        return round(precio * duracion_dias, 2)
+    return precio
 
 
-from datetime import timedelta
-
-def calcular_total_reserva(reserva):
-    duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
-    duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
-    if duracion_dias == 0:
-        duracion_dias = 1
-
-    precio = float(reserva.inmueble.precio)
-    tiempo = reserva.inmueble.tiempo
-
-    if tiempo == 'Por_hora':
-        return round(precio * duracion_horas, 2)
-    elif tiempo == 'Por_noche':
-        return round(precio * duracion_dias, 2)
-    elif tiempo == 'Por_semana':
-        return round(precio * (duracion_dias / 7), 2)
-    elif tiempo == 'Por_mes':
-        return round(precio * (duracion_dias / 30), 2)
-    else:
-        return round(precio * duracion_dias, 2)
