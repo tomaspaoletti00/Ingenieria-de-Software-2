@@ -1,6 +1,10 @@
-<table border="1">
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/tabla_reservas_generica.css' %}">
+
+<table class="tabla-reservas">
     <thead>
         <tr>
+            <th>Inmueble</th>
             <th>Usuario</th>
             <th>Fecha inicio</th>
             <th>Fecha fin</th>
@@ -12,6 +16,7 @@
     <tbody>
         {% for reserva in reservas %}
             <tr>
+                <td>{{ reserva.inmueble.nombre }}</td>
                 <td>{{ reserva.usuario.username }}</td>
                 <td>{{ reserva.fecha_inicio }}</td>
                 <td>{{ reserva.fecha_fin }}</td>
@@ -22,13 +27,13 @@
                         {% if reserva.estado == 'pendiente_pago' %}
                             <form method="post" action="{% url 'pagar_reserva' reserva.id %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit">Pagar</button>
+                                <button type="submit" class="btn-reserva pagar">Pagar</button>
                             </form>
                         {% endif %}
                         {% if reserva.estado in estados_cancelables %}
                             <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
+                                <button type="submit" class="btn-reserva cancelar" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
                             </form>
                         {% endif %}
                     {% else %}
@@ -38,7 +43,7 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">No hay reservas.</td>
+                <td colspan="7">No hay reservas.</td>
             </tr>
         {% endfor %}
     </tbody>
