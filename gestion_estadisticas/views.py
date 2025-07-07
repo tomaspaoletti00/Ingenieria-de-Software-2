@@ -234,6 +234,6 @@ def total_ingresos(request):
 
     total_general = round(total_general, 2)
 
-    return render(request, "gestion_estadisticas/total-empresa.html", {
+    return render(request, "gestion_estadisticas/ingresos-total.html", {
         "total_general": total_general
     })
