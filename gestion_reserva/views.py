@@ -64,7 +64,23 @@ def hacer_reserva(request, id_inmueble):
     cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)  # cambiar si lo sacás de otro lado
 
     FormClase = ReservaCocheraForm if tipo_inmueble == "Cochera" else ReservaNormalForm
+    limite_minutos = 3
+    tiempo_limite_pago = timezone.now() - timedelta(minutes=limite_minutos)
 
+    expiradas = Reserva.objects.filter(
+        estado='pendiente_pago',
+        fecha_pendiente_pago__lt=tiempo_limite_pago
+    )
+    for res in expiradas:
+        res.estado = 'cancelada'
+        res.save()
+
+    conflictos = Reserva.objects.filter(
+        inmueble=inmueble
+    ).filter(
+        Q(estado='aceptada') | Q(estado='pendiente_pago', fecha_pendiente_pago__gte=tiempo_limite_pago)
+    ).values_list('fecha_inicio', 'fecha_fin')
+    
     if request.method == "POST":
         form = FormClase(request.POST, inmueble=inmueble)
         if form.is_valid():
