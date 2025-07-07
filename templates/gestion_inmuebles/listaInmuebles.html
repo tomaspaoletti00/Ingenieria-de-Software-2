@@ -209,10 +209,6 @@
       </select>
     </div>
 
-    <div>
-      <label for="noches">Noches:</label>
-      <input type="number" min="1" name="noches" id="noches" value="{{ noches|default:1 }}">
-    </div>
 
     <div id="plaza-fields" style="display: none;">
       <label for="largo_plaza">Largo Plaza (m):</label>
@@ -277,7 +273,7 @@
     {% endfor %}
 
     {% for inmueble in inmuebles %}
-        {% if inmueble.objeto.estado != 'Disponible' %}
+        {% if inmueble.objeto.estado == 'Mantenimiento' %}
             {% with inmueble=inmueble.objeto tipo=inmueble.tipo %}
                 <a href="{% url 'inmueble_detalle' inmueble.id %}" class="card-link">
                     <div class="card no-disponible" data-estado="{{ inmueble.estado }}">
