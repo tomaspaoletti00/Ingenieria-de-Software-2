@@ -25,7 +25,7 @@
                 <td>
                     {% if reserva.usuario == user %}
                         {% if reserva.estado == 'pendiente_pago' %}
-                            <form method="post" action="{% url 'pagar_reserva' reserva.id %}" style="display:inline;">
+                            <form  action="{% url 'insertar_inquilino' reserva.id %}" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn-reserva pagar">Pagar</button>
                             </form>

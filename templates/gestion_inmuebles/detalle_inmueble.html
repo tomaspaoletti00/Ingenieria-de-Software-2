@@ -81,9 +81,8 @@
         <button>Realizar reserva</button>
     </a>
     {% endif %}
-
+    {% if user.is_authenticated and user.is_staff or user.is_superuser %}
     <!-- Pestañas -->
-    {% if user.is_authenticated %}
     <div class="pestana-selector">
         <button onclick="mostrarPestaña('aceptadas')">Reservas aceptadas</button>
         <button onclick="mostrarPestaña('pendientes')">Solicitudes de reserva pendientes</button>
@@ -99,6 +98,7 @@
         <h3>Solicitudes de reserva pendientes</h3>
         {% include 'gestion_reserva/tabla_reservas.html' with reservas=reservas_pendientes puede_cambiar_estado=puede_cambiar_estado %}
     </div>
+    
     {% endif %}
     <script>
     function mostrarPestaña(nombre) {

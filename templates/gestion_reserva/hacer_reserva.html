@@ -17,48 +17,9 @@
     {% csrf_token %}
     <input type="hidden" id="tipo-inmueble" value="{{ tipo_inmueble }}" data-inmueble-id="{{ inmueble.id }}">
     {{ form.as_p }}
-
-    {% if tipo_inmueble != 'Cochera' %}
-    <div>
-        <label>Máximo de inquilinos: {{ cant_inquilino }}</label>
-    </div>
-    {% endif %}
-
-    <div id="container-persona" data-max="{{ cant_inquilino }}">
-        <div class="persona">
-            <input type="text" name="nombre" value="{{ usuario.first_name }}" readonly>
-            {% if tipo_inmueble == 'Cochera' %}
-                <input type="text" name="edad" placeholder="Patente">
-            {% else %}
-                <input type="text" name="edad" value="{{ usuario.telefono }}" readonly>
-            {% endif %}
-            <input type="text" name="dni" value="{{ usuario.dni }}" readonly>
-        </div>
-    </div>
-
-    {% if tipo_inmueble != 'Cochera' %}
-        <button type="button" id="agregar-persona">+ Agregar inquilino</button>
-    {% endif %}
-
-    <input type="hidden" name="datos_inquilinos" id="datos-inquilinos-hidden">
-    <p><strong>Total estimado:</strong> $<span id="total-estimado">0.00</span></p>
     <button type="submit">Enviar reserva</button>
 </form>
-
-<!-- plantilla para clon -->
-<div id="formulario-persona-plantilla" style="display: none;">
-    <div class="persona">
-        <input type="text" name="nombre" placeholder="Nombre completo">
-        {% if tipo_inmueble == 'Cochera' %}
-            <input type="text" name="edad" placeholder="Patente">
-        {% else %}
-            <input type="number" name="edad" placeholder="Edad">
-        {% endif %}
-        <input type="text" name="dni" placeholder="DNI">
-        <button type="button" class="eliminar-persona">Eliminar</button>
-    </div>
-</div>
-
+<p><strong>Total estimado:</strong> $<span id="total-estimado">0.00</span></p>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const fechasOcupadas = {{ fechas_ocupadas|safe }};
@@ -165,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 
-<script src="{% static 'js/solicitar_reserva.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}

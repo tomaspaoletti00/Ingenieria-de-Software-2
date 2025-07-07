@@ -38,7 +38,8 @@ def obtener_horas_ocupadas(request, inmueble_id):
     reservas = Reserva.objects.filter(
         inmueble=cochera,
         fecha_inicio__date=dia,
-        estado="aceptada"
+        estado__in=["aceptada", "pendiente_pago"],
+        
     )
 
     horas = defaultdict(int)
@@ -56,12 +57,38 @@ def obtener_cant_inquilino(tipo_inmueble, id_inmueble):
         return Departamento.objects.get(pk=id_inmueble).cantidad_inquilinos
     return 1
 
+from django.shortcuts import redirect
+
+@login_required
+def agregarInquilinos(request, reserva_id):
+    reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+    inmueble = reserva.inmueble
+    tipo_inmueble = inmueble.tipo
+    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, inmueble)
+
+    if request.method == "POST":
+        datos_inquilinos = json.loads(request.POST.get("datos_inquilinos", "[]"))
+        print("datos_inquilinos recibido:", datos_inquilinos)
+        reserva.datos_inquilinos = datos_inquilinos
+        reserva.save()
+        return redirect("pagar_reserva", reserva_id=reserva.id)  # 🔁 REDIRECCIÓN
+            
+    
+
+    return render(request, "gestion_reserva/insertar_inquilino.html", {
+        "usuario": request.user,
+        "cant_inquilino": cant_inquilino,
+        "tipo_inmueble": tipo_inmueble,
+        "inmueble": inmueble,
+        "reserva": reserva,
+    })
+
+                   
 
 @login_required
 def hacer_reserva(request, id_inmueble):
     inmueble = get_object_or_404(Inmueble, pk=id_inmueble)
     tipo_inmueble = inmueble.tipo
-    cant_inquilino = obtener_cant_inquilino(tipo_inmueble, id_inmueble)  # cambiar si lo sacás de otro lado
 
     FormClase = ReservaCocheraForm if tipo_inmueble == "Cochera" else ReservaNormalForm
     limite_minutos = 3
@@ -87,17 +114,10 @@ def hacer_reserva(request, id_inmueble):
             reserva = form.save(commit=False)
             reserva.usuario = request.user
             reserva.inmueble = inmueble
-            try:
-                datos_inquilinos = json.loads(request.POST.get("datos_inquilinos", "[]"))
-                if not datos_inquilinos:
-                    form.add_error(None, "Debe agregar al menos una persona.")
-                else:
-                    reserva.datos_inquilinos = datos_inquilinos
-                    reserva.save()
-                    messages.success(request, 'Reserva exitosa.')
-                    return redirect("inmueble_detalle", pk=inmueble.id)
-            except json.JSONDecodeError:
-                form.add_error(None, "Error al procesar los datos de los inquilinos.")
+            reserva.datos_inquilinos=[]
+            reserva.save()
+            messages.success(request, 'Reserva exitosa.')
+            return redirect("inmueble_detalle", pk=inmueble.id)
     else:
         form = FormClase(inmueble=inmueble)
 
@@ -107,19 +127,14 @@ def hacer_reserva(request, id_inmueble):
     # Obtener fechas ocupadas para reservas normales
     fechas_ocupadas = []
     if tipo_inmueble != "Cochera":
-        reservas_existentes = Reserva.objects.filter(
-            inmueble=inmueble,
-            estado="aceptada"
-        )
-        for reserva in reservas_existentes:
-            inicio = reserva.fecha_inicio.date()
-            fin = reserva.fecha_fin.date()
-            for i in range((fin - inicio).days + 1):
-                fechas_ocupadas.append((inicio + timedelta(days=i)).isoformat())
+        for inicio, fin in conflictos:
+            actual = inicio.date()
+            while actual <= fin.date():
+                fechas_ocupadas.append(actual.isoformat())
+                actual += timedelta(days=1)
 
     return render(request, "gestion_reserva/hacer_reserva.html", {
         "form": form,
-        "cant_inquilino": cant_inquilino,
         "tipo_inmueble": tipo_inmueble,
         "inmueble": inmueble,
         "usuario": request.user,
@@ -144,7 +159,19 @@ def listar_reservas(request):
 
 from django.utils.timezone import now
 @login_required
+
 def cambiar_estado_reserva(request, reserva_id):
+    limite_minutos = 3
+    tiempo_limite_pago = timezone.now() - timedelta(minutes=limite_minutos)
+
+    expiradas = Reserva.objects.filter(
+        estado='pendiente_pago',
+        fecha_pendiente_pago__lt=tiempo_limite_pago
+    )
+    for res in expiradas:
+        res.estado = 'cancelada'
+        res.save()
+
     if request.method == 'POST':
         reserva = get_object_or_404(Reserva, id=reserva_id)
         nuevo_estado = request.POST.get('nuevo_estado')
@@ -153,6 +180,7 @@ def cambiar_estado_reserva(request, reserva_id):
 
         if nuevo_estado == 'aceptada' and reserva.estado == 'pendiente':
             # --- LÓGICA ESPECIAL PARA COCHERA ---
+            
             if reserva.inmueble.tipo == "Cochera":
                 try:
                     cochera = Cochera.objects.get(pk=reserva.inmueble.pk)

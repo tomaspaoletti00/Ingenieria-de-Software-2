@@ -38,7 +38,7 @@
                             </div>
                         {% elif reserva.usuario == user %}
                             {% if reserva.estado == 'pendiente_pago' %}
-                                <form method="post" action="{% url 'pagar_reserva' reserva.id %}">
+                                <form  action="{% url 'insertar_inquilino' reserva.id %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn-reserva pagar">Pagar</button>
                                 </form>
