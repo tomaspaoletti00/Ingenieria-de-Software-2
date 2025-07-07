@@ -264,7 +264,6 @@ from datetime import timedelta
 @login_required
 def pagar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
-
     if reserva.estado != 'pendiente_pago':
         return HttpResponseForbidden("Esta reserva no se puede pagar.")
 
@@ -381,16 +380,17 @@ def cancelar_reserva(request, reserva_id):
 from datetime import timedelta
 
 def calcular_total_reserva(reserva):
+    tipo = reserva.inmueble.tipo.lower()  # Por si viene con mayúsculas
     duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
     duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
     if duracion_dias == 0:
         duracion_dias = 1
 
-    precio = float(reserva.inmueble.precio)
-    tiempo = reserva.inmueble.tipo
+    if tipo == "cochera":
+        precio = float(reserva.inmueble.precio) * duracion_horas
+    else:
+        precio = float(reserva.inmueble.precio) * duracion_dias
 
-    if tiempo == 'Cochera':
-        return round(precio * duracion_horas, 2)
-    else :
-        return round(precio * duracion_dias, 2)
-   
+    return precio
+
+

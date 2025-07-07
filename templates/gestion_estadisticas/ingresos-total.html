@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="max-width: 600px; margin: 3rem auto; padding: 2rem; background: #f1f5f9; border-radius: 1rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; font-family: Arial, sans-serif;">
+    <h1 style="font-size: 2rem; color: #1e293b;">Total de Ingresos</h1>
+    
+    <p style="font-size: 1.5rem; margin-top: 1rem; color: #10b981;">
+        ${{ total_general|floatformat:2 }}
+    </p>
+</div>
+
+{% endblock %}

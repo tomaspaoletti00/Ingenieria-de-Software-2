@@ -1,15 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<<<<<<< HEAD
-<h2>Ingresos Mensuales</h2>
-
-<div>
-    <h3>Ingresos Totales: ${{ total_ingresos|floatformat:2 }}</h3>
-</div>
-
-<canvas id="graficoIngresos" width="700" height="350"></canvas>
-=======
 <h2>📈 Ingresos Mensuales:</h2>
 
 <div>
@@ -17,7 +8,6 @@
 </div>
 
 <canvas id="graficoIngresos" width="400" height="100"></canvas>
->>>>>>> e6f35ac34caad458f61074f1c81874251b8391cb
 
 <!-- Pasamos los datos con json_script para evitar problemas -->
 {{ labels|json_script:"labels-data" }}

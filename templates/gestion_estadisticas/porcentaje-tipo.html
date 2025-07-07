@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <link rel="stylesheet" href="{% static 'styles/ingresos-tipo.css' %}">
+
+  <div class="header-container">
+    <button onclick="history.back()" class="btn-volver">← Volver</button>
+    <h1>Porcentaje de reservas por tipo de inmueble</h1>
+  </div>
+
+  {{ labels|json_script:"labels-data" }}
+  {{ valores|json_script:"valores-data" }}
+
+  <div style="max-width: 500px; margin: 0 auto;">
+    <canvas id="graficoTorta"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('graficoTorta').getContext('2d');
+    const labels = JSON.parse(document.getElementById('labels-data').textContent);
+    const valores = JSON.parse(document.getElementById('valores-data').textContent);
+
+    const grafico = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: valores,
+          backgroundColor: [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+          ],
+          borderWidth: 1,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'right',
+            labels: {
+              boxWidth: 20,
+              padding: 15
+            }
+          },
+          tooltip: {
+            enabled: true,
+          }
+        }
+      }
+    });
+  </script>
+
+{% endblock %}
