@@ -1,0 +1,44 @@
+.tabla-reservas {
+    width: 100%;
+    max-width: 900px; /* Limita el ancho total */
+    margin: 0 auto;   /* Centra la tabla */
+    border-collapse: collapse;
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tabla-reservas thead {
+    background-color: #334155;
+}
+
+.tabla-reservas th, .tabla-reservas td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #475569;
+}
+
+.tabla-reservas tr:hover {
+    background-color: #2d3f56;
+}
+
+.btn-reserva {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.btn-reserva.pagar {
+    background-color: #22c55e;
+    color: white;
+}
+
+.btn-reserva.cancelar {
+    background-color: #ef4444;
+    color: white;
+}
