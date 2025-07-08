@@ -19,13 +19,13 @@
     color: white;
     font-family: Arial, sans-serif;
   }
-    <style>
-        body {
+
+     /*   body {
             background-color: #f7f7f7;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-        }
+        } */
 
         .filtros {
             background-color: #062e59;
@@ -99,15 +99,16 @@
             gap: 20px;
         }
 
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            text-decoration: none;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            color: #333;
-        }
+.card {
+    position: relative; /* Asegura que .notificacion se posicione respecto a esta */
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    color: #333;
+}
 
         .card:hover {
             transform: translateY(-5px);
@@ -153,13 +154,13 @@
     position: relative; /* Para que la notificación se posicione respecto al link */
     display: block;
 }
-        .card.no-disponible {
+.card.no-disponible {
             filter: grayscale(10%);
             background-color: rgba(240, 240, 240, 0.38);
             position: relative;
         }
 
-        .card.no-disponible::before {
+.card.no-disponible::before {
             content: attr(data-estado);
             position: absolute;
             top: 8px;
@@ -221,6 +222,7 @@
     {% if user.is_staff %}
       <div>
         <label class="checkbox-container" for="solo_con_reservas">
+          <input type="hidden" name="orden_reservas" id="orden_reservas" value="{{ orden_reservas|default:'' }}">
           <input type="checkbox" name="solo_con_reservas" id="solo_con_reservas" value="si"
             {% if solo_con_reservas == "si" %}checked{% endif %}
             {% if not puede_ver_reservas %}disabled{% endif %}>
@@ -228,14 +230,20 @@
         </label>
       </div>
 
-      <div>
-        <label for="orden_reservas">Reservas pendientes:</label>
-        <select name="orden_reservas" id="orden_reservas" {% if not puede_ver_reservas %}disabled{% endif %}>
-          <option value="">---</option>
-          <option value="asc" {% if orden_reservas == "asc" %}selected{% endif %}>Menor a mayor</option>
-          <option value="desc" {% if orden_reservas == "desc" %}selected{% endif %}>Mayor a menor</option>
-        </select>
-      </div>
+
+  <input type="hidden" name="orden_reservas" value="desc">
+
+
+    <!--
+<div>
+  <label for="orden_reservas">Reservas pendientes:</label>
+  <select name="orden_reservas" id="orden_reservas" {% if not puede_ver_reservas %}disabled{% endif %}>
+    <option value="">---</option>
+    <option value="asc" {% if orden_reservas == "asc" %}selected{% endif %}>Menor a mayor</option>
+    <option value="desc" {% if orden_reservas == "desc" %}selected{% endif %}>Mayor a menor</option>
+  </select>
+</div>
+-->
     {% endif %}
 
     <button type="submit">Filtrar</button>
@@ -319,6 +327,8 @@
     tipoSelect.addEventListener('change', togglePlazaFields);
     togglePlazaFields();
 </script>
+
+
 
 </body>
 
