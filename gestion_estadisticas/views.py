@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.db import models
 from gestion_reserva.models import Reserva
 from django.db.models import Sum, Q
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncYear, TruncMonth, TruncDay
 from gestion_usuarios.models import Usuario
 from django.db.models import F, ExpressionWrapper, FloatField, DurationField
 import math
@@ -14,6 +14,7 @@ from datetime import timedelta
 from django.db.models import F, ExpressionWrapper, DurationField, FloatField, DecimalField, Sum, Q, Value
 from datetime import datetime
 from decimal import Decimal
+from gestion_reserva.views import calcular_total_reserva
 
 def menu_estadisticas(request):
     return render(request, 'gestion_estadisticas/menu-estadisticas.html')
@@ -236,4 +237,35 @@ def total_ingresos(request):
 
     return render(request, "gestion_estadisticas/ingresos-total.html", {
         "total_general": total_general
+    })
+
+def estadistica_ingresos_diario(request):
+    reservas_aceptadas = Reserva.objects.filter(estado="aceptada").select_related("inmueble")
+
+    # Obtener días únicos con reservas aceptadas
+    dias_con_ingresos = reservas_aceptadas.annotate(dia=TruncDay('fecha_inicio')) \
+                                          .values_list('dia', flat=True).distinct().order_by('dia')
+
+    dias_str = [d.strftime('%Y-%m-%d') for d in dias_con_ingresos]
+
+    fecha_str = request.GET.get('fecha')
+    total_ingresos = 0
+    fecha_mostrada = None
+    reservas_del_dia = []
+
+    if fecha_str:
+        try:
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            reservas_filtradas = reservas_aceptadas.filter(fecha_inicio__date=fecha)
+            total_ingresos = sum(calcular_total_reserva(r) for r in reservas_filtradas)
+            fecha_mostrada = fecha
+            reservas_del_dia = reservas_filtradas
+        except ValueError:
+            pass  # Fecha inválida ignorada
+
+    return render(request, 'gestion_estadisticas/estadistica_ingresos_diario.html', {
+        'dias_habilitados': dias_str,
+        'total_ingresos': round(total_ingresos, 2),
+        'fecha_mostrada': fecha_mostrada,
+        'reservas': reservas_del_dia,
     })

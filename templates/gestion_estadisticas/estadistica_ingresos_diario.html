@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-volver {
+    background-color: #e5e7eb;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-volver:hover {
+    background-color: #d1d5db;
+  }
+</style>
+<!-- Carga Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div style="max-width: 600px; margin: auto; padding: 2rem; font-family: sans-serif;">
+  <div class="header-container">
+    <button onclick="history.back()" class="btn-volver">← Volver</button>
+    <h1>Estadísticas de Ingresos Diarios</h1>
+  </div>
+
+  <form method="get">
+    <label for="fecha">Seleccioná un día con ingresos:</label><br>
+    <input id="fecha" name="fecha" type="text" placeholder="Elegí fecha" readonly
+           style="padding: 0.5rem; margin-top: 0.5rem; width: 100%; max-width: 300px; font-size: 1rem;">
+    <br><br>
+    <button type="submit"
+            style="padding: 0.5rem 1rem; background-color: #2563eb; color: white; border: none; border-radius: 0.5rem;">
+      Ver ingresos
+    </button>
+  </form>
+
+  {% if fecha_mostrada %}
+    <h2 style="margin-top: 2rem;">Ingresos para el {{ fecha_mostrada|date:"d M Y" }}</h2>
+    <p style="font-size: 1.5rem; color: #10b981;">
+      Total: ${{ total_ingresos|floatformat:2 }}
+    </p>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    flatpickr("#fecha", {
+      dateFormat: "Y-m-d",
+      enable: {{ dias_habilitados|safe }},
+      disableMobile: true,
+    });
+  });
+</script>
+
+
+
+
+{% endblock %}

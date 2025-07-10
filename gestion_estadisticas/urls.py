@@ -8,5 +8,6 @@ urlpatterns = [
     path('ingresos/tipo', views.ingresos_por_tipo, name='ingresos-tipo'),
     path('porcentaje/tipo', views.porcentaje_reservas_por_tipo, name='porcentaje-tipo'),
     path('porcentaje/total', views.total_ingresos, name='ingresos-total'),
+    path('ingresos/diarios', views.estadistica_ingresos_diario, name='ingresos-diarios'),
 
 ]
