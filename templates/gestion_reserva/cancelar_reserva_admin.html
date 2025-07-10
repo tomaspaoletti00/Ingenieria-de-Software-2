@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Cancelar reserva</h2>
+<p>Reserva de {{ reserva.usuario.username }} en {{ reserva.inmueble.nombre }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="motivo">Motivo de cancelación:</label><br>
+    <textarea name="motivo" rows="4" cols="50" required></textarea><br><br>
+    <button type="submit" class="btn btn-danger">Cancelar reserva</button>
+    <a href="{% url 'inmueble_detalle' reserva.inmueble.id %}"><button type="button">Volver</button></a>
+</form>
+{% endblock %}

@@ -105,7 +105,7 @@ def hacer_reserva(request, id_inmueble):
     conflictos = Reserva.objects.filter(
         inmueble=inmueble
     ).filter(
-        Q(estado='aceptada') | Q(estado='pendiente_pago', fecha_pendiente_pago__gte=tiempo_limite_pago)
+        Q(estado='aceptada') | Q(estado='', fecha_pendiente_pago__gte=tiempo_limite_pago)
     ).values_list('fecha_inicio', 'fecha_fin')
     
     if request.method == "POST":
@@ -143,7 +143,7 @@ def hacer_reserva(request, id_inmueble):
     })
 @login_required
 def listar_reservas(request):
-    reservas_aceptadas = Reserva.objects.filter(usuario=request.user, estado='aceptada')
+    reservas_aceptadas = Reserva.objects.filter(usuario=request.user, estado__in=['aceptada', 'en_curso'])
     reservas_pendientes = Reserva.objects.filter(usuario=request.user,estado__in=['pendiente_pago', 'pendiente'])
     reservas_canceladas = Reserva.objects.filter(usuario=request.user, estado='cancelada')
     puede_cambiar_estado = False  # Solo para admins o empleados, si querés podés condicionar
@@ -291,7 +291,7 @@ def inmueble_detalle(request, pk):
                 estado__in=['pendiente_pago', 'aceptada', 'pendiente']
             )
     
-    reservas_aceptadas = reservas.filter(estado='aceptada')
+    reservas_aceptadas = reservas.filter(estado__in=['aceptada', 'en_curso'])
     reservas_pendientes = reservas.filter(estado__in=['pendiente_pago', 'pendiente'])
 
     context = {
@@ -377,7 +377,7 @@ def pagar_reserva(request, reserva_id):
                         r.estado = 'rechazada'
                         r.save()
 
-            return redirect("inmueble_detalle", pk=reserva.inmueble.id)
+            return redirect('listar_reservas')
     else:
         form = PagoForm()
 
@@ -436,5 +436,59 @@ def calcular_total_reserva(reserva):
         precio = float(reserva.inmueble.precio) * duracion_dias
 
     return precio
+
+@login_required
+def cancelar_reserva_admin(request, reserva_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return HttpResponseForbidden("No tenés permisos para acceder a esta acción.")
+
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+    if request.method == "POST":
+        motivo = request.POST.get("motivo", "").strip()
+
+        if reserva.estado in ['pendiente', 'pendiente_pago', 'aceptada']:
+            reserva.estado = 'cancelada'
+            reserva.save()
+
+            mensaje = f"Su reserva fue cancelada por un administrador.\nMotivo: {motivo}" if motivo else "Su reserva fue cancelada por un administrador."
+            send_mail(
+                'Reserva cancelada por administrador',
+                mensaje,
+                'no-reply@tuapp.com',
+                [reserva.usuario.email],
+                fail_silently=False,
+            )
+            messages.success(request, "Reserva cancelada y mail enviado.")
+        else:
+            messages.error(request, "No se puede cancelar esta reserva.")
+        return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+
+    return render(request, "gestion_reserva/cancelar_reserva_admin.html", {
+        "reserva": reserva
+    })
+
+@login_required
+def actualizar_estado_dinamico(request, reserva_id):
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+
+    if reserva.usuario != request.user and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("No tenés permiso.")
+
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+
+        if accion == 'iniciar' and reserva.estado == 'aceptada':
+            reserva.estado = 'en_curso'
+            reserva.save()
+            messages.success(request, "La reserva se ha iniciado.")
+        elif accion == 'finalizar' and reserva.estado == 'en_curso':
+            reserva.estado = 'finalizada'
+            reserva.save()
+            messages.success(request, "La reserva se ha finalizado.")
+        else:
+            messages.error(request, "Acción no permitida.")
+
+    return redirect('inmueble_detalle', pk=reserva.inmueble.id)
+
 
 

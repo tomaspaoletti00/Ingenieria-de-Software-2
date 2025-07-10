@@ -76,3 +76,12 @@
     background-color: #bd0808; /* naranja */
     color: white;
 }
+.btn-reserva.iniciar {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.btn-reserva.finalizar {
+    background-color: #5cb85c;
+    color: white;
+}
