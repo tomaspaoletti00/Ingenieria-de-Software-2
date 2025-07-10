@@ -14,6 +14,8 @@ class Reserva(models.Model):
         ('pendiente_pago', 'Pendiente de pago'),
         ('aceptada', 'Aceptada'),
         ('rechazada', 'Rechazada'),
+        ('en_curso', 'En curso'),  
+        ('finalizada', 'Finalizada'),  
     ]
     fecha_pendiente_pago = models.DateTimeField(null=True, blank=True)##nuevo
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')

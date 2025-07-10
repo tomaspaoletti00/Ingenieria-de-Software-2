@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const fechasOcupadas = {{ fechas_ocupadas|safe }};
     const diasBloqueados = {{ dias_bloqueados|safe }};
     const diasFinales = fechasOcupadas.concat(diasBloqueados);
+    const diaInicio = document.querySelector('#id_ini');
+    const diaFin = document.querySelector('#id_fin');
 
     // Activar flatpickr sobre todos los inputs con clase .datepicker
     flatpickr(".datepicker", {
@@ -40,14 +42,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const inmuebleInfo = document.getElementById("info-inmueble");
     const tipoInmueble = document.getElementById("tipo-inmueble").value;
     const precio = parseFloat(inmuebleInfo.dataset.precio);
-
     if (!diaInput || !horaInicio || !horaFin) {
         console.error("Faltan campos del formulario. Verificá los ID.");
-        return;
     }
+    console.log("hola");
 
+    function calcularTotal() {
+    if (tipoInmueble === "Cochera") {
+        const hIni = horaInicio.value;
+        const hFin = horaFin.value;
+
+        if (!hIni || !hFin) {
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        const inicio = parseInt(hIni.split(":")[0]);
+        const fin = parseInt(hFin.split(":")[0]);
+        const horas = fin - inicio;
+
+        if (horas <= 0) {
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        const total = precio * horas;
+        totalSpan.textContent = total.toFixed(2);
+    } else {
+        const diaI = diaInicio.value;
+        const diaF = diaFin.value;
+
+        if (!diaI || !diaF) {
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        // Convertir strings a fechas
+        const fechaInicio = new Date(diaI);
+        const fechaFin = new Date(diaF);
+
+        // Validar fechas válidas
+        if (isNaN(fechaInicio) || isNaN(fechaFin)) {
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        const diffMs = fechaFin - fechaInicio;
+        const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+        if (diffDias <= 0) {
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        const total = precio * diffDias;
+        totalSpan.textContent = total.toFixed(2);
+    }
+}
+    if (diaInicio) diaInicio.addEventListener("change", calcularTotal);
+    if (diaFin) diaFin.addEventListener("change", calcularTotal)
     // Reemplazar las opciones de hora según disponibilidad
     diaInput.addEventListener("change", function () {
+        console.log("hola");
         const diaSeleccionado = this.value;
         const inmuebleId = document.getElementById("tipo-inmueble").dataset.inmuebleId;
 
@@ -96,32 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Cálculo del total estimado
-    function calcularTotal() {
-        if (tipoInmueble === "Cochera") {
-            const hIni = horaInicio.value;
-            const hFin = horaFin.value;
-
-            if (!hIni || !hFin) {
-                totalSpan.textContent = "0.00";
-                return;
-            }
-
-            const inicio = parseInt(hIni.split(":")[0]);
-            const fin = parseInt(hFin.split(":")[0]);
-            const horas = fin - inicio;
-
-            if (horas <= 0) {
-                totalSpan.textContent = "0.00";
-                return;
-            }
-
-            const total = precio * horas;
-            totalSpan.textContent = total.toFixed(2);
-        }
-    }
-
+    
     horaInicio.addEventListener("change", calcularTotal);
     horaFin.addEventListener("change", calcularTotal);
+       
 });
 </script>
 
