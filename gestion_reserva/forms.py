@@ -18,8 +18,8 @@ class ReservaNormalForm(forms.ModelForm):
         model = Reserva
         fields = ['fecha_inicio', 'fecha_fin', 'metodo_pago']
         widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}),
-            'fecha_fin': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}),
+            'fecha_inicio': forms.DateInput(attrs={'id': 'id_ini','type': 'text', 'class': 'datepicker'}),
+            'fecha_fin': forms.DateInput(attrs={'id': 'id_fin','type': 'text', 'class': 'datepicker'}),
             'metodo_pago': forms.Select(),
         }
 

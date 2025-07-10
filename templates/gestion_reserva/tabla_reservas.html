@@ -1,4 +1,6 @@
-<table border="1">
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/tabla_reservas.css' %}">
+<table class="tabla-reservas">
     <thead>
         <tr>
             <th>Usuario</th>
@@ -6,7 +8,7 @@
             <th>Fecha fin</th>
             <th>Método de pago</th>
             <th>Estado</th>
-            <th>Acciones</th> <!-- Nueva columna -->
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -18,35 +20,65 @@
                 <td>{{ reserva.metodo_pago }}</td>
                 <td>{{ reserva.get_estado_display }}</td>
                 <td>
-                    {% if puede_cambiar_estado and reserva.estado == 'pendiente' %}
-                        <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
-                            <select name="nuevo_estado" required>
-                                <option value="aceptada">Aceptar</option>
-                                <option value="rechazada">Rechazar</option>
-                            </select>
-                            <button type="submit">Cambiar</button>
-                        </form>
-                     {% elif reserva.usuario == user %}
-                           {% if reserva.estado == 'pendiente_pago' %}
-                              <!-- Botón pagar -->
-                              <form method="post" action="{% url 'pagar_reserva' reserva.id %}" style="display:inline;">
-                                 {% csrf_token %}
-                                 <button type="submit">Pagar</button>
-                              </form>
+                <td>
+                    <div class="acciones-reserva">
+                        {% if puede_cambiar_estado and reserva.estado == 'pendiente' %}
+                            <!-- Botones aceptar/rechazar para admin/empleado -->
+                            <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
+                                <input type="hidden" name="nuevo_estado" value="aceptada">
+                                <button type="submit" class="btn-reserva aceptar">Aceptar</button>
+                            </form>
+                            <form method="post" action="{% url 'cambiar_estado_reserva' reserva.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="inmueble_id" value="{{ inmueble.id }}">
+                                <input type="hidden" name="nuevo_estado" value="rechazada">
+                                <button type="submit" class="btn-reserva rechazar">Rechazar</button>
+                            </form>
+                        {% endif %}
+
+                        {% if reserva.usuario == user %}
+                            {% if reserva.estado == 'pendiente_pago' %}
+                                <form action="{% url 'insertar_inquilino' reserva.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-reserva pagar">Pagar</button>
+                                </form>
                             {% endif %}
                             {% if reserva.estado in estados_cancelables %}
-                               <!-- Botón cancelar -->
-                              <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">
-                                 {% csrf_token %}
-                                 <button type="submit" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
-                              </form>
+                                <form method="post" action="{% url 'cancelar_reserva' reserva.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-reserva cancelar" onclick="return confirm('¿Querés cancelar esta reserva?')">Cancelar</button>
+                                </form>
                             {% endif %}
-                    {% else %}
-                        <!-- Sin acciones disponibles -->
-                        -
-                    {% endif %}
+                        {% endif %}
+                        {% if user.is_staff or user.is_superuser %}
+                            {% if reserva.estado in estados_cancelables and reserva.usuario != user %}
+                                <!-- Botón de cancelar como admin/empleado -->
+                                 {% if reserva.estado != 'pendiente' %}
+                                <form method="get" action="{% url 'cancelar_reserva_admin' reserva.id %}">
+                                    <button type="submit" class="btn-reserva cancelar">Cancelar reserva</button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                            {% if reserva.estado == 'aceptada' %}
+                                <form method="post" action="{% url 'actualizar_estado_reserva' reserva.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="accion" value="iniciar">
+                                    <button type="submit" class="btn-reserva iniciar">Iniciar</button>
+                                </form>
+                            {% elif reserva.estado == 'en_curso' %}
+                                <form method="post" action="{% url 'actualizar_estado_reserva' reserva.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="accion" value="finalizar">
+                                    <button type="submit" class="btn-reserva finalizar">Finalizar</button>
+                                </form>
+                            {% endif %}
+                        {% if not puede_cambiar_estado and reserva.usuario != user %}
+                            -
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         {% empty %}

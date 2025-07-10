@@ -1,0 +1,87 @@
+.tabla-reservas {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tabla-reservas th, .tabla-reservas td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #475569;
+}
+
+.tabla-reservas thead {
+    background-color: #334155;
+}
+
+.tabla-reservas tr:hover {
+    background-color: #2d3f56;
+}
+
+.btn-reserva {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.btn-reserva.pagar {
+    background-color: #22c55e;
+    color: white;
+}
+
+.btn-reserva.cancelar {
+    background-color: #ef4444;
+    color: white;
+}
+
+.select-estado {
+    padding: 4px 6px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid #94a3b8;
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+/* Agrupación de acciones (botones y selects en fila) */
+.acciones-reserva {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.acciones-reserva form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-reserva.aceptar {
+    background-color: #3b82f6; /* azul */
+    color: white;
+}
+
+.btn-reserva.rechazar {
+    background-color: #bd0808; /* naranja */
+    color: white;
+}
+.btn-reserva.iniciar {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.btn-reserva.finalizar {
+    background-color: #5cb85c;
+    color: white;
+}

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.db import models
 from gestion_reserva.models import Reserva
 from django.db.models import Sum, Q
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncYear, TruncMonth, TruncDay
 from gestion_usuarios.models import Usuario
 from django.db.models import F, ExpressionWrapper, FloatField, DurationField
 import math
@@ -14,6 +14,7 @@ from datetime import timedelta
 from django.db.models import F, ExpressionWrapper, DurationField, FloatField, DecimalField, Sum, Q, Value
 from datetime import datetime
 from decimal import Decimal
+from gestion_reserva.views import calcular_total_reserva
 
 def menu_estadisticas(request):
     return render(request, 'gestion_estadisticas/menu-estadisticas.html')
@@ -180,4 +181,91 @@ def ingresos_por_tipo(request):
     return render(request, 'gestion_estadisticas/ingresos-tipo.html', {
         'labels': labels,
         'valores': valores,
+    })
+
+def porcentaje_reservas_por_tipo(request):
+    # Filtrar solo reservas aceptadas
+    reservas = Reserva.objects.filter(estado="aceptada").select_related("inmueble")
+
+    # Contador por tipo
+    conteo_por_tipo = {}
+    total_reservas = 0
+
+    for reserva in reservas:
+        tipo = getattr(reserva.inmueble, "tipo", "Otro")
+        conteo_por_tipo[tipo] = conteo_por_tipo.get(tipo, 0) + 1
+        total_reservas += 1
+
+    # Calcular porcentaje por tipo
+    porcentajes = {}
+    for tipo, cantidad in conteo_por_tipo.items():
+        porcentaje = (cantidad / total_reservas) * 100 if total_reservas > 0 else 0
+        porcentajes[tipo] = round(porcentaje, 2)
+
+    # Preparar datos para el gráfico o tabla
+    labels = list(porcentajes.keys())
+    valores = list(porcentajes.values())
+
+    return render(request, 'gestion_estadisticas/porcentaje-tipo.html', {
+        "labels": labels,
+        "valores": valores,
+        "total_reservas": total_reservas
+    })
+
+def total_ingresos(request):
+    reservas = Reserva.objects.filter(estado="aceptada").select_related("inmueble")
+    total_general = 0
+
+    for reserva in reservas:
+        inmueble = reserva.inmueble
+        precio = float(inmueble.precio)
+
+        if inmueble.tipo == "Cochera":
+            # Total por horas
+            duracion_horas = (reserva.fecha_fin - reserva.fecha_inicio).total_seconds() / 3600
+            total = precio * duracion_horas
+        else:
+            # Total por noches (mínimo 1 noche)
+            duracion_dias = (reserva.fecha_fin.date() - reserva.fecha_inicio.date()).days
+            if duracion_dias == 0:
+                duracion_dias = 1
+            total = precio * duracion_dias
+
+        total_general += total
+
+    total_general = round(total_general, 2)
+
+    return render(request, "gestion_estadisticas/ingresos-total.html", {
+        "total_general": total_general
+    })
+
+def estadistica_ingresos_diario(request):
+    reservas_aceptadas = Reserva.objects.filter(estado="aceptada").select_related("inmueble")
+
+    # Obtener días únicos con reservas aceptadas
+    dias_con_ingresos = reservas_aceptadas.annotate(dia=TruncDay('fecha_inicio')) \
+                                          .values_list('dia', flat=True).distinct().order_by('dia')
+
+    dias_str = [d.strftime('%Y-%m-%d') for d in dias_con_ingresos]
+
+    fecha_str = request.GET.get('fecha')
+    total_ingresos = 0
+    fecha_mostrada = None
+    reservas_del_dia = []
+
+    if fecha_str:
+        try:
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            reservas_filtradas = reservas_aceptadas.filter(fecha_inicio__date=fecha)
+            total_ingresos = sum(calcular_total_reserva(r) for r in reservas_filtradas)
+            fecha_mostrada = fecha
+            reservas_del_dia = reservas_filtradas
+        except ValueError:
+            pass  # Fecha inválida ignorada
+
+    return render(request, 'gestion_estadisticas/estadistica_ingresos_diario.html', {
+        'dias_habilitados': dias_str,
+        'total_ingresos': round(total_ingresos, 2),
+        'fecha_mostrada': fecha_mostrada,
+        'reservas': reservas_del_dia,
     })

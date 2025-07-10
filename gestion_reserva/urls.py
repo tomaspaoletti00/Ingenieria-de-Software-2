@@ -10,4 +10,8 @@ urlpatterns = [
     path('reserva/pagar/<int:reserva_id>/', views.pagar_reserva, name='pagar_reserva'),
     path('reservas/horas_ocupadas/<int:inmueble_id>/', views.obtener_horas_ocupadas, name='obtener_horas_ocupadas'),
 
+    path('agregarInquilino/<int:reserva_id>/', views.agregarInquilinos, name='insertar_inquilino'),
+    path('admin/cancelar_reserva/<int:reserva_id>/', views.cancelar_reserva_admin, name='cancelar_reserva_admin'),
+    path('reservas/<int:reserva_id>/actualizar/', views.actualizar_estado_dinamico, name='actualizar_estado_reserva'),
+
 ]

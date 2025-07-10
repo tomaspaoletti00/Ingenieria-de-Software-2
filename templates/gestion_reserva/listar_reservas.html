@@ -2,26 +2,69 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'styles/detalle_inmueble.css' %}">
-<!-- Pestañas -->
-<div class="pestana-selector">
-    <button onclick="mostrarPestaña('aceptadas')">Mis reservas</button>
-    <button onclick="mostrarPestaña('pendientes')">Reservas pendientes</button>
-    <button onclick="mostrarPestaña('canceladas')">Reservas canceladas</button>
-</div>
 
-<div id="pestana-aceptadas" class="pestana" style="margin-top: 1rem;">
-    <h3>Mis reservas (aceptadas)</h3>
-    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_aceptadas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
-</div>
+<style>
+/* Centrado general */
+.contenedor-reservas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
 
-<div id="pestana-pendientes" class="pestana" style="display:none; margin-top: 1rem;">
-    <h3>Reservas pendientes</h3>
-    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_pendientes user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
-</div>
+/* Botones de pestaña */
+.pestana-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-<div id="pestana-canceladas" class="pestana" style="display:none; margin-top: 1rem;">
-    <h3>Reservas canceladas</h3>
-    {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_canceladas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+.pestana-selector button {
+    background-color: #334155;
+    color: #f8fafc;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.pestana-selector button:hover {
+    background-color: #475569;
+}
+
+/* Títulos de pestañas */
+.pestana h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+</style>
+
+<div class="contenedor-reservas">
+    <!-- Pestañas -->
+    <div class="pestana-selector">
+        <button onclick="mostrarPestaña('aceptadas')">Mis reservas</button>
+        <button onclick="mostrarPestaña('pendientes')">Reservas pendientes</button>
+        <button onclick="mostrarPestaña('canceladas')">Reservas canceladas</button>
+    </div>
+
+    <!-- Contenido de cada pestaña -->
+    <div id="pestana-aceptadas" class="pestana" style="margin-top: 1rem;">
+        <h3>Mis reservas (aceptadas)</h3>
+        {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_aceptadas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+    </div>
+
+    <div id="pestana-pendientes" class="pestana" style="display:none; margin-top: 1rem;">
+        <h3>Reservas pendientes</h3>
+        {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_pendientes user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+    </div>
+
+    <div id="pestana-canceladas" class="pestana" style="display:none; margin-top: 1rem;">
+        <h3>Reservas canceladas</h3>
+        {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_canceladas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+    </div>
 </div>
 
 <script>
