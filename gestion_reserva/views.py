@@ -146,12 +146,14 @@ def listar_reservas(request):
     reservas_aceptadas = Reserva.objects.filter(usuario=request.user, estado__in=['aceptada', 'en_curso'])
     reservas_pendientes = Reserva.objects.filter(usuario=request.user,estado__in=['pendiente_pago', 'pendiente'])
     reservas_canceladas = Reserva.objects.filter(usuario=request.user, estado='cancelada')
+    reservas_finalizadas = Reserva.objects.filter(usuario=request.user, estado='finalizada')
     puede_cambiar_estado = False  # Solo para admins o empleados, si querés podés condicionar
 
     return render(request, 'gestion_reserva/listar_reservas.html', {
         'reservas_aceptadas': reservas_aceptadas,
         'reservas_pendientes': reservas_pendientes,
         'reservas_canceladas': reservas_canceladas,
+        'reservas_finalizadas': reservas_finalizadas,
         'puede_cambiar_estado': puede_cambiar_estado,
         'user': request.user,  # Por si lo necesitás en la tabla
         'estados_cancelables': ['pendiente', 'pendiente_pago', 'aceptada'],
@@ -237,6 +239,7 @@ def cambiar_estado_reserva(request, reserva_id):
                 [usuario.email],
                 fail_silently=False,
             )
+            messages.success(request, 'Reserva aceptada.')
 
         elif nuevo_estado == 'rechazada' and reserva.estado == 'pendiente':
             reserva.estado = 'rechazada'
@@ -248,6 +251,7 @@ def cambiar_estado_reserva(request, reserva_id):
                 [usuario.email],
                 fail_silently=False,
             )
+            messages.success(request, 'Reserva rechazada.')
 
         return redirect('inmueble_detalle', pk=inmueble_id)
 
@@ -377,6 +381,7 @@ def pagar_reserva(request, reserva_id):
                         r.estado = 'rechazada'
                         r.save()
 
+            messages.success(request, 'Reserva pagada.')
             return redirect('listar_reservas')
     else:
         form = PagoForm()
@@ -413,7 +418,8 @@ def cancelar_reserva(request, reserva_id):
              fail_silently=False,
     )          
         reserva.estado = 'cancelada'
-        reserva.save()     
+        reserva.save()
+        messages.success(request, 'Reserva cancelada')     
     else:
         messages.error(request, "No se puede cancelar esta reserva.")
     if(usuario.is_staff or usuario.is_superuser):

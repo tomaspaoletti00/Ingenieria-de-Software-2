@@ -27,7 +27,7 @@
                         {% if reserva.estado == 'pendiente_pago' %}
                             <form  action="{% url 'insertar_inquilino' reserva.id %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-reserva pagar">Pagar</button>
+                                <button type="submit" class="btn-reserva pagar">Completar reserva</button>
                             </form>
                         {% endif %}
                         {% if reserva.estado in estados_cancelables %}

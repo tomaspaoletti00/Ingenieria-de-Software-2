@@ -45,14 +45,15 @@
 <div class="contenedor-reservas">
     <!-- Pestañas -->
     <div class="pestana-selector">
-        <button onclick="mostrarPestaña('aceptadas')">Mis reservas</button>
+        <button onclick="mostrarPestaña('aceptadas')">Reservas aceptadas</button>
         <button onclick="mostrarPestaña('pendientes')">Reservas pendientes</button>
         <button onclick="mostrarPestaña('canceladas')">Reservas canceladas</button>
+        <button onclick="mostrarPestaña('finalizadas')">Reservas finalizadas</button>
     </div>
 
     <!-- Contenido de cada pestaña -->
-    <div id="pestana-aceptadas" class="pestana" style="margin-top: 1rem;">
-        <h3>Mis reservas (aceptadas)</h3>
+    <div id="pestana-aceptadas" class="pestana" style="display:none; margin-top: 1rem;">
+        <h3>Reservas Aceptadas</h3>
         {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_aceptadas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
     </div>
 
@@ -65,11 +66,16 @@
         <h3>Reservas canceladas</h3>
         {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_canceladas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
     </div>
+
+    <div id="pestana-finalizadas" class="pestana" style="display:none; margin-top: 1rem;">
+        <h3>Reservas finalizadas</h3>
+        {% include 'gestion_reserva/tabla_reservas_generica.html' with reservas=reservas_finalizadas user=user puede_cambiar_estado=puede_cambiar_estado estados_cancelables=estados_cancelables %}
+    </div>
 </div>
 
 <script>
 function mostrarPestaña(nombre) {
-    const pestañas = ['aceptadas', 'pendientes', 'canceladas'];
+    const pestañas = ['aceptadas', 'pendientes', 'canceladas', 'finalizadas'];
     pestañas.forEach(p => {
         document.getElementById('pestana-' + p).style.display = 'none';
     });
