@@ -20,7 +20,6 @@
                 <td>{{ reserva.metodo_pago }}</td>
                 <td>{{ reserva.get_estado_display }}</td>
                 <td>
-                <td>
                     <div class="acciones-reserva">
                         {% if puede_cambiar_estado and reserva.estado == 'pendiente' %}
                             <!-- Botones aceptar/rechazar para admin/empleado -->
