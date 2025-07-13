@@ -116,7 +116,7 @@ def hacer_reserva(request, id_inmueble):
             reserva.inmueble = inmueble
             reserva.datos_inquilinos=[]
             reserva.save()
-            messages.success(request, 'Reserva exitosa.')
+            messages.success(request, 'Solicitud Exitosa.')
             return redirect("inmueble_detalle", pk=inmueble.id)
     else:
         form = FormClase(inmueble=inmueble)
