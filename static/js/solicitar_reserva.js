@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const soloNumeros = /^[0-9]+$/;
 
         let camposIncompletos = false;
+        let dniRepetido = false;
+        const dnisSet = new Set();
 
         for (const div of campos) {
             const nombre = div.querySelector("input[name='nombre']").value.trim();
@@ -40,10 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const nombreValido = soloLetras.test(nombre);
             const dniValido = soloNumeros.test(dni);
+            const edadValida = /^\d+$/.test(edad) && parseInt(edad, 10) >= 0;
 
-            if (!nombre || !edad || !dni || !nombreValido || !dniValido) {
+            if (!nombre || !edad || !dni || !nombreValido || !dniValido || !edadValida) {
                 camposIncompletos = true;
+            } else if (dnisSet.has(dni)) {
+                dniRepetido = true;
             } else {
+                dnisSet.add(dni);
                 personas.push({ nombre_completo: nombre, edad: edad, dni: dni });
             }
         }
@@ -53,7 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 icon: 'error',
                 title: 'Campos inválidos',
-                text: 'Completá todos los campos con datos válidos (nombre solo letras, DNI solo números).',
+                text: 'Completá todos los campos con datos válidos.',
+                animation: false,
+            });
+            return;
+        } else if (dniRepetido) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'DNI repetido',
+                text: 'Asegurate de no repetir el DNI en los campos del inquilino.',
                 animation: false,
             });
             return;
@@ -62,3 +77,4 @@ document.addEventListener("DOMContentLoaded", () => {
         inputOculto.value = JSON.stringify(personas);
     });
 });
+

@@ -2,6 +2,9 @@
 {% block content %}
 <h2>Cancelar reserva</h2>
 <p>Reserva de {{ reserva.usuario.username }} en {{ reserva.inmueble.nombre }}</p>
+{% if reserva.estado == 'aceptada' %}
+    <p>Estimado a reembolsar {{ estimado }}</p>
+{% endif %}
 
 <form method="post">
     {% csrf_token %}

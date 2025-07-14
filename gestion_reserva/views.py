@@ -470,7 +470,8 @@ def cancelar_reserva_admin(request, reserva_id):
         return redirect('inmueble_detalle', pk=reserva.inmueble.id)
 
     return render(request, "gestion_reserva/cancelar_reserva_admin.html", {
-        "reserva": reserva
+        "reserva": reserva,
+        "estimado": calcular_total_reserva(reserva)
     })
 
 @login_required
