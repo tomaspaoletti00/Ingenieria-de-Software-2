@@ -456,9 +456,9 @@ def cancelar_reserva_admin(request, reserva_id):
             reserva.estado = 'cancelada'
             reserva.save()
 
-            mensaje = f"Su reserva fue cancelada por un administrador.\nMotivo: {motivo}" if motivo else "Su reserva fue cancelada por un administrador."
+            mensaje = f"Su reserva fue cancelada.\nMotivo: {motivo}" if motivo else "Su reserva fue cancelada."
             send_mail(
-                'Reserva cancelada por administrador',
+                'Reserva cancelada',
                 mensaje,
                 'no-reply@tuapp.com',
                 [reserva.usuario.email],
