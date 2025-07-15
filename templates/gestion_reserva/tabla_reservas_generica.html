@@ -4,6 +4,7 @@
 <table class="tabla-reservas">
     <thead>
         <tr>
+            <th>Nº Reserva</th>
             <th>Inmueble</th>
             <th>Usuario</th>
             <th>Fecha inicio</th>
@@ -16,6 +17,7 @@
     <tbody>
         {% for reserva in reservas %}
             <tr>
+                <td>{{ reserva.id }}</td>
                 <td>{{ reserva.inmueble.nombre }}</td>
                 <td>{{ reserva.usuario.username }}</td>
                 <td>{{ reserva.fecha_inicio }}</td>

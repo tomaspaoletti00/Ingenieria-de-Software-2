@@ -3,6 +3,7 @@
 <table class="tabla-reservas">
     <thead>
         <tr>
+            <th>Nº Reserva</th>
             <th>Usuario</th>
             <th>Fecha inicio</th>
             <th>Fecha fin</th>
@@ -14,6 +15,7 @@
     <tbody>
         {% for reserva in reservas %}
             <tr>
+                <th>{{ reserva.id }}</th>
                 <td>{{ reserva.usuario.username }}</td>
                 <td>{{ reserva.fecha_inicio }}</td>
                 <td>{{ reserva.fecha_fin }}</td>
