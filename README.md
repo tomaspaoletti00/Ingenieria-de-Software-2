@@ -38,7 +38,7 @@ Se aplicaron estrategias de prueba **caja negra** (validaciones de entradas/sali
 
 ```bash
 git clone https://github.com/tomaspaoletti00/Ingenieria-de-Software-2.git
-cd alquiler-express
+cd sistema_alquileres
 python -m venv venv
 source venv/bin/activate  # o .\venv\Scripts\activate en Windows
 pip install -r requirements.txt
