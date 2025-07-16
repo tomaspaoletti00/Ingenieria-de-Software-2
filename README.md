@@ -46,7 +46,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-👨‍💻 Equipo de desarrollo
+## 👨‍💻 Equipo de desarrollo
 
 Tomás Paoletti
 
